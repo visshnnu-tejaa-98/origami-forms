@@ -14,7 +14,7 @@ import { env } from "./env";
 
 export const app = express();
 const openApiDocument = generateOpenApiDocument(serverRouter, {
-  title: "Streamyst OpenAPI",
+  title: "Origami Form API's",
   version: "1.0.0",
   baseUrl: env.BASE_URL.concat("/api"),
 });
@@ -27,7 +27,6 @@ if (env.NODE_ENV !== "prod") {
   );
 }
 
-app.use(express.json());
 
 app.get("/", (req, res) => {
   return res.json({ message: "Streamyst is up and running..." });
