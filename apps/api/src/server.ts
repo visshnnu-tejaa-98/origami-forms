@@ -3,6 +3,8 @@ import { logger } from "@repo/logger";
 import cors from "cors";
 
 import * as trpcExpress from "@trpc/server/adapters/express";
+
+// TODO: What does trpc-to-openapi package does
 import { generateOpenApiDocument, createOpenApiExpressMiddleware } from "trpc-to-openapi";
 import { apiReference } from "@scalar/express-api-reference";
 
