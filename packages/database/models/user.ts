@@ -5,6 +5,7 @@ import {
   timestamp,
   text,
 } from "drizzle-orm/pg-core";
+import { userRolesEnum } from "./enum";
 
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -15,6 +16,7 @@ export const usersTable = pgTable("users", {
 
   email: varchar("email", { length: 255 }).notNull().unique(),
   avatarUrl: text("profile_image_url"),
+  role: userRolesEnum("role").default("starter"),
 
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),

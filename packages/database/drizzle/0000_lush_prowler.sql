@@ -1,3 +1,23 @@
+CREATE TYPE "public"."analytics_event_type" AS ENUM('viewed', 'started', 'submitted', 'abandoned', 'email_sent');--> statement-breakpoint
+CREATE TYPE "public"."field_type" AS ENUM('short_text', 'long_text', 'email', 'number', 'phone', 'url', 'date', 'single_select', 'multi_select', 'check_box', 'radio', 'rating', 'file_upload');--> statement-breakpoint
+CREATE TYPE "public"."form_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
+CREATE TYPE "public"."form_visibility" AS ENUM('public', 'unlisted');--> statement-breakpoint
+CREATE TYPE "public"."response_statis" AS ENUM('partial', 'completed');--> statement-breakpoint
+CREATE TYPE "public"."user_roles" AS ENUM('admin', 'subscriber', 'starter');--> statement-breakpoint
+CREATE TABLE "users" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"clerk_user_id" text,
+	"first_name" varchar(50) NOT NULL,
+	"last_name" varchar(50) NOT NULL,
+	"email" varchar(255) NOT NULL,
+	"profile_image_url" text,
+	"role" "user_roles" DEFAULT 'starter',
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp,
+	"deleted_at" timestamp,
+	CONSTRAINT "users_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
 CREATE TABLE "analytics_events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"form_id" uuid NOT NULL,

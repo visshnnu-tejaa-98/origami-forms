@@ -1,5 +1,7 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
+export const userRolesEnum = pgEnum("user_roles", ["admin", "subscriber", "starter"])
+
 export const formStatusEnum = pgEnum("form_status", ["draft", "published", "archived"]);
 
 export const formVisibilityEnum = pgEnum("form_visibility", ["public", "unlisted"])

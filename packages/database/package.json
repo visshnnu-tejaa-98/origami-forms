@@ -4,6 +4,7 @@
   "scripts": {
     "db:migrate": "dotenv -- drizzle-kit migrate",
     "db:generate": "dotenv -- drizzle-kit generate",
+    "db:studio": "dotenv -- drizzle-kit studio",
     "dev": "dotenv -- drizzle-kit studio"
   },
   "devDependencies": {

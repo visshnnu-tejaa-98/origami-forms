@@ -1,3 +1,4 @@
+export * from "./models/enum"
 export * from "./models/user";
 export * from "./models/analytics"
 export * from "./models/forms"
