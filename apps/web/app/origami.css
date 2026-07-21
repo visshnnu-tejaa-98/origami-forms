@@ -687,6 +687,21 @@ main,
 }
 .o-float { animation: paperFloat 5.5s ease-in-out infinite; }
 
+/* inline loading spinner (inherits currentColor) */
+@keyframes oSpin {
+  to { transform: rotate(360deg); }
+}
+.o-spinner {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  opacity: 0.9;
+  animation: oSpin 620ms linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

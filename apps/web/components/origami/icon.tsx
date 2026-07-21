@@ -37,7 +37,10 @@ export type IconName =
   | "play"
   | "star"
   | "hash"
-  | "drag";
+  | "drag"
+  | "alertCircle"
+  | "refresh"
+  | "arrowLeftShort";
 
 const ICONS: Record<IconName, React.ReactNode> = {
   home: <><path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" /></>,
@@ -111,6 +114,9 @@ const ICONS: Record<IconName, React.ReactNode> = {
       <circle cx="15" cy="12" r="1.4" fill="currentColor" /><circle cx="15" cy="18" r="1.4" fill="currentColor" />
     </>
   ),
+  alertCircle: <><circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" /></>,
+  refresh: <><path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v5h-5" /></>,
+  arrowLeftShort: <path d="M19 12H5M12 19l-7-7 7-7" />,
 };
 
 interface IconProps {
