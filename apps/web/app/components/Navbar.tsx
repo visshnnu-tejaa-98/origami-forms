@@ -4,7 +4,7 @@ import Link from "next/link"
 import Logo from "./Logo"
 import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs"
 import { useCurrentUser } from "~/hooks/use-user"
-import { setRole } from "../admin/user/actions"
+import { setRole } from "../admin/actions"
 
 
 const Navbar = () => {
@@ -38,7 +38,7 @@ const Navbar = () => {
             </SignInButton>
           </Show>
           <Show when="signed-in">
-            <Link className="o-btn o-btn--accent o-btn--sm" href="/auth?signup=1">
+            <Link className="o-btn o-btn--accent o-btn--sm" href="/dashboard">
               Dashboard
             </Link>
             <UserButton />

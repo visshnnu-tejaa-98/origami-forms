@@ -88,7 +88,7 @@ export default function Home() {
             your paper desk.
           </p>
           <div className="lp-hero-actions">
-            <Link href="/auth?signup=1" className="o-btn o-btn--accent o-btn--xl">
+            <Link href="/sign-up" className="o-btn o-btn--accent o-btn--xl">
               <Icon name="sparkles" size={20} /> Start folding — it&apos;s free
             </Link>
             <Link href="/f/demo" className="o-btn o-btn--lg">
@@ -384,7 +384,7 @@ export default function Home() {
         <h2>Fold your first form today.</h2>
         <p>Free for up to three forms and one thousand responses a month. Upgrade when the paper stack gets heavy.</p>
         <div className="actions">
-          <Link className="o-btn o-btn--accent o-btn--xl" href="/auth?signup=1">Get started — no card needed</Link>
+          <Link className="o-btn o-btn--accent o-btn--xl" href="/sign-up">Get started — no card needed</Link>
           <Link className="o-btn o-btn--xl" href="/pricing">See pricing</Link>
         </div>
       </section>

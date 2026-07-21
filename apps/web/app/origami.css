@@ -386,6 +386,7 @@ main,
 .o-btn--lg { padding: 0.85em 1.5em; font-size: 1.02rem; border-radius: 14px 18px 14px 18px / 16px 14px 16px 14px; }
 .o-btn--xl { padding: 1em 1.8em; font-size: 1.12rem; border-radius: 16px 20px 16px 20px / 18px 16px 18px 16px; }
 .o-btn--icon { padding: 0.55em; aspect-ratio: 1; }
+.o-btn--block { width: 100%; justify-content: center; }
 .o-btn[disabled], .o-btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
 
 /* ------------------------------------------------------------
@@ -442,6 +443,14 @@ main,
 }
 .o-tape--pink { background-color: rgba(237, 157, 174, 0.78); }
 .o-tape--matcha { background-color: rgba(162, 193, 129, 0.72); }
+.o-tape--left { left: 16px; margin-left: 0; transform: rotate(-8deg); }
+.o-tape--right { right: 16px; left: auto; margin-left: 0; transform: rotate(6deg); }
+
+/* sticky note colour variants */
+.o-note--sticky.o-note--pink { background: var(--sakura-soft); }
+.o-note--sticky.o-note--green { background: var(--matcha-soft); }
+.o-note--sticky.o-note--peach { background: var(--peach-soft); }
+.o-note--sticky.o-note--lavender { background: var(--lavender-soft); }
 
 /* ------------------------------------------------------------
    BADGES + DOTS
@@ -563,6 +572,111 @@ main,
 
 .o-rule { border: 0; border-top: 1px solid var(--rule-line); height: 0; margin: var(--s-5) 0; }
 .o-rule--dashed { border-top: 1px dashed var(--rule-strong); }
+
+/* ------------------------------------------------------------
+   FORM FIELDS — notebook underline + paper field
+   ------------------------------------------------------------ */
+.o-field { display: flex; flex-direction: column; gap: 6px; }
+.o-field-label {
+  font-family: var(--font-body);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.o-field-label .req { color: var(--coral-deep); font-family: var(--font-hand); font-size: 1.1em; }
+.o-field-help { font-size: var(--t-xs); color: var(--ink-3); font-style: italic; }
+.o-field-error {
+  color: var(--danger);
+  font-family: var(--font-hand);
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.o-input,
+.o-textarea {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--ink-1);
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-bottom: 2px solid var(--ink-5);
+  border-radius: 10px 12px 10px 12px / 12px 10px 12px 10px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color var(--transition-snap), box-shadow var(--transition-snap);
+}
+.o-input::placeholder, .o-textarea::placeholder { color: var(--ink-4); font-style: italic; }
+.o-input:hover, .o-textarea:hover { border-bottom-color: var(--ink-3); }
+.o-input:focus, .o-textarea:focus { border-bottom-color: var(--accent); box-shadow: var(--glow-focus); }
+.o-textarea { min-height: 96px; resize: vertical; line-height: 1.55; }
+.o-field.has-error .o-input { border-bottom-color: var(--danger); background: rgba(230, 136, 114, 0.06); }
+
+/* checkbox — hand-drawn check */
+.o-check {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--ink-1);
+  line-height: 1.4;
+  user-select: none;
+}
+.o-check input { position: absolute; opacity: 0; pointer-events: none; }
+.o-check .box {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border: 1.8px solid var(--ink-3);
+  border-radius: 5px 7px 6px 8px / 7px 5px 8px 6px;
+  background: var(--surface-card);
+  position: relative;
+  transition: all var(--transition-snap);
+  margin-top: 1px;
+}
+.o-check:hover .box { border-color: var(--ink-1); }
+.o-check input:focus-visible + .box { box-shadow: var(--glow-focus); }
+.o-check input:checked + .box { background: var(--ink-1); border-color: var(--ink-1); }
+.o-check input:checked + .box::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 9px;
+  height: 14px;
+  border: solid var(--paper-0);
+  border-width: 0 2.4px 2.4px 0;
+  transform: rotate(38deg);
+  border-radius: 1.4px;
+}
+
+/* radio — ink stamp */
+.o-radio { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; font-family: var(--font-body); font-size: 0.95rem; color: var(--ink-1); user-select: none; }
+.o-radio input { position: absolute; opacity: 0; pointer-events: none; }
+.o-radio .stamp { flex: 0 0 22px; width: 22px; height: 22px; border: 1.8px solid var(--ink-3); border-radius: 50%; background: var(--surface-card); position: relative; transition: all var(--transition-snap); }
+.o-radio input:checked + .stamp { border-color: var(--accent-deep); }
+.o-radio input:checked + .stamp::after { content: ""; position: absolute; inset: 3px; background: var(--accent); border-radius: 50%; }
+
+/* ------------------------------------------------------------
+   PROGRESS — brush stroke
+   ------------------------------------------------------------ */
+.o-progress { position: relative; height: 6px; background: var(--bg-sunken); border-radius: 999px; overflow: hidden; }
+.o-progress .bar {
+  position: absolute;
+  inset: 0;
+  width: var(--p, 50%);
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent));
+  border-radius: 999px;
+  -webkit-mask-image: radial-gradient(ellipse at 100% 50%, black 96%, transparent 100%);
+  mask-image: radial-gradient(ellipse at 100% 50%, black 96%, transparent 100%);
+}
 
 /* ------------------------------------------------------------
    ANIMATIONS

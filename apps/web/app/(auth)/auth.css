@@ -1,0 +1,205 @@
+/* ============================================================
+   Auth flow — shared shell for sign-in / sign-up / forgot.
+   Built on the Origami design system (origami.css tokens).
+   ============================================================ */
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ---------- LEFT: the paper desk ---------- */
+.auth-desk {
+  background: var(--bg-elevated);
+  position: relative;
+  overflow: hidden;
+  padding: 56px;
+  display: flex;
+  flex-direction: column;
+}
+.auth-desk::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 25% 15%, var(--accent-soft), transparent 55%),
+    radial-gradient(circle at 75% 80%, var(--matcha-soft), transparent 60%);
+  opacity: 0.55;
+}
+.auth-desk > * { position: relative; }
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-hand);
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--ink-1);
+  text-decoration: none;
+  margin-bottom: 56px;
+}
+.auth-brand .mark { color: var(--accent); }
+
+.desk-quote { margin-top: auto; margin-bottom: 24px; max-width: 460px; }
+.desk-quote h2 { font-size: clamp(2.4rem, 4vw, 3.8rem); line-height: 1; margin: 0 0 18px; }
+.desk-quote p { font-size: 1.1rem; color: var(--ink-2); line-height: 1.5; }
+
+/* floating paper cards on the desk */
+.desk-cards { position: absolute; inset: 0; pointer-events: none; }
+.dc {
+  position: absolute;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-3);
+  padding: 14px 16px;
+}
+.dc1 { top: 12%; right: 12%; width: 220px; transform: rotate(-4deg); }
+.dc2 { top: 28%; right: 38%; width: 200px; transform: rotate(5deg); background: var(--sakura-soft); }
+.dc3 { bottom: 18%; right: 8%; width: 240px; transform: rotate(-2deg); }
+.dc .lbl { font-size: 0.7rem; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+.dc .ttl { font-family: var(--font-hand); font-size: 1.5rem; line-height: 1; color: var(--ink-1); margin-top: 4px; }
+.dc .sub { font-size: 0.78rem; color: var(--ink-3); margin-top: 4px; }
+
+/* scattered origami decorations */
+.deco-floats { position: absolute; inset: 0; pointer-events: none; }
+.deco-floats .crane { position: absolute; top: 8%; right: 6%; color: var(--accent); animation: paperFloat 6s ease-in-out infinite; }
+.deco-floats .plane { position: absolute; bottom: 30%; right: 38%; color: var(--indigo-deep); transform: rotate(20deg); animation: paperFloat 7s 0.6s ease-in-out infinite; }
+.deco-floats .sakura1 { position: absolute; top: 24%; left: 8%; color: var(--sakura-deep); }
+.deco-floats .sakura2 { position: absolute; bottom: 8%; left: 12%; color: var(--peach-deep); }
+.deco-floats .leaf { position: absolute; bottom: 26%; left: 6%; color: var(--matcha-deep); transform: rotate(20deg); }
+.deco-floats .pen { position: absolute; top: 18%; left: 14%; color: var(--ink-1); transform: rotate(-15deg); }
+
+/* ---------- RIGHT: the form card ---------- */
+.auth-form-side {
+  display: grid;
+  place-items: center;
+  padding: 48px 32px;
+  background: var(--bg);
+  position: relative;
+}
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-3);
+  padding: 36px 36px 32px;
+  position: relative;
+}
+.auth-card .clip-pin { position: absolute; top: -18px; left: 32px; color: var(--ink-3); z-index: 2; }
+
+.auth-tabs {
+  display: flex;
+  background: var(--bg-elevated);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+  border: 1px solid var(--rule-line);
+}
+.auth-tabs a {
+  flex: 1;
+  padding: 9px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.86rem;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 200ms;
+  text-align: center;
+  text-decoration: none;
+}
+.auth-tabs a:hover { color: var(--ink-1); }
+.auth-tabs a.active {
+  background: var(--surface-card);
+  color: var(--ink-1);
+  box-shadow: 0 1px 0 rgba(31, 27, 23, 0.05), 0 2px 6px rgba(31, 27, 23, 0.08);
+}
+
+.auth-title { font-size: 2.4rem; line-height: 1; margin-bottom: 6px; }
+.auth-sub { font-family: var(--font-body); color: var(--ink-3); font-size: 0.92rem; margin-bottom: 22px; }
+
+/* oauth */
+.oauth-row { display: flex; gap: 8px; }
+.oauth-btn {
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: 10px;
+  color: var(--ink-1);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 180ms;
+}
+.oauth-btn:hover { background: var(--bg-elevated); border-color: var(--rule-strong); }
+
+.or { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: 0.78rem; margin: 18px 0; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--rule-line); }
+
+.form-stack { display: flex; flex-direction: column; gap: 16px; }
+
+.forgot-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent-deep);
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: var(--font-body);
+}
+
+.demo-hint {
+  margin-top: 18px;
+  background: var(--surface-sticky);
+  border-radius: var(--r-sticky);
+  padding: 12px 14px;
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  line-height: 1.2;
+  color: var(--ink-1);
+  transform: rotate(-1.5deg);
+  box-shadow: var(--shadow-sticky);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.demo-hint code {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--ink-1);
+}
+
+.auth-foot { margin-top: 18px; text-align: center; color: var(--ink-3); font-size: 0.86rem; }
+.auth-foot a { color: var(--accent-deep); text-decoration: none; font-weight: 600; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 980px) {
+  .auth-shell { grid-template-columns: 1fr; }
+  .auth-desk { min-height: 280px; padding: 32px; }
+  .desk-quote h2 { font-size: 2.4rem; }
+  .dc1, .dc2, .dc3 { display: none; }
+}
+@media (max-width: 560px) {
+  .auth-form-side { padding: 24px 16px; }
+  .auth-card { padding: 28px 22px; }
+  .auth-desk { display: none; }
+}

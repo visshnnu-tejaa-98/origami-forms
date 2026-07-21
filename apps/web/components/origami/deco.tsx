@@ -88,6 +88,31 @@ export function Sakura({ size = 32, className, style }: DecoProps) {
   );
 }
 
+/** Single leaf. */
+export function Leaf({ size = 32, className, style }: DecoProps) {
+  return (
+    <svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg" className={className} style={svgStyle(size, style)} aria-hidden="true">
+      <path d="M20,4 C36,16 36,44 20,56 C4,44 4,16 20,4 Z" fill="currentColor" fillOpacity="0.78" stroke="currentColor" strokeWidth="1" />
+      <path d="M20,4 L20,56" stroke="currentColor" strokeWidth="0.6" strokeOpacity="0.5" />
+    </svg>
+  );
+}
+
+/** Fountain pen. */
+export function Pen({ size = 140, className, style }: DecoProps) {
+  return (
+    <svg viewBox="0 0 140 40" xmlns="http://www.w3.org/2000/svg" className={className} style={svgStyle(size, style)} aria-hidden="true">
+      <rect x="40" y="14" width="80" height="12" rx="3" fill="currentColor" fillOpacity="0.85" />
+      <rect x="40" y="14" width="6" height="12" fill="currentColor" />
+      <rect x="90" y="10" width="4" height="22" rx="1" fill="currentColor" fillOpacity="0.85" />
+      <path d="M40,20 L18,20 L8,24 L18,28 L40,28 Z" fill="currentColor" />
+      <path d="M22,20 L22,28 M30,21 L30,27" stroke="#FFFDF7" strokeWidth="0.8" />
+      <circle cx="22" cy="24" r="1.4" fill="#FFFDF7" />
+      <rect x="120" y="12" width="14" height="16" rx="2" fill="currentColor" fillOpacity="0.9" />
+    </svg>
+  );
+}
+
 /** Scribbled down-right arrow. */
 export function ScribbleArrow({ size = 100, className, style }: DecoProps) {
   return (
