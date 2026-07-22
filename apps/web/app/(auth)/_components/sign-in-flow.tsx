@@ -5,30 +5,66 @@ import Link from "next/link";
 import { Icon } from "~/components/origami/icon";
 import { OAuthRow } from "./oauth-row";
 import { VerifyCode } from "./verify-code";
+import { useSignIn, useSignUp } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useForm, SubmitHandler } from "react-hook-form"
+import { signInFormInput, SignInFormInputType } from "../validators";
+import { validateForm } from "../utils";
 
 export function SignInFlow() {
+  const [code, setCode] = useState("")
   const [isVerificationPending, setIsVerificationPending] = useState(false);
-  const [email, setEmail] = useState("");
   const [isSendingCode, setIsSendingCode] = useState(false);
+  const [showMissingRequirements, setShowMissingRequirements] = useState(false)
+  const [formError, setFormError] = useState("")
 
-  const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    setEmail(String(data.get("email") ?? ""));
+  const { signIn, errors: signInError, fetchStatus } = useSignIn()
+  const { signUp } = useSignUp()
 
-    setIsSendingCode(true);
-    try {
-      // TODO: kick off the email-code sign-in (e.g. signIn.emailCode.sendCode()).
-      setIsVerificationPending(true);
-    } finally {
-      setIsSendingCode(false);
+  const router = useRouter()
+
+
+  const { register, handleSubmit, getValues, watch, formState: { errors } } = useForm<SignInFormInputType>({
+    defaultValues: {
+      email: "",
+      password: ""
     }
+  })
+
+  const enableSignInButton = !!(watch("email") && watch("password"))
+
+
+  const handleSignIn = async (data: SignInFormInputType) => {
+    try {
+      setFormError("")
+      const { error, data: parsedData } = await validateForm({ schema: signInFormInput, input: data })
+      if (error) {
+        setFormError(error)
+      }
+    } catch (error) {
+      console.log("error: ", error)
+    }
+
+    // event.preventDefault();
+    // const data = new FormData(event.currentTarget);
+    // setEmail(String(data.get("email") ?? ""));
+
+    // setIsSendingCode(true);
+    // try {
+    //   // TODO: kick off the email-code sign-in (e.g. signIn.emailCode.sendCode()).
+    //   setIsVerificationPending(true);
+    // } finally {
+    //   setIsSendingCode(false);
+    // }
   };
 
   if (isVerificationPending) {
+    const email = getValues("email")
     return (
       <VerifyCode
         email={email}
+        code={code}
+        setCode={setCode}
         onBack={() => setIsVerificationPending(false)}
         onVerify={async () => {
           // TODO: verify the code and redirect into the studio.
@@ -47,10 +83,15 @@ export function SignInFlow() {
 
       <OAuthRow />
 
-      <form className="form-stack" onSubmit={handleSignIn}>
+      <form className="form-stack" onSubmit={handleSubmit(handleSignIn)}>
         <div className="o-field">
           <label className="o-field-label" htmlFor="email">Email</label>
-          <input id="email" name="email" className="o-input" type="email" placeholder="you@studio.dev" autoComplete="email" required />
+          <input
+            className="o-input"
+            type="email"
+            placeholder="you@studio.dev"
+            {...register("email")}
+          />
         </div>
 
         <div className="o-field">
@@ -58,10 +99,16 @@ export function SignInFlow() {
             <label className="o-field-label" htmlFor="password">Password</label>
             <Link className="forgot-link" href="/forgot">forgot?</Link>
           </div>
-          <input id="password" name="password" className="o-input" type="password" placeholder="at least 8 characters" autoComplete="current-password" required />
+          <input
+            className="o-input"
+            type="password"
+            placeholder="at least 8 characters"
+            {...register("password")}
+          />
         </div>
 
-        <button className="o-btn o-btn--accent o-btn--lg o-btn--block" type="submit" disabled={isSendingCode}>
+        {formError && <p className="text-[var(--accent-deep)] text-xs font-semibold py-2">{formError}</p>}
+        <button className="o-btn o-btn--accent o-btn--lg o-btn--block" type="submit" disabled={!enableSignInButton || isSendingCode}>
           {isSendingCode ? (
             <>
               <span className="o-spinner" /> Sending code…

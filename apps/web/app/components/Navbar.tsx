@@ -2,19 +2,10 @@
 
 import Link from "next/link"
 import Logo from "./Logo"
-import { Show, SignInButton, UserButton, useUser } from "@clerk/nextjs"
-import { useCurrentUser } from "~/hooks/use-user"
-import { setRole } from "../admin/actions"
+import { Show, UserButton } from "@clerk/nextjs"
 
 
 const Navbar = () => {
-  const { user } = useCurrentUser()
-  console.log({ user })
-
-  // if (user.role !== "admin") {
-  //   setRole(user.clerkId, "admin")
-  // }
-
   return (
     <nav className="lp-nav">
       <div className="lp-nav-inner">
@@ -28,14 +19,14 @@ const Navbar = () => {
         </div>
         <div className="lp-nav-cta">
           <Show when="signed-out">
-            <SignInButton>
+            <Link href="/sign-in">
               <button
                 type="button"
                 className="o-btn o-btn--ghost o-btn--sm lp-hide-sm"
               >
                 Sign In
               </button>
-            </SignInButton>
+            </Link>
           </Show>
           <Show when="signed-in">
             <Link className="o-btn o-btn--accent o-btn--sm" href="/dashboard">

@@ -9,6 +9,8 @@ const CODE_LENGTH = 6;
 interface VerifyCodeProps {
   /** Address the code was sent to — shown back to the user. */
   email?: string;
+  code: string,
+  setCode: (code: string) => void
   /** Return to the credentials form. */
   onBack: () => void;
   /** Submit the code. Throw / reject to surface an error. */
@@ -17,8 +19,7 @@ interface VerifyCodeProps {
   onResend?: () => Promise<void> | void;
 }
 
-export function VerifyCode({ email, onBack, onVerify, onResend }: VerifyCodeProps) {
-  const [code, setCode] = useState("");
+export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }: VerifyCodeProps) {
   const [status, setStatus] = useState<"idle" | "verifying" | "resending">("idle");
   const [error, setError] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
