@@ -1,3 +1,7 @@
+"use client";
+
+import { useSignInOrUp } from "~/hooks/use-signin";
+
 /** Google / GitHub sign-in buttons, shared by sign-in and sign-up. */
 
 function GoogleMark() {
@@ -12,10 +16,12 @@ function GoogleMark() {
 }
 
 export function OAuthRow() {
+  const { signInWithGoogle } = useSignInOrUp();
+
   return (
     <>
       <div className="oauth-row">
-        <button className="oauth-btn" type="button">
+        <button className="oauth-btn" type="button" onClick={() => signInWithGoogle()}>
           <GoogleMark /> Google
         </button>
       </div>

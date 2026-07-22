@@ -1,6 +1,6 @@
 "use client"
 
-import { useSignIn, useSignUp } from "@clerk/nextjs";
+import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useRouter } from "next/navigation";
 import { useState } from "react"
@@ -13,8 +13,9 @@ export function useSignInOrUp() {
     const [missingRequirements, setMissingRequirements] = useState(false)
 
 
-    const { signIn, errors: signInError, fetchStatus } = useSignIn()
+    const { signIn } = useSignIn()
     const { signUp } = useSignUp()
+    const clerk = useClerk()
     const router = useRouter()
 
 
@@ -54,6 +55,21 @@ export function useSignInOrUp() {
             }
 
             setOtpVerifying(true)
+        }
+    }
+
+    const signInWithGoogle = async () => {
+        setFormError("")
+
+        try {
+            await clerk.client.signIn.authenticateWithRedirect({
+                strategy: 'oauth_google',
+                redirectUrl: '/sso-callback',
+                redirectUrlComplete: '/',
+            })
+        } catch (error) {
+            console.error(JSON.stringify(error, null, 2))
+            setFormError("Couldn't start Google sign-in. Please try again.")
         }
     }
 
@@ -160,6 +176,7 @@ export function useSignInOrUp() {
         signInWithEmailAndPasswordWithOTPVerification,
         setOtpVerifying,
         verifyOtp,
-        resendOtp
+        resendOtp,
+        signInWithGoogle
     }
 }
