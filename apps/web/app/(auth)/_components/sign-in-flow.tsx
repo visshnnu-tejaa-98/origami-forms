@@ -43,6 +43,7 @@ export function SignInFlow() {
       <VerifyCode
         email={email}
         code={code}
+        loginMode={"sign-in"}
         setCode={setCode}
         onBack={() => {
           setOtpVerifying(false);

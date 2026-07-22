@@ -9,6 +9,7 @@ interface VerifyCodeProps {
   /** Address the code was sent to — shown back to the user. */
   email?: string;
   code: string;
+  loginMode: 'sign-in' | 'sign-up'
   setCode: (code: string) => void;
   /** Return to the credentials form. */
   onBack: () => void;
@@ -18,7 +19,7 @@ interface VerifyCodeProps {
   onResend: () => Promise<void> | void;
 }
 
-export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }: VerifyCodeProps) {
+export function VerifyCode({ email, code, loginMode, setCode, onBack, onVerify, onResend }: VerifyCodeProps) {
   const [status, setStatus] = useState<"idle" | "verifying" | "resending">("idle");
   const [error, setError] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
@@ -129,7 +130,7 @@ export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }:
         </button>
         <button type="button" className="verify-link verify-link--muted" onClick={onBack}>
           <Icon name="arrowLeftShort" size={14} />
-          Back to sign in
+          Back to {loginMode}
         </button>
       </div>
     </div>
