@@ -17,23 +17,23 @@ export default function SignUpPage() {
             <OAuthRow />
 
             <form className="form-stack">
-                <div className="o-field">
+                {/* <div className="o-field">
                     <label className="o-field-label" htmlFor="name">Name</label>
                     <input id="name" name="name" className="o-input" placeholder="Aiko Tanaka" autoComplete="name" />
-                </div>
+                </div> */}
 
                 <div className="o-field">
                     <label className="o-field-label" htmlFor="email">Email</label>
                     <input id="email" name="email" className="o-input" type="email" placeholder="you@studio.dev" autoComplete="email" />
                 </div>
 
-                <div className="o-field">
+                {/* <div className="o-field">
                     <label className="o-field-label" htmlFor="password">Choose a password</label>
                     <input id="password" name="password" className="o-input" type="password" placeholder="at least 8 characters" autoComplete="new-password" />
                     <div className="o-field-help">
                         Eight characters, folded tight. Something only you can unfold.
                     </div>
-                </div>
+                </div> */}
 
                 <label className="o-check">
                     <input type="checkbox" name="newsletter" defaultChecked />

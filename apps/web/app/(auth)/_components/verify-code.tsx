@@ -8,14 +8,14 @@ const CODE_LENGTH = 6;
 interface VerifyCodeProps {
   /** Address the code was sent to — shown back to the user. */
   email?: string;
-  code: string,
-  setCode: (code: string) => void
+  code: string;
+  setCode: (code: string) => void;
   /** Return to the credentials form. */
   onBack: () => void;
   /** Submit the code. Throw / reject to surface an error. */
-  onVerify: (event: FormEvent) => Promise<void> | void;
+  onVerify: (code: string) => Promise<void>;
   /** Re-send the email code. */
-  onResend?: () => Promise<void> | void;
+  onResend: () => Promise<void> | void;
 }
 
 export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }: VerifyCodeProps) {
@@ -26,6 +26,26 @@ export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }:
   const isVerifying = status === "verifying";
   const canSubmit = code.length === CODE_LENGTH && !isVerifying;
 
+  const handleResendOtp = () => {
+    setResent(true);
+    onResend();
+  };
+
+  const handleOnSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    if (!canSubmit) return;
+    setStatus("verifying");
+    setError(null);
+
+    try {
+      await onVerify(code);
+    } catch (err) {
+      setError("Verification failed at DOM boundary:");
+    } finally {
+      setStatus("idle");
+    }
+  };
 
   return (
     <div>
@@ -34,14 +54,15 @@ export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }:
         We folded a six-digit code and sent it
         {email ? (
           <>
-            {" "}to <strong style={{ color: "var(--ink-1)" }}>{email}</strong>.
+            {" "}
+            to <strong style={{ color: "var(--ink-1)" }}>{email}</strong>.
           </>
         ) : (
           " to your email."
         )}
       </p>
 
-      <form className="form-stack" onSubmit={onVerify}>
+      <form className="form-stack" onSubmit={handleOnSubmit}>
         <div className={`o-field${error ? " has-error" : ""}`}>
           <label className="o-field-label" htmlFor="otp-code">
             Verification code
@@ -69,7 +90,11 @@ export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }:
           )}
         </div>
 
-        <button className="o-btn o-btn--accent o-btn--lg o-btn--block" type="submit" disabled={!canSubmit}>
+        <button
+          className="o-btn o-btn--accent o-btn--lg o-btn--block"
+          type="submit"
+          disabled={!canSubmit}
+        >
           {isVerifying ? (
             <>
               <span className="o-spinner" /> Verifying…
@@ -93,7 +118,12 @@ export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }:
       ) : null}
 
       <div className="verify-actions">
-        <button type="button" className="verify-link" onClick={onResend} disabled={status !== "idle"}>
+        <button
+          type="button"
+          className="verify-link"
+          onClick={handleResendOtp}
+          disabled={status !== "idle"}
+        >
           <Icon name="refresh" size={14} />
           {status === "resending" ? "Sending…" : "Resend verification code"}
         </button>
