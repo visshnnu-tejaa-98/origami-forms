@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { signInFormInput, SignInFormInputType } from "../validators";
 import { validateForm } from "../utils";
+import { toast } from "~/components/origami/toast";
 
 export function SignInFlow() {
   const [code, setCode] = useState("")
@@ -35,27 +36,39 @@ export function SignInFlow() {
 
 
   const handleSignIn = async (data: SignInFormInputType) => {
-    try {
-      setFormError("")
-      const { error, data: parsedData } = await validateForm({ schema: signInFormInput, input: data })
-      if (error) {
-        setFormError(error)
-      }
-    } catch (error) {
-      console.log("error: ", error)
+
+    setFormError("")
+
+    const { error, data: parsedData } = await validateForm({ schema: signInFormInput, input: data })
+
+    if (error) {
+      setFormError(error)
+      toast.info("Couldn't sign you in", {
+        title: "Error",
+      })
+      return
     }
 
-    // event.preventDefault();
-    // const data = new FormData(event.currentTarget);
-    // setEmail(String(data.get("email") ?? ""));
+    if (!parsedData) {
+      setFormError("Form data processing failed.");
+      return;
+    }
 
-    // setIsSendingCode(true);
-    // try {
-    //   // TODO: kick off the email-code sign-in (e.g. signIn.emailCode.sendCode()).
-    //   setIsVerificationPending(true);
-    // } finally {
-    //   setIsSendingCode(false);
-    // }
+    const { email, password } = parsedData
+
+    const { error: createError } = await signIn.create({
+      identifier: email,
+      signUpIfMissing: true,
+    })
+
+    if (createError) {
+      console.error(JSON.stringify(createError, null, 2))
+      toast.error("Couldn't sign you in", {
+        title: "Error",
+      })
+      return
+    }
+
   };
 
   if (isVerificationPending) {
