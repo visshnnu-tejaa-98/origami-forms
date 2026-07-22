@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react";
 import { Icon } from "~/components/origami/icon";
 import { OtpInput } from "./otp-input";
-
 const CODE_LENGTH = 6;
 
 interface VerifyCodeProps {
@@ -14,7 +13,7 @@ interface VerifyCodeProps {
   /** Return to the credentials form. */
   onBack: () => void;
   /** Submit the code. Throw / reject to surface an error. */
-  onVerify?: (code: string) => Promise<void> | void;
+  onVerify: (event: FormEvent) => Promise<void> | void;
   /** Re-send the email code. */
   onResend?: () => Promise<void> | void;
 }
@@ -27,38 +26,6 @@ export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }:
   const isVerifying = status === "verifying";
   const canSubmit = code.length === CODE_LENGTH && !isVerifying;
 
-  const handleVerify = async (event: FormEvent) => {
-    event.preventDefault();
-    if (code.length !== CODE_LENGTH) {
-      setError("Enter all six digits.");
-      return;
-    }
-
-    setError(null);
-    setStatus("verifying");
-    try {
-      await onVerify?.(code);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "That code didn't match. Try again.");
-    } finally {
-      setStatus("idle");
-    }
-  };
-
-  const handleResend = async () => {
-    setError(null);
-    setResent(false);
-    setStatus("resending");
-    try {
-      await onResend?.();
-      setCode("");
-      setResent(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't resend the code.");
-    } finally {
-      setStatus("idle");
-    }
-  };
 
   return (
     <div>
@@ -74,7 +41,7 @@ export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }:
         )}
       </p>
 
-      <form className="form-stack" onSubmit={handleVerify}>
+      <form className="form-stack" onSubmit={onVerify}>
         <div className={`o-field${error ? " has-error" : ""}`}>
           <label className="o-field-label" htmlFor="otp-code">
             Verification code
@@ -126,7 +93,7 @@ export function VerifyCode({ email, code, setCode, onBack, onVerify, onResend }:
       ) : null}
 
       <div className="verify-actions">
-        <button type="button" className="verify-link" onClick={handleResend} disabled={status !== "idle"}>
+        <button type="button" className="verify-link" onClick={onResend} disabled={status !== "idle"}>
           <Icon name="refresh" size={14} />
           {status === "resending" ? "Sending…" : "Resend verification code"}
         </button>

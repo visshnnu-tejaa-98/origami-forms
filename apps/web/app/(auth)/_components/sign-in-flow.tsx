@@ -11,18 +11,21 @@ import { useForm, SubmitHandler } from "react-hook-form"
 import { signInFormInput, SignInFormInputType } from "../validators";
 import { validateForm } from "../utils";
 import { toast } from "~/components/origami/toast";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 
 export function SignInFlow() {
   const [code, setCode] = useState("")
-  const [isVerificationPending, setIsVerificationPending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
-  const [showMissingRequirements, setShowMissingRequirements] = useState(false)
   const [formError, setFormError] = useState("")
+  const [showMissingRequirements, setShowMissingRequirements] = useState(false)
+
 
   const { signIn, errors: signInError, fetchStatus } = useSignIn()
   const { signUp } = useSignUp()
-
   const router = useRouter()
+
+
 
 
   const { register, handleSubmit, getValues, watch, formState: { errors } } = useForm<SignInFormInputType>({
@@ -38,14 +41,12 @@ export function SignInFlow() {
   const handleSignIn = async (data: SignInFormInputType) => {
 
     setFormError("")
+    setVerifying(true)
 
     const { error, data: parsedData } = await validateForm({ schema: signInFormInput, input: data })
 
     if (error) {
       setFormError(error)
-      toast.info("Couldn't sign you in", {
-        title: "Error",
-      })
       return
     }
 
@@ -63,25 +64,133 @@ export function SignInFlow() {
 
     if (createError) {
       console.error(JSON.stringify(createError, null, 2))
-      toast.error("Couldn't sign you in", {
-        title: "Error",
-      })
       return
+    }
+
+    if (!createError) {
+
+      const { error: sendError } = await signIn.emailCode.sendCode()
+      if (sendError) {
+        console.error(JSON.stringify(sendError, null, 2))
+        setVerifying(false)
+        return
+      }
+
+      setVerifying(true)
     }
 
   };
 
-  if (isVerificationPending) {
+  const handleVerify = async (event: FormEvent) => {
+    event.preventDefault();
+
+    const { error } = await signIn.emailCode.verifyCode({ code })
+
+    // When the user doesn't exist, verifyCode returns an error with
+    // the code 'sign_up_if_missing_transfer'. Check for this error
+    // to determine if we need to transfer to sign-up.
+    if (error) {
+      if (isClerkAPIResponseError(error)) {
+        if (error.errors[0]?.code === 'sign_up_if_missing_transfer') {
+          // The user doesn't exist - transfer to sign-up
+          await handleTransferToSignUp()
+          return
+        }
+      }
+
+      // Some other error occurred
+      console.error(JSON.stringify(error, null, 2))
+      return
+    }
+
+    // The user exists and verification succeeded
+    if (signIn.status === 'complete') {
+      await finalizeSignIn()
+    } else {
+      // Check why the sign-in is not complete
+      console.error('Sign-in attempt not complete:', signIn.status)
+    }
+  };
+
+  const handleResend = async () => {
+
+  };
+
+  const handleTransferToSignUp = async () => {
+    // Create sign-up using transfer.
+    // This moves the verified identification from the sign-in to a new sign-up.
+    const { error } = await signUp.create({ transfer: true })
+    if (error) {
+      console.error(JSON.stringify(error, null, 2))
+      return
+    }
+
+    if (signUp.status === 'complete') {
+      // No additional requirements - sign-up is complete
+      await finalizeSignUp()
+    } else if (signUp.status === 'missing_requirements') {
+      // Additional fields are required to complete sign-up.
+      // Common missing fields include legal_accepted, first_name, last_name, etc.
+      // Show a form to collect the missing fields.
+      setShowMissingRequirements(true)
+    } else {
+      console.error('Unexpected sign-up status:', signUp.status)
+    }
+  }
+
+  const finalizeSignIn = async () => {
+    await signIn.finalize({
+      navigate: ({ session, decorateUrl }) => {
+        if (session?.currentTask) {
+          // Handle pending session tasks
+          // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
+          console.log(session?.currentTask)
+          return
+        }
+
+        const url = decorateUrl('/')
+        console.log({ url })
+        if (url.startsWith('http')) {
+          window.location.href = url
+        } else {
+          router.push(url)
+        }
+      },
+    })
+  }
+
+  // Helper to finalize sign-up and navigate
+  const finalizeSignUp = async () => {
+    await signUp.finalize({
+      navigate: ({ session, decorateUrl }) => {
+        if (session?.currentTask) {
+          // Handle pending session tasks
+          // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
+          console.log(session?.currentTask)
+          return
+        }
+
+        const url = decorateUrl('/')
+        if (url.startsWith('http')) {
+          window.location.href = url
+        } else {
+          router.push(url)
+        }
+      },
+    })
+  }
+
+
+
+  if (verifying) {
     const email = getValues("email")
     return (
       <VerifyCode
         email={email}
         code={code}
         setCode={setCode}
-        onBack={() => setIsVerificationPending(false)}
-        onVerify={async () => {
-          // TODO: verify the code and redirect into the studio.
-        }}
+        onBack={() => setVerifying(false)}
+        onVerify={handleVerify}
         onResend={async () => {
           // TODO: re-send the email code.
         }}
