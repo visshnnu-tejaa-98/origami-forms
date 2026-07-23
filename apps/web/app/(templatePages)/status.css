@@ -1,0 +1,110 @@
+/* ============================================================
+   STATUS PAGES · 404 + Error
+   Shared styles built on the Origami design-system tokens.
+   ============================================================ */
+
+.o-status {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--s-9) var(--s-5);
+  text-align: center;
+  overflow: hidden;
+}
+
+.o-status-inner {
+  position: relative;
+  max-width: 560px;
+  width: 100%;
+}
+
+/* floating paper scraps in the background */
+.o-status-scrap {
+  position: absolute;
+  border-radius: 4px 10px 6px 12px / 10px 4px 12px 6px;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  box-shadow: var(--shadow-paper-1);
+  opacity: 0.7;
+  pointer-events: none;
+  animation: o-status-drift 9s ease-in-out infinite;
+}
+.o-status-scrap--1 { width: 40px; height: 52px; top: -6%; left: 4%; transform: rotate(-14deg); animation-delay: -1s; }
+.o-status-scrap--2 { width: 30px; height: 38px; top: 8%; right: 6%; transform: rotate(12deg); animation-delay: -3.5s; }
+.o-status-scrap--3 { width: 22px; height: 28px; bottom: 2%; left: 12%; transform: rotate(8deg); animation-delay: -6s; }
+.o-status-scrap--4 { width: 34px; height: 44px; bottom: -4%; right: 14%; transform: rotate(-10deg); animation-delay: -2s; }
+
+@keyframes o-status-drift {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-14px) rotate(calc(var(--r, 0deg) + 3deg)); }
+}
+
+/* artwork */
+.o-status-art { position: relative; display: inline-block; margin-bottom: var(--s-6); }
+.o-status-art svg { display: block; width: clamp(160px, 42vw, 240px); height: auto; }
+.o-status-art--float { animation: o-status-float 5s ease-in-out infinite; }
+@keyframes o-status-float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+
+/* big code */
+.o-status-code {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: clamp(4.5rem, 18vw, 8rem);
+  line-height: 0.9;
+  color: var(--ink-1);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+.o-status-code .o-hl { padding: 0 0.08em; }
+
+.o-status-eyebrow { margin-bottom: var(--s-4); }
+
+.o-status-title {
+  font-family: var(--font-hand);
+  font-size: var(--t-h1);
+  color: var(--ink-1);
+  margin: var(--s-4) 0 var(--s-3);
+}
+
+.o-status-lede {
+  color: var(--ink-3);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 26rem;
+  margin: 0 auto;
+}
+
+/* actions */
+.o-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  justify-content: center;
+  margin-top: var(--s-7);
+}
+
+/* torn-paper divider under error digest */
+.o-status-digest {
+  margin-top: var(--s-7);
+  padding: var(--s-3) var(--s-4);
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  background: var(--bg-sunken);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r-sm);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* stroke helpers driven by theme tokens */
+.o-art-ink { stroke: var(--ink-1); }
+.o-art-paper { fill: var(--surface-card); }
+.o-art-accent { fill: var(--accent); }
+.o-art-accent-soft { fill: var(--accent-soft); }
+.o-art-shadow { fill: var(--ink-1); opacity: 0.08; }
+.o-art-dash { stroke: var(--accent); }
