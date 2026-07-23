@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server'
 import { handleAuthRouting } from './app/middlewares/authRules'
 
 
-const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 
 
 export default clerkMiddleware(async (auth, req) => {
