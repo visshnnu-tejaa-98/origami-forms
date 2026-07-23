@@ -130,7 +130,7 @@ export function useSignInOrUp() {
             await clerk.client.signIn.authenticateWithRedirect({
                 strategy: 'oauth_google',
                 redirectUrl: `/sso-callback?flow=${flow}`,
-                redirectUrlComplete: '/',
+                redirectUrlComplete: '/dashboard',
             })
         } catch (error) {
             console.error(JSON.stringify(error, null, 2))

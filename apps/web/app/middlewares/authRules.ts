@@ -7,7 +7,7 @@ type handleRouteProps = {
     role: string | undefined;
 }
 
-export const handleAuthRoiting = ({ req, userId, role }: handleRouteProps) => {
+export const handleAuthRouting = ({ req, userId, role }: handleRouteProps) => {
     const currentPath = req.nextUrl.pathname
 
     // redirect user to sign-in page if he tries to access the private routes

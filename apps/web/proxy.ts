@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { handleAuthRoiting } from './app/middlewares/authRules'
+import { handleAuthRouting } from './app/middlewares/authRules'
 
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
@@ -12,7 +12,7 @@ export default clerkMiddleware(async (auth, req) => {
     const role = authDetails.sessionClaims?.metadata?.role
     const userId = authDetails.sessionClaims?.sub
 
-    return handleAuthRoiting({ req, userId, role })
+    return handleAuthRouting({ req, userId, role })
 })
 
 export const config = {
