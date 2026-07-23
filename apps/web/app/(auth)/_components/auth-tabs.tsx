@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "/sign-in", label: "Sign in" },
   { href: "/sign-up", label: "Sign up" },
-  // { href: "/forgot", label: "Forgot" },
 ] as const;
 
 export function AuthTabs() {
