@@ -61,19 +61,24 @@ export function SignUpFlow() {
           </label>
           <input
             className="o-input"
-            type="email"
+            type="text"
             placeholder="you@studio.dev"
             {...register("email")}
           />
         </div>
 
-        <label className="o-check">
+        {/* <label className="o-check">
           <input type="checkbox" name="newsletter" defaultChecked />
           <span className="box" /> I&apos;d like the gentle monthly notebook.
-        </label>
+        </label> */}
 
-        {formError && (
-          <p className="text-[var(--accent-deep)] text-xs font-semibold py-2">{formError}</p>
+
+        {formError ? (
+          <p className="text-[var(--accent-deep)] text-xs font-semibold py-1">{formError}</p>
+        ) : (
+          <p className="text-[var(--accent-deep)] text-xs font-semibold py-1 text-transparent">
+            Test error
+          </p>
         )}
 
         <button

@@ -21,7 +21,11 @@ export function useSignInOrUp() {
     const clerk = useClerk()
     const router = useRouter()
 
-    const clearFormError = () => setFormError("")
+    const clearFormError = () => {
+        setFormError("")
+        setisSignUpLoading(false)
+        setisSigningInLoading(false)
+    }
 
     const sendOtp = async (mode: 'sign-in' | 'sign-up') => {
         return mode === "sign-up"
@@ -39,6 +43,7 @@ export function useSignInOrUp() {
 
         if (error) {
             setFormError(error)
+            setisSigningInLoading(false)
             return
         }
 
@@ -62,6 +67,7 @@ export function useSignInOrUp() {
 
         if (error) {
             setFormError(error)
+            setisSignUpLoading(false)
             return
         }
 
