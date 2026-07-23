@@ -4,6 +4,8 @@ import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useRouter } from "next/navigation";
 import { useState } from "react"
+import { signInFlow, signupFlow } from "~/app/(auth)/constants";
+import { LoginFlow } from "~/app/(auth)/types";
 import { validateForm } from "~/app/(auth)/utils";
 import { signInFormInput, SignInFormInputType } from "~/app/(auth)/validators"
 
@@ -14,7 +16,7 @@ export function useSignInOrUp() {
     const [isSignUpLoading, setisSignUpLoading] = useState(false)
     const [missingRequirements, setMissingRequirements] = useState(false)
     // Which resource the shared OTP screen is driving.
-    const [loginFlow, setLoginFlow] = useState<'sign-in' | 'sign-up'>('sign-in')
+    const [loginFlow, setLoginFlow] = useState<LoginFlow>('sign-in')
 
     const { signIn } = useSignIn()
     const { signUp } = useSignUp()
@@ -27,8 +29,8 @@ export function useSignInOrUp() {
         setisSigningInLoading(false)
     }
 
-    const sendOtp = async (mode: 'sign-in' | 'sign-up') => {
-        return mode === "sign-up"
+    const sendOtp = async (mode: LoginFlow) => {
+        return mode === signupFlow
             ? signUp.verifications.sendEmailCode()
             : signIn.emailCode.sendCode();
     };
@@ -93,8 +95,7 @@ export function useSignInOrUp() {
         ['session_exists', 'identifier_already_signed_in'].includes(error.errors[0]?.code ?? '')
 
     const startEmailSignIn = async (email: string) => {
-        const loginFlow = 'sign-in'
-        setLoginFlow(loginFlow)
+        setLoginFlow(signInFlow)
 
         const { error: createSignInError } = await signIn.create({
             identifier: email,
@@ -122,7 +123,7 @@ export function useSignInOrUp() {
         setOtpVerifying(true)
     }
 
-    const signInWithGoogle = async (flow: 'sign-in' | 'sign-up' = 'sign-in') => {
+    const signInWithGoogle = async (flow: LoginFlow = signInFlow) => {
         setFormError("")
 
         try {
@@ -190,7 +191,7 @@ export function useSignInOrUp() {
         // Catch here so a thrown Clerk error surfaces as a real message instead of
         // bubbling to VerifyCode's generic "Verification failed at DOM boundary".
         try {
-            if (loginFlow === 'sign-up') {
+            if (loginFlow === signupFlow) {
                 await verifySignUpOtp(code)
                 return
             }

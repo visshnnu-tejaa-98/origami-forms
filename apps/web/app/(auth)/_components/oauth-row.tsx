@@ -1,6 +1,8 @@
 "use client";
 
 import { useSignInOrUp } from "~/hooks/use-signin";
+import { signInFlow } from "../constants";
+import { LoginFlow } from "../types";
 
 /** Google / GitHub sign-in buttons, shared by sign-in and sign-up. */
 
@@ -15,7 +17,7 @@ function GoogleMark() {
   );
 }
 
-export function OAuthRow({ flow = "sign-in" }: { flow?: "sign-in" | "sign-up" }) {
+export function OAuthRow({ flow = signInFlow }: { flow?: LoginFlow }) {
   const { signInWithGoogle } = useSignInOrUp();
 
   return (

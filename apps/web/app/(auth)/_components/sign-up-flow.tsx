@@ -8,6 +8,7 @@ import { VerifyCode } from "./verify-code";
 import { useForm } from "react-hook-form";
 import { SignInFormInputType } from "../validators";
 import { useSignInOrUp } from "~/hooks/use-signin";
+import { signupFlow } from "../constants";
 
 export function SignUpFlow() {
   const [code, setCode] = useState("");
@@ -34,7 +35,7 @@ export function SignUpFlow() {
       <VerifyCode
         email={getValues("email")}
         code={code}
-        loginMode={"sign-up"}
+        loginMode={signupFlow}
         formError={formError}
         setCode={setCode}
         onBack={() => {
@@ -52,7 +53,7 @@ export function SignUpFlow() {
       <h2 className="auth-title">Start folding.</h2>
       <p className="auth-sub">Three forms free, no card needed.</p>
 
-      <OAuthRow flow="sign-up" />
+      <OAuthRow flow={signupFlow} />
 
       <form className="form-stack" onSubmit={handleSubmit((data) => signUpWithEmail(data))}>
         <div className="o-field">

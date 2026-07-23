@@ -1,4 +1,5 @@
 import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
+import { signupFlow } from "../constants";
 
 /**
  * OAuth landing page. Clerk's component reads the redirect params and finishes
@@ -16,7 +17,7 @@ export default async function SSOCallbackPage({
   const { flow } = await searchParams;
 
   const message =
-    flow === "sign-up"
+    flow === signupFlow
       ? "Folding a fresh sheet just for you…"
       : "Pressing the last fold into place…";
 

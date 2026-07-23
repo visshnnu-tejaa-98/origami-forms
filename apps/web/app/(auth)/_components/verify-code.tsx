@@ -3,12 +3,13 @@
 import { useState, type FormEvent } from "react";
 import { Icon } from "~/components/origami/icon";
 import { OtpInput } from "./otp-input";
+import { LoginFlow } from "../types";
 const CODE_LENGTH = 6;
 
 interface VerifyCodeProps {
   email?: string;
   code: string;
-  loginMode: 'sign-in' | 'sign-up',
+  loginMode: LoginFlow,
   formError: string,
   setCode: (code: string) => void;
   onBack: () => void;
