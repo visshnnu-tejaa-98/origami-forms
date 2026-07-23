@@ -122,13 +122,13 @@ export function useSignInOrUp() {
         setOtpVerifying(true)
     }
 
-    const signInWithGoogle = async () => {
+    const signInWithGoogle = async (flow: 'sign-in' | 'sign-up' = 'sign-in') => {
         setFormError("")
 
         try {
             await clerk.client.signIn.authenticateWithRedirect({
                 strategy: 'oauth_google',
-                redirectUrl: '/sso-callback',
+                redirectUrl: `/sso-callback?flow=${flow}`,
                 redirectUrlComplete: '/',
             })
         } catch (error) {

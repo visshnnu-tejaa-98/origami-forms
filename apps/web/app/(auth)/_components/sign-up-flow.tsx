@@ -52,7 +52,7 @@ export function SignUpFlow() {
       <h2 className="auth-title">Start folding.</h2>
       <p className="auth-sub">Three forms free, no card needed.</p>
 
-      <OAuthRow />
+      <OAuthRow flow="sign-up" />
 
       <form className="form-stack" onSubmit={handleSubmit((data) => signUpWithEmail(data))}>
         <div className="o-field">

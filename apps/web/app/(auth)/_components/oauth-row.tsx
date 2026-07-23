@@ -15,13 +15,13 @@ function GoogleMark() {
   );
 }
 
-export function OAuthRow() {
+export function OAuthRow({ flow = "sign-in" }: { flow?: "sign-in" | "sign-up" }) {
   const { signInWithGoogle } = useSignInOrUp();
 
   return (
     <>
       <div className="oauth-row">
-        <button className="oauth-btn" type="button" onClick={() => signInWithGoogle()}>
+        <button className="oauth-btn" type="button" onClick={() => signInWithGoogle(flow)}>
           <GoogleMark /> Google
         </button>
       </div>

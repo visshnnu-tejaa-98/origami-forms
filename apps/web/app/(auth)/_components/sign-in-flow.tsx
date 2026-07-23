@@ -69,7 +69,7 @@ export function SignInFlow() {
       <h2 className="auth-title">Welcome back.</h2>
       <p className="auth-sub">Pick up where you left your pen.</p>
 
-      <OAuthRow />
+      <OAuthRow flow="sign-in" />
 
       <form className="form-stack" onSubmit={handleSubmit((formData) => signInWithEmail(formData))}>
         <div className="o-field">
