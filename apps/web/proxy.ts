@@ -1,19 +1,18 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { handleAuthRoiting } from './app/middlewares/authRules'
 
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
 
 
 export default clerkMiddleware(async (auth, req) => {
-    // Fetch the user's role from the session claims
-    const userRole = (await auth()).sessionClaims?.metadata?.role
 
-    // Protect all routes starting with `/admin` and subscriber
-    if (isAdminRoute(req) && !(userRole === 'admin' || userRole === 'subscriber')) {
-        const url = new URL('/', req.url)
-        return NextResponse.redirect(url)
-    }
+    const authDetails = await auth()
+    const role = authDetails.sessionClaims?.metadata?.role
+    const userId = authDetails.sessionClaims?.sub
+
+    return handleAuthRoiting({ req, userId, role })
 })
 
 export const config = {

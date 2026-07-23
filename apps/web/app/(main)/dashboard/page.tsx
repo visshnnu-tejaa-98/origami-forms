@@ -1,10 +1,15 @@
+import { currentUser } from "@clerk/nextjs/server";
 import React from "react";
 
-const Dashboard = () => {
+const Dashboard = async () => {
+  const user = await currentUser()
+  const { id, emailAddresses } = user!;
+
   return (
     <div>
       <div>Dashboard page</div>
-      <p>User: </p>
+      <p>User: {id}</p>
+      <p>Email: {emailAddresses[0]?.emailAddress}</p>
     </div>
   );
 };
