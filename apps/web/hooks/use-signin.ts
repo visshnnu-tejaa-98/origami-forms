@@ -10,6 +10,8 @@ import { signInFormInput, SignInFormInputType } from "~/app/(auth)/validators"
 export function useSignInOrUp() {
     const [formError, setFormError] = useState("")
     const [otpVerifying, setOtpVerifying] = useState(false);
+    const [isSigningInLoading, setisSigningInLoading] = useState(false)
+    const [isSignUpLoading, setisSignUpLoading] = useState(false)
     const [missingRequirements, setMissingRequirements] = useState(false)
     // Which resource the shared OTP screen is driving.
     const [loginFlow, setLoginFlow] = useState<'sign-in' | 'sign-up'>('sign-in')
@@ -19,17 +21,7 @@ export function useSignInOrUp() {
     const clerk = useClerk()
     const router = useRouter()
 
-    const createSignInOrUp = async ({ email }: SignInFormInputType, mode: 'sign-in' | 'sign-up') => {
-        return mode === 'sign-up' ?
-            await signUp.create({
-                emailAddress: email,
-            })
-            :
-            await signIn.create({
-                identifier: email,
-                signUpIfMissing: true,
-            })
-    }
+    const clearFormError = () => setFormError("")
 
     const sendOtp = async (mode: 'sign-in' | 'sign-up') => {
         return mode === "sign-up"
@@ -38,8 +30,10 @@ export function useSignInOrUp() {
     };
 
 
-    const signInWithEmailAndPasswordWithOTPVerification = async (data: SignInFormInputType) => {
+    const signInWithEmail = async (data: SignInFormInputType) => {
         setFormError("")
+        setisSigningInLoading(true)
+
 
         const { error, data: parsedData } = await validateForm({ schema: signInFormInput, input: data })
 
@@ -55,13 +49,14 @@ export function useSignInOrUp() {
 
         const { email } = parsedData
 
-        setLoginFlow('sign-in')
-
         await startEmailSignIn(email)
+        setisSigningInLoading(false)
     }
 
     const signUpWithEmail = async (data: SignInFormInputType) => {
         setFormError("")
+        setisSignUpLoading(true)
+
 
         const { error, data: parsedData } = await validateForm({ schema: signInFormInput, input: data })
 
@@ -78,28 +73,30 @@ export function useSignInOrUp() {
         const { email } = parsedData
 
         await startEmailSignIn(email)
+        setisSignUpLoading(false)
+
     }
 
-    // Pulls a human-readable message out of a Clerk error (falls back to generic).
     const clerkErrorMessage = (error: unknown, fallback: string) =>
         isClerkAPIResponseError(error)
             ? error.errors[0]?.longMessage ?? error.errors[0]?.message ?? fallback
             : fallback
 
-    // Clerk codes that mean "a session already exists on this client".
     const isAlreadySignedIn = (error: unknown) =>
         isClerkAPIResponseError(error) &&
         ['session_exists', 'identifier_already_signed_in'].includes(error.errors[0]?.code ?? '')
 
-    // Starts the email-OTP sign-in path (shared by the sign-in form and the
-    // "already registered" fallback from the sign-up form).
     const startEmailSignIn = async (email: string) => {
-        setLoginFlow('sign-in')
+        const loginFlow = 'sign-in'
+        setLoginFlow(loginFlow)
 
-        const { error: createSignInError } = await createSignInOrUp({ email }, 'sign-in')
+        const { error: createSignInError } = await signIn.create({
+            identifier: email,
+            signUpIfMissing: true,
+        })
         if (createSignInError) {
+
             console.error(JSON.stringify(createSignInError, null, 2))
-            // Already logged in on this device: just go home instead of erroring.
             if (isAlreadySignedIn(createSignInError)) {
                 router.push('/')
                 return
@@ -108,7 +105,8 @@ export function useSignInOrUp() {
             return
         }
 
-        const { error: sendCodeError } = await sendOtp('sign-in')
+        const { error: sendCodeError } = await sendOtp(loginFlow)
+
         if (sendCodeError) {
             console.error(JSON.stringify(sendCodeError, null, 2))
             setOtpVerifying(false)
@@ -152,6 +150,11 @@ export function useSignInOrUp() {
         isClerkAPIResponseError(error) &&
         error.errors[0]?.code === 'sign_up_if_missing_transfer'
 
+
+    const isIncorrectCode = (error: unknown) => !!error &&
+        isClerkAPIResponseError(error) &&
+        error.errors[0]?.code === 'form_code_incorrect'
+
     const verifySignUpOtp = async (code: string) => {
         const { error } = await signUp.verifications.verifyEmailCode({ code })
 
@@ -190,6 +193,11 @@ export function useSignInOrUp() {
 
             if (isSignUpTransfer(error)) {
                 await handleTransferToSignUp()
+                return
+            }
+
+            if (isIncorrectCode(error)) {
+                setFormError("Incorrect code, Please try again.")
                 return
             }
 
@@ -273,11 +281,14 @@ export function useSignInOrUp() {
         otpVerifying,
         formError,
         missingRequirements,
-        signInWithEmailAndPasswordWithOTPVerification,
+        isSigningInLoading,
+        isSignUpLoading,
+        signInWithEmail,
         signUpWithEmail,
         setOtpVerifying,
         verifyOtp,
         resendOtp,
-        signInWithGoogle
+        signInWithGoogle,
+        clearFormError
     }
 }

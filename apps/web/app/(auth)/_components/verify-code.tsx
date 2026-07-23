@@ -6,20 +6,18 @@ import { OtpInput } from "./otp-input";
 const CODE_LENGTH = 6;
 
 interface VerifyCodeProps {
-  /** Address the code was sent to — shown back to the user. */
   email?: string;
   code: string;
-  loginMode: 'sign-in' | 'sign-up'
+  loginMode: 'sign-in' | 'sign-up',
+  formError: string,
   setCode: (code: string) => void;
-  /** Return to the credentials form. */
   onBack: () => void;
-  /** Submit the code. Throw / reject to surface an error. */
   onVerify: (code: string) => Promise<void>;
-  /** Re-send the email code. */
   onResend: () => Promise<void> | void;
+  clearFormError: () => Promise<void> | void;
 }
 
-export function VerifyCode({ email, code, loginMode, setCode, onBack, onVerify, onResend }: VerifyCodeProps) {
+export function VerifyCode({ email, code, loginMode, formError, setCode, onBack, onVerify, onResend, clearFormError }: VerifyCodeProps) {
   const [status, setStatus] = useState<"idle" | "verifying" | "resending">("idle");
   const [error, setError] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
@@ -73,7 +71,7 @@ export function VerifyCode({ email, code, loginMode, setCode, onBack, onVerify, 
             value={code}
             onChange={(next) => {
               setCode(next);
-              if (error) setError(null);
+              if (formError) clearFormError();
               if (resent) setResent(false);
             }}
             length={CODE_LENGTH}
@@ -90,6 +88,10 @@ export function VerifyCode({ email, code, loginMode, setCode, onBack, onVerify, 
             <div className="o-field-help">Paste the whole code — it&apos;ll fill itself in.</div>
           )}
         </div>
+
+        {formError ? (
+          <p className="text-[var(--accent-deep)] text-xs font-semibold py-1">{formError}</p>
+        ) : <p className="text-[var(--accent-deep)] text-xs font-semibold py-1 text-transparent">Test error</p>}
 
         <button
           className="o-btn o-btn--accent o-btn--lg o-btn--block"

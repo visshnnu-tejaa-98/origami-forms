@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Icon } from "~/components/origami/icon";
 import { OAuthRow } from "./oauth-row";
@@ -17,7 +17,9 @@ export function SignInFlow() {
   const {
     otpVerifying,
     formError,
-    signInWithEmailAndPasswordWithOTPVerification,
+    isSigningInLoading,
+    clearFormError,
+    signInWithEmail,
     setOtpVerifying,
     verifyOtp,
     resendOtp,
@@ -37,6 +39,12 @@ export function SignInFlow() {
 
   const enableSignInButton = !!watch("email");
 
+  useEffect(() => {
+    if (formError === "Incorrect code, Please try again.") {
+      setCode("");
+    }
+  }, [formError]);
+
   if (otpVerifying) {
     const email = getValues("email");
     return (
@@ -44,12 +52,14 @@ export function SignInFlow() {
         email={email}
         code={code}
         loginMode={"sign-in"}
+        formError={formError}
         setCode={setCode}
         onBack={() => {
           setOtpVerifying(false);
         }}
         onVerify={(code: string) => verifyOtp(code)}
         onResend={resendOtp}
+        clearFormError={clearFormError}
       />
     );
   }
@@ -61,33 +71,32 @@ export function SignInFlow() {
 
       <OAuthRow />
 
-      <form
-        className="form-stack"
-        onSubmit={handleSubmit((formData) =>
-          signInWithEmailAndPasswordWithOTPVerification(formData),
-        )}
-      >
+      <form className="form-stack" onSubmit={handleSubmit((formData) => signInWithEmail(formData))}>
         <div className="o-field">
           <label className="o-field-label" htmlFor="email">
             Email
           </label>
           <input
             className="o-input"
-            type="email"
+            type="text"
             placeholder="you@studio.dev"
             {...register("email")}
           />
         </div>
 
-        {formError && (
-          <p className="text-[var(--accent-deep)] text-xs font-semibold py-2">{formError}</p>
+        {formError ? (
+          <p className="text-[var(--accent-deep)] text-xs font-semibold py-1">{formError}</p>
+        ) : (
+          <p className="text-[var(--accent-deep)] text-xs font-semibold py-1 text-transparent">
+            Test error
+          </p>
         )}
         <button
           className="o-btn o-btn--accent o-btn--lg o-btn--block"
           type="submit"
-          disabled={!enableSignInButton || isSendingCode}
+          disabled={!enableSignInButton || isSigningInLoading}
         >
-          {isSendingCode ? (
+          {isSigningInLoading ? (
             <>
               <span className="o-spinner" /> Sending code…
             </>
