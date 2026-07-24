@@ -9,10 +9,10 @@ import { userRolesEnum } from "./enum";
 
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  clerkUserId: text("clerk_user_id"),
+  clerkUserId: text("clerk_user_id").notNull(),
 
   firstName: varchar("first_name", { length: 50 }).notNull(),
-  lastName: varchar("last_name", { length: 50 }).notNull(),
+  lastName: varchar("last_name", { length: 50 }),
 
   email: varchar("email", { length: 255 }).notNull().unique(),
   avatarUrl: text("profile_image_url"),
