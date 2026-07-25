@@ -1,0 +1,63 @@
+/* ============================================================
+   ABOUT · company / product story page
+   Built on the Origami design-system tokens (origami.css).
+   ============================================================ */
+
+.o-about { padding: var(--s-10) var(--s-5) var(--s-11); }
+.o-about-shell { max-width: 940px; margin: 0 auto; }
+
+/* ---- Hero ---- */
+.o-about-hero { max-width: 660px; margin: 0 auto var(--s-10); text-align: center; }
+.o-about-title { font-size: var(--t-display); margin: var(--s-3) 0 var(--s-4); }
+.o-about-title .o-hl { padding: 0 0.08em; }
+.o-about-lede { font-size: 1.12rem; line-height: 1.65; color: var(--ink-3); max-width: 36rem; margin: 0 auto; }
+
+/* ---- Stats strip ---- */
+.o-about-stats {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-4);
+  margin: var(--s-9) 0;
+}
+@media (min-width: 720px) { .o-about-stats { grid-template-columns: repeat(4, 1fr); } }
+.o-about-stat { padding: var(--s-5) var(--s-4); text-align: center; }
+.o-about-stat:nth-child(odd) { transform: rotate(-0.6deg); }
+.o-about-stat:nth-child(even) { transform: rotate(0.6deg); }
+.o-about-stat-num {
+  font-family: var(--font-hand); font-weight: 700;
+  font-size: 2.4rem; line-height: 1; color: var(--accent-deep);
+}
+.o-about-stat-label {
+  font-family: var(--font-body); font-size: var(--t-xs);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3);
+  margin-top: var(--s-2); font-weight: 600;
+}
+
+/* ---- Story ---- */
+.o-about-section-head { text-align: center; margin: var(--s-10) 0 var(--s-6); }
+.o-about-h2 { font-family: var(--font-hand); font-size: var(--t-h1); color: var(--ink-1); margin-top: var(--s-3); }
+
+.o-about-story { max-width: 640px; margin: 0 auto; }
+.o-about-story p { color: var(--ink-2); font-size: 1.05rem; line-height: 1.7; }
+.o-about-story p + p { margin-top: var(--s-4); }
+
+/* ---- Values ---- */
+.o-about-values {
+  display: grid; grid-template-columns: 1fr; gap: var(--s-5);
+  margin-top: var(--s-6);
+}
+@media (min-width: 720px) { .o-about-values { grid-template-columns: repeat(3, 1fr); } }
+.o-about-value { padding: var(--s-6); }
+.o-about-value:nth-child(1) { transform: rotate(-0.5deg); }
+.o-about-value:nth-child(3) { transform: rotate(0.5deg); }
+.o-about-value-emoji { font-size: 1.8rem; line-height: 1; display: block; margin-bottom: var(--s-3); }
+.o-about-value h3 { font-family: var(--font-hand); font-size: var(--t-h3); color: var(--ink-1); margin: 0 0 var(--s-2); }
+.o-about-value p { color: var(--ink-3); font-size: var(--t-sm); line-height: 1.6; margin: 0; }
+
+/* ---- CTA ---- */
+.o-about-cta {
+  position: relative; margin-top: var(--s-11); padding: var(--s-9) var(--s-6);
+  text-align: center; background: var(--surface-card); border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper); box-shadow: var(--shadow-paper-2);
+}
+.o-about-cta h2 { font-family: var(--font-hand); font-size: var(--t-h1); color: var(--ink-1); margin: 0 0 var(--s-3); }
+.o-about-cta p { color: var(--ink-3); margin: 0 auto var(--s-6); max-width: 28rem; }
+.o-about-cta-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ADMIN, ALLOWED_PUBLIC_ROUTES } from "../(auth)/constants";
+import { ADMIN, PUBLIC_ROUTES, LOGGED_IN_ONLY_ROUTES, LOGGED_OUT_ONLY_ROUTES } from "../(auth)/constants";
 
 type handleRouteProps = {
     req: NextRequest;
@@ -10,33 +10,41 @@ type handleRouteProps = {
 export const handleAuthRouting = ({ req, userId, role }: handleRouteProps) => {
     const currentPath = req.nextUrl.pathname
 
-    // redirect user to sign-in page if he tries to access the private routes
     if (!userId) {
-        if (!ALLOWED_PUBLIC_ROUTES.includes(currentPath)) {
-            const signInUrl = new URL('/sign-in', req.url)
-            return NextResponse.redirect(signInUrl)
+        // Logged-out users may see public and logged-out-only routes.
+        if (PUBLIC_ROUTES.includes(currentPath) || LOGGED_OUT_ONLY_ROUTES.includes(currentPath)) {
+            return NextResponse.next();
         }
-        return NextResponse.next()
+
+        // Anything else (logged-in-only routes) sends them to sign-in.
+        const signInUrl = new URL('/sign-in', req.url)
+        //  Append redirect_url so Clerk returns them here after signing in
+        signInUrl.searchParams.set('redirect_url', currentPath);
+        return NextResponse.redirect(signInUrl)
     }
 
     try {
-        // redirect user to /admin/dashboard if he is admin and tries to access the public routes
+        if (currentPath === "/error" || currentPath === "/notfound") {
+            return NextResponse.next();
+        }
+
+        const isLoggedOutOnlyRoute = LOGGED_OUT_ONLY_ROUTES.includes(currentPath);
+
+
         if (role === ADMIN) {
-            if (currentPath === "/dashboard" || ALLOWED_PUBLIC_ROUTES.includes(currentPath)) {
+            if (currentPath === "/dashboard" || PUBLIC_ROUTES.includes(currentPath) || isLoggedOutOnlyRoute) {
                 const dashboardUrl = new URL('/admin/dashboard', req.url)
                 return NextResponse.redirect(dashboardUrl)
             }
             return NextResponse.next()
         }
 
-        // redirect user to /dashboard if he is subscriber or standard user and tries to access the public routes
-        if (ALLOWED_PUBLIC_ROUTES.includes(currentPath)) {
+        if (currentPath.startsWith("/admin")) {
             const dashboardUrl = new URL('/dashboard', req.url)
             return NextResponse.redirect(dashboardUrl)
         }
 
-        // redirect user to /dashboard if he is subscriber or standard user and tries to access the admin routes
-        if (currentPath.startsWith("/admin")) {
+        if (isLoggedOutOnlyRoute) {
             const dashboardUrl = new URL('/dashboard', req.url)
             return NextResponse.redirect(dashboardUrl)
         }

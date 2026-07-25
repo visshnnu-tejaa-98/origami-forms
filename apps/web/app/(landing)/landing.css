@@ -3,57 +3,6 @@
    Built on the Origami design system (origami.css tokens).
    ============================================================ */
 
-/* ===== NAV ===== */
-.lp-nav {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  backdrop-filter: blur(10px);
-  background: color-mix(in srgb, var(--paper-0) 86%, transparent);
-  border-bottom: 1px solid var(--rule-line);
-}
-.lp-nav-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 14px 32px;
-  display: flex;
-  align-items: center;
-  gap: 28px;
-}
-.lp-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-hand);
-  font-size: 1.6rem;
-  line-height: 1;
-  text-decoration: none;
-  color: var(--ink-1);
-}
-.lp-logo .mark {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  color: var(--accent);
-}
-.lp-nav-links {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  margin-left: 8px;
-}
-.lp-nav-links a {
-  padding: 8px 12px;
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: var(--ink-2);
-  text-decoration: none;
-  border-radius: 8px;
-}
-.lp-nav-links a:hover { background: var(--bg-elevated); color: var(--ink-1); }
-.lp-nav-cta { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-
 /* ===== HERO ===== */
 .lp-hero {
   max-width: 1280px;
@@ -426,10 +375,8 @@
   .lp-ana-grid { grid-template-columns: 1fr; gap: 56px; }
   .lp-builder .body { grid-template-columns: 1fr; min-height: auto; }
   .lp-builder .left, .lp-builder .right { display: none; }
-  .lp-nav-links { display: none; }
 }
 @media (max-width: 560px) {
-  .lp-nav-inner { padding: 12px 18px; }
   .lp-feature-grid { grid-template-columns: 1fr; }
   .lp-template-row { grid-template-columns: 1fr; }
   .lp-t-wall { grid-template-columns: 1fr; }
@@ -438,5 +385,4 @@
   .lp-showcase { margin: 24px 18px; padding: 48px 24px; border-radius: 18px; }
   .lp-ana-board { aspect-ratio: 1 / 1; }
   .lp-hero h1 { font-size: 3.2rem; }
-  .lp-nav-cta .lp-hide-sm { display: none; }
 }

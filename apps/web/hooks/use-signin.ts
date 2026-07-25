@@ -2,7 +2,7 @@
 
 import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react"
 import { signInFlow, signupFlow } from "~/app/(auth)/constants";
 import { LoginFlow } from "~/app/(auth)/types";
@@ -22,6 +22,7 @@ export function useSignInOrUp() {
     const { signUp } = useSignUp()
     const clerk = useClerk()
     const router = useRouter()
+    const searchParams = useSearchParams();
 
     const clearFormError = () => {
         setFormError("")
@@ -219,12 +220,6 @@ export function useSignInOrUp() {
                 return
             }
 
-            if (isClerkAPIResponseError(error)) {
-                setFormError(error.errors[0]?.message ?? "Something went wrong. Please try again.")
-                setOtpVerifying(false)
-                return
-            }
-
             if (error) {
                 console.error(JSON.stringify(error, null, 2))
                 setFormError("That code didn't work. Please try again.")
@@ -264,6 +259,8 @@ export function useSignInOrUp() {
     }
 
     const finalizeSignIn = async () => {
+        const redirectUrl = searchParams.get('redirect_url') || "/dashboard"
+
         await signIn.finalize({
             navigate: ({ session, decorateUrl }) => {
                 console.log({ session })
@@ -272,7 +269,7 @@ export function useSignInOrUp() {
                     return
                 }
 
-                const url = decorateUrl('/dashboard')
+                const url = decorateUrl(redirectUrl)
                 if (url.startsWith('http')) {
                     window.location.href = url
                 } else {
@@ -283,6 +280,8 @@ export function useSignInOrUp() {
     }
 
     const finalizeSignUp = async () => {
+        const redirectUrl = searchParams.get('redirect_url') || "/dashboard"
+
         await signUp.finalize({
             navigate: ({ session, decorateUrl }) => {
                 if (session?.currentTask) {
@@ -290,7 +289,7 @@ export function useSignInOrUp() {
                     return
                 }
 
-                const url = decorateUrl('/dashboard')
+                const url = decorateUrl(redirectUrl)
                 if (url.startsWith('http')) {
                     window.location.href = url
                 } else {

@@ -1,0 +1,47 @@
+/* ============================================================
+   CONTACT · get-in-touch page
+   Built on the Origami design-system tokens (origami.css).
+   ============================================================ */
+
+.o-contact { padding: var(--s-10) var(--s-5) var(--s-11); }
+.o-contact-shell { max-width: 960px; margin: 0 auto; }
+
+/* ---- Hero ---- */
+.o-contact-hero { max-width: 620px; margin: 0 auto var(--s-9); text-align: center; }
+.o-contact-title { font-family: var(--font-hand); font-size: var(--t-display); color: var(--ink-1); margin: var(--s-3) 0 var(--s-4); }
+.o-contact-title .o-hl { padding: 0 0.08em; }
+.o-contact-lede { font-size: 1.08rem; line-height: 1.6; color: var(--ink-3); max-width: 32rem; margin: 0 auto; }
+
+/* ---- Layout ---- */
+.o-contact-grid { display: grid; grid-template-columns: 1fr; gap: var(--s-7); align-items: start; }
+@media (min-width: 860px) { .o-contact-grid { grid-template-columns: 1.3fr 1fr; gap: var(--s-8); } }
+
+/* ---- Form card ---- */
+.o-contact-form-card { padding: var(--s-7); }
+.o-contact-form { display: flex; flex-direction: column; gap: var(--s-5); }
+.o-contact-row { display: grid; grid-template-columns: 1fr; gap: var(--s-5); }
+@media (min-width: 560px) { .o-contact-row { grid-template-columns: 1fr 1fr; } }
+
+/* ---- Sidebar channels ---- */
+.o-contact-side { display: flex; flex-direction: column; gap: var(--s-5); }
+.o-contact-channel { display: flex; gap: var(--s-4); padding: var(--s-5); align-items: flex-start; }
+.o-contact-channel:nth-child(even) { transform: rotate(0.6deg); }
+.o-contact-channel:nth-child(odd) { transform: rotate(-0.5deg); }
+.o-contact-channel-emoji {
+  font-size: 1.4rem; line-height: 1; flex: none;
+  width: 44px; height: 44px; display: grid; place-items: center;
+  background: var(--accent-soft); border-radius: var(--r-md);
+}
+.o-contact-channel h3 { font-family: var(--font-hand); font-size: 1.3rem; color: var(--ink-1); margin: 0 0 2px; }
+.o-contact-channel p { font-size: var(--t-sm); color: var(--ink-3); margin: 0; line-height: 1.5; }
+.o-contact-channel a { color: var(--accent-deep); font-weight: 600; text-decoration: none; }
+.o-contact-channel a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- Success sticky note ---- */
+.o-contact-success {
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-3);
+  text-align: center; padding: var(--s-9) var(--s-6);
+}
+.o-contact-success-emoji { font-size: 3rem; line-height: 1; }
+.o-contact-success h3 { font-family: var(--font-hand); font-size: var(--t-h2); color: var(--ink-1); margin: 0; }
+.o-contact-success p { color: var(--ink-3); margin: 0; max-width: 22rem; }

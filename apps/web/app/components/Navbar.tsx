@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Logo from "./Logo"
 import { Show, UserButton } from "@clerk/nextjs"
+import "./Navbar.css"
 
 
 const Navbar = () => {
@@ -12,9 +13,10 @@ const Navbar = () => {
         <Logo />
         <div className="lp-nav-links">
           <Link href="/templates">Templates</Link>
-          <a href="#features">Features</a>
           <Link href="/pricing">Pricing</Link>
-          <a href="#explore">Explore</a>
+          <Link href="/about">About</Link>
+          <Link href="/contact">Contact</Link>
+          <a href="#features">Features</a>
           <Link href="/studio">Studio</Link>
         </div>
         <div className="lp-nav-cta">
