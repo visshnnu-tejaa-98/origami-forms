@@ -10,9 +10,9 @@ export default class UserService {
 
     public async createUser(userData: CreateUserInputModelType) {
         const { firstName, lastName, email, clerkUserId, avatarUrl, role } = await createUserInputModel.parseAsync(userData)
+        const resolvedFirstName = firstName || email.split("@")[0]!
 
         const existingUser = await this.getUserByEmail(email)
-
         if (existingUser) return {
             id: existingUser.id,
             clerkUserId: existingUser.clerkUserId,
@@ -25,7 +25,7 @@ export default class UserService {
 
         return await db.insert(usersTable).values({
             clerkUserId,
-            firstName,
+            firstName: resolvedFirstName,
             lastName: lastName || null,
             email,
             avatarUrl: avatarUrl || null,

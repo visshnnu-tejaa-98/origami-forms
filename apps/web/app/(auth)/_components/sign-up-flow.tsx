@@ -104,6 +104,7 @@ export function SignUpFlow() {
         By signing up you agree to our <Link href="/terms">terms</Link> &amp;{" "}
         <Link href="/privacy">privacy</Link>.
       </div>
+      <div id="clerk-captcha" className="my-2" />
     </div>
   );
 }

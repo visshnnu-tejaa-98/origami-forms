@@ -7,7 +7,8 @@ export const createUserInputModel = z.object({
     .trim()
     .min(2, "Firstname must be atleast 2 characters long")
     .max(50, "Firstname cannot be longer than 50 characters")
-    .describe("first name of the user"),
+    .optional()
+    .describe("first name of the user — falls back to the email local-part when absent"),
   lastName: z
     .string()
     .trim()

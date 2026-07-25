@@ -90,6 +90,15 @@ export function useSignInOrUp() {
             ? error.errors[0]?.longMessage ?? error.errors[0]?.message ?? fallback
             : fallback
 
+    const isEmailLimitExceeded = (error: unknown) =>
+        isClerkAPIResponseError(error) &&
+        error.errors[0]?.code === 'dev_monthly_email_limit_exceeded'
+
+    const sendCodeErrorMessage = (error: unknown, fallback: string) =>
+        isEmailLimitExceeded(error)
+            ? "We've hit our email limit for now. Please try again later."
+            : clerkErrorMessage(error, fallback)
+
     const isAlreadySignedIn = (error: unknown) =>
         isClerkAPIResponseError(error) &&
         ['session_exists', 'identifier_already_signed_in'].includes(error.errors[0]?.code ?? '')
@@ -116,6 +125,7 @@ export function useSignInOrUp() {
 
         if (sendCodeError) {
             console.error(JSON.stringify(sendCodeError, null, 2))
+            setFormError(sendCodeErrorMessage(sendCodeError, "Couldn't send code to your email address. Please try again."))
             setOtpVerifying(false)
             return
         }
@@ -143,6 +153,7 @@ export function useSignInOrUp() {
 
         if (sendCodeError) {
             console.error(JSON.stringify(sendCodeError, null, 2))
+            setFormError(sendCodeErrorMessage(sendCodeError, "Couldn't resend the code. Please try again."))
             setOtpVerifying(false)
             return
         }
@@ -208,6 +219,12 @@ export function useSignInOrUp() {
                 return
             }
 
+            if (isClerkAPIResponseError(error)) {
+                setFormError(error.errors[0]?.message ?? "Something went wrong. Please try again.")
+                setOtpVerifying(false)
+                return
+            }
+
             if (error) {
                 console.error(JSON.stringify(error, null, 2))
                 setFormError("That code didn't work. Please try again.")
@@ -255,7 +272,7 @@ export function useSignInOrUp() {
                     return
                 }
 
-                const url = decorateUrl('/')
+                const url = decorateUrl('/dashboard')
                 if (url.startsWith('http')) {
                     window.location.href = url
                 } else {
@@ -273,7 +290,7 @@ export function useSignInOrUp() {
                     return
                 }
 
-                const url = decorateUrl('/')
+                const url = decorateUrl('/dashboard')
                 if (url.startsWith('http')) {
                     window.location.href = url
                 } else {
