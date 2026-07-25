@@ -1,47 +1,183 @@
 /* ============================================================
    CONTACT · get-in-touch page
    Built on the Origami design-system tokens (origami.css).
+   All selectors scoped under .contact-page / its wrapper.
    ============================================================ */
 
-.o-contact { padding: var(--s-10) var(--s-5) var(--s-11); }
-.o-contact-shell { max-width: 960px; margin: 0 auto; }
-
-/* ---- Hero ---- */
-.o-contact-hero { max-width: 620px; margin: 0 auto var(--s-9); text-align: center; }
-.o-contact-title { font-family: var(--font-hand); font-size: var(--t-display); color: var(--ink-1); margin: var(--s-3) 0 var(--s-4); }
-.o-contact-title .o-hl { padding: 0 0.08em; }
-.o-contact-lede { font-size: 1.08rem; line-height: 1.6; color: var(--ink-3); max-width: 32rem; margin: 0 auto; }
-
-/* ---- Layout ---- */
-.o-contact-grid { display: grid; grid-template-columns: 1fr; gap: var(--s-7); align-items: start; }
-@media (min-width: 860px) { .o-contact-grid { grid-template-columns: 1.3fr 1fr; gap: var(--s-8); } }
-
-/* ---- Form card ---- */
-.o-contact-form-card { padding: var(--s-7); }
-.o-contact-form { display: flex; flex-direction: column; gap: var(--s-5); }
-.o-contact-row { display: grid; grid-template-columns: 1fr; gap: var(--s-5); }
-@media (min-width: 560px) { .o-contact-row { grid-template-columns: 1fr 1fr; } }
-
-/* ---- Sidebar channels ---- */
-.o-contact-side { display: flex; flex-direction: column; gap: var(--s-5); }
-.o-contact-channel { display: flex; gap: var(--s-4); padding: var(--s-5); align-items: flex-start; }
-.o-contact-channel:nth-child(even) { transform: rotate(0.6deg); }
-.o-contact-channel:nth-child(odd) { transform: rotate(-0.5deg); }
-.o-contact-channel-emoji {
-  font-size: 1.4rem; line-height: 1; flex: none;
-  width: 44px; height: 44px; display: grid; place-items: center;
-  background: var(--accent-soft); border-radius: var(--r-md);
+.contact-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 64px 32px 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: flex-start;
+  position: relative;
 }
-.o-contact-channel h3 { font-family: var(--font-hand); font-size: 1.3rem; color: var(--ink-1); margin: 0 0 2px; }
-.o-contact-channel p { font-size: var(--t-sm); color: var(--ink-3); margin: 0; line-height: 1.5; }
-.o-contact-channel a { color: var(--accent-deep); font-weight: 600; text-decoration: none; }
-.o-contact-channel a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-/* ---- Success sticky note ---- */
-.o-contact-success {
-  display: flex; flex-direction: column; align-items: center; gap: var(--s-3);
-  text-align: center; padding: var(--s-9) var(--s-6);
+/* ---- left col ---- */
+.contact-page .c-left h1 {
+  font-family: var(--font-hand);
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 0.95;
+  color: var(--ink-1);
+  margin: 0 0 16px;
 }
-.o-contact-success-emoji { font-size: 3rem; line-height: 1; }
-.o-contact-success h3 { font-family: var(--font-hand); font-size: var(--t-h2); color: var(--ink-1); margin: 0; }
-.o-contact-success p { color: var(--ink-3); margin: 0; max-width: 22rem; }
+.contact-page .c-left .lede {
+  font-size: 1.1rem; color: var(--ink-2); line-height: 1.55;
+  max-width: 50ch;
+  margin-bottom: 28px;
+}
+.contact-page .c-left .eyebrow {
+  display: inline-block;
+  background: var(--surface-tape);
+  padding: 4px 12px;
+  transform: rotate(-2deg);
+  font-family: var(--font-body);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-1);
+  margin-bottom: 16px;
+}
+
+/* ---- channel list ---- */
+.contact-page .channel {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 18px;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: 14px;
+  margin-bottom: 12px;
+  text-decoration: none; color: inherit;
+  box-shadow: var(--shadow-paper-1);
+  transition: transform var(--transition-paper);
+}
+.contact-page .channel:hover { transform: translateY(-2px) rotate(var(--rot-2)); }
+.contact-page .channel .ic {
+  width: 44px; height: 44px; flex: 0 0 44px;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  background: var(--accent-soft); color: var(--accent-deep);
+}
+.contact-page .channel.matcha .ic { background: var(--matcha-soft); color: var(--matcha-deep); }
+.contact-page .channel.sakura .ic { background: var(--sakura-soft); color: var(--sakura-deep); }
+.contact-page .channel.lav .ic { background: var(--lavender-soft); color: var(--lavender-deep); }
+.contact-page .channel .body { flex: 1; }
+.contact-page .channel .ttl { font-family: var(--font-hand); font-size: 1.5rem; color: var(--ink-1); line-height: 1; margin-bottom: 4px; }
+.contact-page .channel .desc { font-size: 0.86rem; color: var(--ink-3); margin: 0 0 4px; }
+.contact-page .channel .addr { font-family: var(--font-mono); font-size: 0.84rem; color: var(--accent-deep); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.contact-page .channel .ago { font-family: var(--font-body); font-size: 0.74rem; color: var(--ink-4); font-style: italic; }
+.contact-page .channel .pgp {
+  background: var(--ink-1); color: var(--paper-0);
+  padding: 1px 6px; font-size: 0.7rem; border-radius: 4px; font-family: var(--font-body);
+}
+
+/* ---- studio card ---- */
+.contact-page .studio-card {
+  margin-top: 22px;
+  padding: 20px 22px;
+  background: var(--paper-1);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r-paper);
+  position: relative;
+}
+.contact-page .studio-card .clip { position: absolute; top: -14px; left: 24px; color: var(--ink-3); }
+.contact-page .studio-card h3 { font-family: var(--font-hand); font-size: 1.6rem; line-height: 1; margin: 0 0 8px; color: var(--ink-1); }
+.contact-page .studio-card p { font-size: 0.9rem; color: var(--ink-2); margin: 0 0 4px; }
+.contact-page .studio-card .hours {
+  margin-top: 10px;
+  font-size: 0.84rem; color: var(--ink-3); font-style: italic;
+  display: flex; gap: 8px; align-items: center;
+}
+.contact-page .studio-card .hours .o-dot { background: var(--matcha); animation: cPulseSoft 1.4s ease-in-out infinite; }
+
+/* ---- right: form sheet ---- */
+.contact-page .form-sheet {
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-3);
+  padding: 36px 36px 32px;
+  position: relative;
+  transform: rotate(-0.4deg);
+}
+.contact-page .form-sheet .clip-top { position: absolute; top: -16px; left: 32px; color: var(--ink-3); }
+.contact-page .form-sheet .tape {
+  position: absolute; top: -10px; right: 24px;
+  width: 80px; height: 22px;
+  background: var(--surface-tape);
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.22) 0 4px, transparent 4px 8px);
+  transform: rotate(8deg);
+}
+.contact-page .form-sheet h2 { font-family: var(--font-hand); font-size: 2rem; line-height: 1; margin-bottom: 6px; color: var(--ink-1); }
+.contact-page .form-sheet p.intro { color: var(--ink-3); font-size: 0.92rem; margin: 0 0 22px; }
+.contact-page .form-sheet .form-stack { display: flex; flex-direction: column; gap: 14px; }
+.contact-page .form-sheet .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ---- topic tiles ---- */
+.contact-page .topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.contact-page .topic-tile {
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1.4px solid var(--rule-line);
+  border-radius: 10px;
+  font-size: 0.86rem; font-weight: 600;
+  color: var(--ink-2); cursor: pointer;
+  text-align: left;
+  transition: all 180ms;
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-body);
+}
+.contact-page .topic-tile .ic { width: 22px; height: 22px; display: grid; place-items: center; color: var(--ink-3); }
+.contact-page .topic-tile:hover { border-color: var(--rule-strong); }
+.contact-page .topic-tile.active { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--accent); }
+.contact-page .topic-tile.active .ic { color: var(--accent-deep); }
+
+/* ---- sla note ---- */
+.contact-page .sla-note {
+  background: var(--matcha-soft);
+  color: var(--matcha-deep);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 6px;
+}
+.contact-page .sla-note strong { font-family: var(--font-hand); font-size: 1.05rem; }
+.contact-page .sla-note .iconbox {
+  width: 28px; height: 28px; flex: none;
+  display: grid; place-items: center; border-radius: 8px;
+  background: rgba(255,255,255,0.5); color: var(--matcha-deep);
+}
+.contact-page .form-note { font-size: 0.78rem; color: var(--ink-3); text-align: center; margin: 0; }
+.contact-page .form-note a { color: var(--accent-deep); }
+
+/* ---- floating deco ---- */
+.contact-page .float-deco { position: absolute; pointer-events: none; }
+.contact-page .float-deco.crane { top: 10%; right: 3%; color: var(--accent); transform: rotate(-12deg); animation: paperFloat 6s ease-in-out infinite; }
+.contact-page .float-deco.plane { top: 45%; left: 2%; color: var(--indigo-deep); transform: rotate(15deg); animation: paperFloat 7s 0.6s ease-in-out infinite; }
+.contact-page .float-deco.sakura1 { bottom: 4%; right: 8%; color: var(--sakura-deep); }
+
+/* ---- footer sticky note ---- */
+.contact-footer { max-width: 1180px; margin: 0 auto 80px; padding: 0 32px; text-align: center; }
+.contact-footer .o-note { display: inline-block; max-width: 460px; transform: rotate(-2deg); font-size: 1rem; text-align: left; }
+.contact-footer .o-note a { color: var(--matcha-deep); font-weight: 600; }
+
+@keyframes cPulseSoft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ---- responsive ---- */
+@media (max-width: 880px) {
+  .contact-page { grid-template-columns: 1fr; gap: 36px; }
+  .contact-page .float-deco.crane,
+  .contact-page .float-deco.plane,
+  .contact-page .float-deco.sakura1 { display: none; }
+  .contact-page .form-sheet { transform: none; }
+}
+@media (max-width: 560px) {
+  .contact-page { padding: 36px 18px 60px; }
+  .contact-page .form-sheet { padding: 26px 22px; }
+  .contact-page .form-sheet .row-2 { grid-template-columns: 1fr; }
+  .contact-page .topic-grid { grid-template-columns: 1fr; }
+}

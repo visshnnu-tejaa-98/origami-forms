@@ -1,175 +1,207 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import Navbar from '../../components/Navbar'
+import { Icon, type IconName } from '../../(main)/components/icons'
 import './contact.css'
 
-const channels = [
+const channels: {
+    cls: string
+    icon: IconName
+    title: string
+    desc: string
+    addr: string
+    ago: string
+    pgp?: boolean
+}[] = [
     {
-        emoji: '✉️',
-        title: 'Email us',
-        body: (
-            <>
-                We usually reply within a day.
-                <br />
-                <a href="mailto:hello@origamiforms.com">hello@origamiforms.com</a>
-            </>
-        ),
+        cls: '',
+        icon: 'mail',
+        title: 'General hello',
+        desc: 'questions, suggestions, fan mail — we want all of it',
+        addr: 'hello@origamiforms.com',
+        ago: 'avg. reply · 4 hours',
     },
     {
-        emoji: '🐦',
-        title: 'Say hi on socials',
-        body: (
-            <>
-                Follow along as we fold in the open at{' '}
-                <a href="#" >@origamiforms</a>.
-            </>
-        ),
+        cls: 'sakura',
+        icon: 'sparkles',
+        title: 'Stuck on something?',
+        desc: 'technical hiccups, account questions, billing',
+        addr: 'support@origamiforms.com',
+        ago: 'avg. reply · 2 hours · M–F · 24h Pro',
     },
     {
-        emoji: '💬',
-        title: 'Support',
-        body: (
-            <>
-                Stuck on a fold? Reach the team at{' '}
-                <a href="mailto:support@origamiforms.com">support@origamiforms.com</a>.
-            </>
-        ),
+        cls: 'matcha',
+        icon: 'mail',
+        title: 'Press & partnerships',
+        desc: 'stories, podcasts, integrations, co-marketing',
+        addr: 'press@origamiforms.com',
+        ago: 'avg. reply · 1 business day',
+    },
+    {
+        cls: 'lav',
+        icon: 'lock',
+        title: 'Security & abuse',
+        desc: 'found a bug? reporting bad content? please tell us',
+        addr: 'security@origamiforms.com',
+        ago: 'priority queue · avg. reply < 4h',
+        pgp: true,
     },
 ]
 
+const topics: { icon: IconName; label: string }[] = [
+    { icon: 'sparkles', label: 'Just saying hello' },
+    { icon: 'zap', label: "I'm stuck" },
+    { icon: 'mail', label: 'Press / partnership' },
+    { icon: 'zap', label: 'Feature wish' },
+    { icon: 'lock', label: 'Security report' },
+    { icon: 'trash', label: 'Data / account' },
+]
+
 const Page = () => {
-    const [sent, setSent] = useState(false)
+    const [activeTopic, setActiveTopic] = useState(0)
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         // Wire this up to your API / email service.
-        setSent(true)
     }
 
     return (
         <>
             <Navbar />
-            <main className="o-contact o-page">
-                <div className="o-contact-shell">
-                    <header className="o-contact-hero">
-                        <p className="o-eyebrow">We&rsquo;d love to hear from you</p>
-                        <h1 className="o-contact-title">
-                            Drop us a <span className="o-hl">note.</span>
-                        </h1>
-                        <p className="o-contact-lede">
-                            Questions, feedback, or just want to say hello? Leave a note on our desk
-                            and we&rsquo;ll fold a reply back to you.
+
+            <main className="contact-page">
+                <span className="float-deco crane"><Icon name="crane" size={80} /></span>
+                <span className="float-deco plane"><Icon name="plane" size={56} /></span>
+                <span className="float-deco sakura1"><Icon name="sakura" size={38} /></span>
+
+                {/* LEFT: channels */}
+                <div className="c-left">
+                    <span className="eyebrow">★ say hello ✶</span>
+                    <h1>We read every<br />paper letter.</h1>
+                    <p className="lede">
+                        A small team in Kobe and Brooklyn, mostly. We answer within a workday —
+                        usually faster. Pick a paper trail below or send a note over there →
+                    </p>
+
+                    {channels.map((c) => (
+                        <a key={c.addr} className={`channel ${c.cls}`} href={`mailto:${c.addr}`}>
+                            <span className="ic"><Icon name={c.icon} size={20} /></span>
+                            <div className="body">
+                                <div className="ttl">{c.title}</div>
+                                <p className="desc">{c.desc}</p>
+                                <div className="addr">
+                                    {c.addr}
+                                    {c.pgp && <span className="pgp">PGP</span>}
+                                </div>
+                                <div className="ago">{c.ago}</div>
+                            </div>
+                        </a>
+                    ))}
+
+                    {/* studio card */}
+                    <div className="studio-card">
+                        <span className="clip"><Icon name="clip" size={28} /></span>
+                        <h3>The paper desk</h3>
+                        <p>
+                            Origami Stationery, Co.<br />
+                            3-12-1 Kita-Aoyama, Minato-ku<br />
+                            Tokyo 107-0061 · Japan
                         </p>
-                    </header>
-
-                    <div className="o-contact-grid">
-                        {/* Form */}
-                        <div className="o-card o-card--paper o-contact-form-card">
-                            {sent ? (
-                                <div className="o-contact-success">
-                                    <span className="o-contact-success-emoji" aria-hidden>
-                                        🕊️
-                                    </span>
-                                    <h3>Your note is on its way!</h3>
-                                    <p>
-                                        Thanks for reaching out — we&rsquo;ll get back to you at the
-                                        email you shared. Talk soon.
-                                    </p>
-                                    <button
-                                        type="button"
-                                        className="o-btn o-btn--outline"
-                                        onClick={() => setSent(false)}
-                                    >
-                                        Send another
-                                    </button>
-                                </div>
-                            ) : (
-                                <form className="o-contact-form" onSubmit={handleSubmit}>
-                                    <div className="o-contact-row">
-                                        <div className="o-field">
-                                            <label className="o-field-label" htmlFor="name">
-                                                Name <span className="req">*</span>
-                                            </label>
-                                            <input
-                                                id="name"
-                                                name="name"
-                                                className="o-input"
-                                                placeholder="Ayumi Nakamura"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="o-field">
-                                            <label className="o-field-label" htmlFor="email">
-                                                Email <span className="req">*</span>
-                                            </label>
-                                            <input
-                                                id="email"
-                                                name="email"
-                                                type="email"
-                                                className="o-input"
-                                                placeholder="you@example.com"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="o-field">
-                                        <label className="o-field-label" htmlFor="subject">
-                                            Subject
-                                        </label>
-                                        <input
-                                            id="subject"
-                                            name="subject"
-                                            className="o-input"
-                                            placeholder="What&rsquo;s on your mind?"
-                                        />
-                                    </div>
-
-                                    <div className="o-field">
-                                        <label className="o-field-label" htmlFor="message">
-                                            Message <span className="req">*</span>
-                                        </label>
-                                        <textarea
-                                            id="message"
-                                            name="message"
-                                            className="o-textarea"
-                                            rows={5}
-                                            placeholder="Tell us everything…"
-                                            required
-                                        />
-                                        <span className="o-field-help">
-                                            We&rsquo;ll only use this to reply to you.
-                                        </span>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        className="o-btn o-btn--accent o-btn--lg o-btn--block"
-                                    >
-                                        Send note
-                                    </button>
-                                </form>
-                            )}
+                        <p style={{ marginTop: '6px' }}>
+                            &amp; a co-working spot in Brooklyn,<br />
+                            61 Greenpoint Ave, NY 11222 · USA
+                        </p>
+                        <div className="hours">
+                            <span className="o-dot o-dot--success" />
+                            Open · Mon–Fri 09:00–18:00 JST · async always
                         </div>
-
-                        {/* Channels */}
-                        <aside className="o-contact-side">
-                            {channels.map((c) => (
-                                <div key={c.title} className="o-card o-contact-channel">
-                                    <span className="o-contact-channel-emoji" aria-hidden>
-                                        {c.emoji}
-                                    </span>
-                                    <div>
-                                        <h3>{c.title}</h3>
-                                        <p>{c.body}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </aside>
                     </div>
                 </div>
+
+                {/* RIGHT: contact form sheet */}
+                <aside className="form-sheet">
+                    <span className="tape" />
+                    <span className="clip-top"><Icon name="clip" size={30} /></span>
+
+                    <span className="o-badge o-badge--matcha" style={{ marginBottom: '14px' }}>
+                        ★ folded by origami ↗
+                    </span>
+                    <h2>Send a paper.</h2>
+                    <p className="intro">We&rsquo;ll fold an answer back, usually within a few hours.</p>
+
+                    <form className="form-stack" onSubmit={handleSubmit}>
+                        <div className="row-2">
+                            <div className="o-field">
+                                <label className="o-field-label">Name</label>
+                                <input className="o-input" placeholder="Aiko Tanaka" />
+                            </div>
+                            <div className="o-field">
+                                <label className="o-field-label">Email <span className="req">*</span></label>
+                                <input className="o-input" type="email" placeholder="you@studio.dev" required />
+                            </div>
+                        </div>
+
+                        <div className="o-field">
+                            <label className="o-field-label">What&rsquo;s this about?</label>
+                            <div className="topic-grid">
+                                {topics.map((t, i) => (
+                                    <button
+                                        type="button"
+                                        key={t.label}
+                                        className={`topic-tile${i === activeTopic ? ' active' : ''}`}
+                                        onClick={() => setActiveTopic(i)}
+                                    >
+                                        <span className="ic"><Icon name={t.icon} size={14} /></span>
+                                        {t.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="o-field">
+                            <label className="o-field-label">Your message <span className="req">*</span></label>
+                            <textarea
+                                className="o-textarea"
+                                rows={5}
+                                required
+                                placeholder="tell us about the form you're trying to fold, what you wish worked differently, or just say hi…"
+                                defaultValue={`I'm planning a sakura picnic in Kobe and have a question about conditional logic — when "can't make it" is picked, can I jump to a totally different page?`}
+                            />
+                            <div className="o-field-help">no formatting needed — plain words are perfect</div>
+                        </div>
+
+                        <label className="o-check">
+                            <input type="checkbox" defaultChecked />
+                            <span className="box" /> Send me a confirmation receipt
+                        </label>
+
+                        <div className="sla-note">
+                            <span className="iconbox"><Icon name="clock" size={14} /></span>
+                            <div><strong>Expected reply · within 4 hours </strong>· Mon–Fri · faster on Pro</div>
+                        </div>
+
+                        <button type="submit" className="o-btn o-btn--accent o-btn--lg o-btn--block">
+                            <Icon name="mail" size={16} />
+                            Send the paper
+                        </button>
+
+                        <p className="form-note">
+                            we&rsquo;ll never sell your address · <Link href="/policies">privacy policy</Link>
+                        </p>
+                    </form>
+                </aside>
             </main>
+
+            {/* footer note */}
+            <section className="contact-footer">
+                <div className="o-note o-note--sticky o-note--green">
+                    <strong>★ a small confession</strong><br />
+                    this contact form was built with origami. of course it was.{' '}
+                    <a href="#">make one too →</a>
+                </div>
+            </section>
         </>
     )
 }

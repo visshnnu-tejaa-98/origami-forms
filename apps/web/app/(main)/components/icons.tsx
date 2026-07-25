@@ -22,6 +22,10 @@ export type IconName =
     | 'filter'
     | 'crane'
     | 'sakura'
+    | 'lock'
+    | 'clip'
+    | 'plane'
+    | 'trash'
 
 const paths: Record<IconName, React.ReactNode> = {
     plus: <path d="M12 5v14M5 12h14" />,
@@ -92,6 +96,15 @@ const paths: Record<IconName, React.ReactNode> = {
             <path d="M12 4c1.6 0 2.6 1.6 2 3.4M12 4c-1.6 0-2.6 1.6-2 3.4M20 10c.5 1.5-.5 3.1-2.4 3.2M20 10c-1-1.2-2.9-1-3.7.6M17 20c-1.3.9-3.2.3-3.7-1.5M17 20c.4-1.5-.6-3-2.4-3.1M7 20c-.4-1.5.6-3 2.4-3.1M7 20c1.3.9 3.2.3 3.7-1.5M4 10c1-1.2 2.9-1 3.7.6M4 10c-.5 1.5.5 3.1 2.4 3.2" />
         </>
     ),
+    lock: (
+        <>
+            <rect x="5" y="11" width="14" height="9" rx="2" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+        </>
+    ),
+    clip: <path d="M16 7v9a4 4 0 0 1-8 0V6a2.5 2.5 0 0 1 5 0v9a1 1 0 0 1-2 0V7" />,
+    plane: <path d="M3 11 21 3l-8 18-2-7z" />,
+    trash: <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13h10l1-13" />,
 }
 
 export const Icon = ({
