@@ -1,0 +1,552 @@
+/* ============================================================
+   DASHBOARD · overview page content
+   Renders inside the (main) shell layout (shell.css).
+   Built on the Origami design-system tokens (origami.css).
+   ============================================================ */
+
+/* ====== TOPBAR ====== */
+.db-shell .topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.db-shell .topbar h1 {
+  font-family: var(--font-hand);
+  font-size: 2.6rem;
+  line-height: 1;
+  margin: 0;
+  color: var(--ink-1);
+}
+.db-shell .topbar h1 .smaller {
+  font-size: 1.5rem;
+  color: var(--ink-3);
+  display: block;
+}
+.db-shell .topbar .search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-line);
+  border-radius: 10px;
+  padding: 7px 12px;
+  width: 260px;
+  color: var(--ink-3);
+}
+.db-shell .topbar .search input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 0.86rem;
+  color: var(--ink-1);
+  font-family: var(--font-body);
+  flex: 1;
+  min-width: 0;
+}
+.db-shell .topbar .search input::placeholder {
+  color: var(--ink-4);
+}
+.db-shell .topbar .search .o-kbd {
+  margin-left: auto;
+}
+.db-shell .topbar .icon-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-line);
+  border-radius: 10px;
+  color: var(--ink-2);
+  cursor: pointer;
+  position: relative;
+}
+.db-shell .topbar .icon-btn:hover {
+  color: var(--ink-1);
+}
+.db-shell .topbar .icon-btn .badge-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--coral-deep);
+  border: 2px solid var(--bg);
+}
+
+/* ====== GREETING ====== */
+.db-shell .greet {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.db-shell .greet-card {
+  background:
+    radial-gradient(circle at 80% -20%, var(--accent-soft), transparent 60%),
+    radial-gradient(circle at 0% 100%, var(--matcha-soft), transparent 50%), var(--surface-card);
+  border-radius: var(--r-paper);
+  padding: 28px 32px;
+  border: 1px solid var(--rule-line);
+  box-shadow: var(--shadow-paper-2);
+  position: relative;
+  overflow: hidden;
+}
+.db-shell .greet-card h2 {
+  font-family: var(--font-hand);
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1;
+  color: var(--ink-1);
+  margin: 8px 0 0;
+}
+.db-shell .greet-card .lede {
+  font-size: 1rem;
+  color: var(--ink-2);
+  margin-top: 8px;
+  max-width: 45ch;
+}
+.db-shell .greet-card .actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.db-shell .greet-card .crane {
+  position: absolute;
+  right: 24px;
+  top: 16px;
+  color: var(--accent);
+  animation: paperFloat 6s ease-in-out infinite;
+  transform: rotate(-8deg);
+}
+
+.db-shell .focus-card {
+  background: var(--surface-card);
+  border-radius: var(--r-paper);
+  padding: 22px;
+  border: 1px solid var(--rule-line);
+  box-shadow: var(--shadow-paper-2);
+  position: relative;
+}
+.db-shell .focus-card .o-tape {
+  left: 30px;
+}
+.db-shell .focus-card .lbl {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 700;
+}
+.db-shell .focus-card h3 {
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-top: 6px;
+  color: var(--ink-1);
+}
+.db-shell .focus-card .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--ink-2);
+  font-size: 0.86rem;
+}
+.db-shell .focus-card .row .o-dot {
+  background: var(--matcha);
+}
+.db-shell .focus-card .row.warn .o-dot {
+  background: var(--peach-deep);
+}
+
+/* ====== STATS ====== */
+.db-shell .stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.db-shell .stat-card {
+  background: var(--surface-card);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--rule-line);
+  box-shadow: var(--shadow-paper-1);
+  padding: 18px 20px;
+  position: relative;
+}
+.db-shell .stat-card .ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  margin-bottom: 10px;
+}
+.db-shell .stat-card.s2 .ic {
+  background: var(--matcha-soft);
+  color: var(--matcha-deep);
+}
+.db-shell .stat-card.s3 .ic {
+  background: var(--sakura-soft);
+  color: var(--sakura-deep);
+}
+.db-shell .stat-card.s4 .ic {
+  background: var(--lavender-soft);
+  color: var(--lavender-deep);
+}
+.db-shell .stat-card .num {
+  font-family: var(--font-hand);
+  font-size: 2.2rem;
+  line-height: 1;
+  color: var(--ink-1);
+}
+.db-shell .stat-card .lbl {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+.db-shell .stat-card .delta {
+  font-size: 0.72rem;
+  color: var(--matcha-deep);
+  font-weight: 600;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.db-shell .stat-card .delta.down {
+  color: var(--coral-deep);
+}
+.db-shell .stat-card .mini-spark {
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  opacity: 0.5;
+}
+
+/* ====== MAIN GRID ====== */
+.db-shell .grid-cols {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 22px;
+}
+
+/* panels */
+.db-shell .panel {
+  background: var(--surface-card);
+  border-radius: var(--r-paper);
+  border: 1px solid var(--rule-line);
+  box-shadow: var(--shadow-paper-2);
+  padding: 22px 24px;
+  margin-bottom: 22px;
+}
+.db-shell .panel-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.db-shell .panel-head h3 {
+  font-family: var(--font-hand);
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--ink-1);
+}
+.db-shell .panel-head .sub {
+  color: var(--ink-3);
+  font-size: 0.86rem;
+  font-style: italic;
+}
+.db-shell .panel-head .head-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* segmented control */
+.db-shell .seg {
+  display: inline-flex;
+  background: var(--bg-sunken);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 2px;
+}
+.db-shell .seg button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding: 4px 10px;
+  border-radius: 7px;
+}
+.db-shell .seg button.active {
+  background: var(--surface-card);
+  color: var(--ink-1);
+  box-shadow: var(--shadow-paper-1);
+}
+
+/* forms list */
+.db-shell .form-row {
+  display: grid;
+  grid-template-columns: 36px 1.4fr 1fr 1fr 1fr 36px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 8px;
+  border-radius: 10px;
+  transition: background 180ms;
+  cursor: pointer;
+}
+.db-shell .form-row:hover {
+  background: var(--bg-elevated);
+}
+.db-shell .form-row + .form-row {
+  border-top: 1px dashed var(--rule-line);
+}
+.db-shell .form-row .ic {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.db-shell .form-row.k2 .ic {
+  background: var(--matcha-soft);
+  color: var(--matcha-deep);
+}
+.db-shell .form-row.k3 .ic {
+  background: var(--sakura-soft);
+  color: var(--sakura-deep);
+}
+.db-shell .form-row.k4 .ic {
+  background: var(--peach-soft);
+  color: var(--peach-deep);
+}
+.db-shell .form-row.k5 .ic {
+  background: var(--lavender-soft);
+  color: var(--lavender-deep);
+}
+.db-shell .form-row .name {
+  font-weight: 600;
+  color: var(--ink-1);
+  font-size: 0.96rem;
+}
+.db-shell .form-row .sub {
+  font-size: 0.76rem;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+.db-shell .form-row .col {
+  font-size: 0.86rem;
+  color: var(--ink-2);
+}
+.db-shell .form-row .col .lbl {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-4);
+  font-weight: 600;
+}
+.db-shell .form-row .col .num {
+  font-family: var(--font-hand);
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--ink-1);
+}
+.db-shell .form-row .ellipsis {
+  color: var(--ink-3);
+  display: inline-flex;
+  justify-content: center;
+}
+
+/* activity */
+.db-shell .activity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.db-shell .activity .row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px dashed var(--rule-line);
+  align-items: flex-start;
+}
+.db-shell .activity .row:last-child {
+  border-bottom: 0;
+}
+.db-shell .activity .row .av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-hand);
+  font-size: 1rem;
+  flex: 0 0 30px;
+}
+.db-shell .activity .row.k2 .av {
+  background: var(--matcha-soft);
+  color: var(--matcha-deep);
+}
+.db-shell .activity .row.k3 .av {
+  background: var(--sakura-soft);
+  color: var(--sakura-deep);
+}
+.db-shell .activity .row.k4 .av {
+  background: var(--peach-soft);
+  color: var(--peach-deep);
+}
+.db-shell .activity .row.k5 .av {
+  background: var(--lavender-soft);
+  color: var(--lavender-deep);
+}
+.db-shell .activity .row .body {
+  flex: 1;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  line-height: 1.4;
+}
+.db-shell .activity .row .body strong {
+  color: var(--ink-1);
+  font-weight: 600;
+}
+.db-shell .activity .row .time {
+  font-size: 0.74rem;
+  color: var(--ink-4);
+  margin-top: 3px;
+}
+.db-shell .activity .row .pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 8px;
+  margin-top: 8px;
+  background: var(--accent);
+}
+
+/* chart */
+.db-shell .chart-wrap {
+  position: relative;
+  height: 200px;
+  padding: 0;
+}
+.db-shell .chart-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+.db-shell .chart-meta {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 12px;
+  align-items: baseline;
+}
+.db-shell .chart-meta .big {
+  font-family: var(--font-hand);
+  font-size: 2.6rem;
+  line-height: 1;
+  color: var(--ink-1);
+}
+.db-shell .chart-meta .lbl {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+.db-shell .chart-meta .pos {
+  color: var(--matcha-deep);
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* sticky notes */
+.db-shell .notes-panel {
+  background: var(--surface-card);
+  border-radius: var(--r-paper);
+  border: 1px solid var(--rule-line);
+  box-shadow: var(--shadow-paper-2);
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.db-shell .notes-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+.db-shell .notes-panel-head h3 {
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink-1);
+}
+.db-shell .note-wall {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.db-shell .note-wall .o-note {
+  font-size: 1.07rem;
+}
+
+@keyframes dbPulseSoft {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+.db-shell .pulse {
+  animation: dbPulseSoft 1.6s ease-in-out infinite;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1080px) {
+  .db-shell .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .db-shell .grid-cols {
+    grid-template-columns: 1fr;
+  }
+  .db-shell .greet {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .db-shell .stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .db-shell .topbar h1 {
+    font-size: 2rem;
+  }
+  .db-shell .topbar .search {
+    width: auto;
+    flex: 1;
+  }
+  .db-shell .form-row {
+    grid-template-columns: 36px 1fr 1fr;
+  }
+  .db-shell .form-row .col:nth-child(4),
+  .db-shell .form-row .col:nth-child(5),
+  .db-shell .form-row > :last-child {
+    display: none;
+  }
+}
