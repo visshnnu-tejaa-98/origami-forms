@@ -7,7 +7,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { userRolesEnum } from "./enum";
 
-export const usersTable = pgTable("users", {
+export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   clerkUserId: text("clerk_user_id").notNull(),
 
@@ -23,5 +23,5 @@ export const usersTable = pgTable("users", {
   deletedAt: timestamp("deleted_at").$onUpdate(() => new Date()),
 });
 
-export type SelectUser = typeof usersTable.$inferSelect;
-export type InsertUser = typeof usersTable.$inferInsert;
+export type SelectUser = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;

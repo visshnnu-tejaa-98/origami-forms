@@ -9,12 +9,13 @@ import {
     doublePrecision,
     uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "./user";
+import { users } from "./user";
 import { formFieldTypeEnum, formStatusEnum, formVisibilityEnum } from "./enum";
+import { relations } from "drizzle-orm";
 
-export const formsTable = pgTable("forms", {
+export const forms = pgTable("forms", {
     id: uuid("id").primaryKey().defaultRandom(),
-    creatorId: uuid("creator_id").notNull().references(() => usersTable.id),
+    creatorId: uuid("creator_id").notNull().references(() => users.id),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
     logoUrl: text("logo_url"),
@@ -34,9 +35,9 @@ export const formsTable = pgTable("forms", {
     deletedAt: timestamp("deleted_at").$onUpdate(() => new Date()),
 });
 
-export const formFieldsTable = pgTable("form_fields", {
+export const formFields = pgTable("form_fields", {
     id: uuid("id").primaryKey().defaultRandom(),
-    formId: uuid("form_id").notNull().references(() => formsTable.id),
+    formId: uuid("form_id").notNull().references(() => forms.id),
 
     type: formFieldTypeEnum("type").notNull(),
     label: varchar("label", { length: 255 }).notNull(),
@@ -48,9 +49,9 @@ export const formFieldsTable = pgTable("form_fields", {
     labelKey: varchar("label_key", { length: 255 }).notNull(),
 })
 
-export const formViewsTable = pgTable("form_views", {
+export const views = pgTable("form_views", {
     id: uuid("id").primaryKey().defaultRandom(),
-    formId: uuid("form_id").notNull().references(() => formsTable.id),
+    formId: uuid("form_id").notNull().references(() => forms.id),
 
     sessionId: text("session_id").notNull(),
     viewedAt: timestamp("viewed_at", { withTimezone: true }).notNull().defaultNow(),
@@ -59,11 +60,34 @@ export const formViewsTable = pgTable("form_views", {
 ]);
 
 
-export type SelectForms = typeof formsTable.$inferSelect;
-export type InsertForm = typeof formsTable.$inferInsert;
+export type SelectForms = typeof forms.$inferSelect;
+export type InsertForm = typeof forms.$inferInsert;
 
-export type SelectFormField = typeof formFieldsTable.$inferSelect;
-export type InsertFormField = typeof formFieldsTable.$inferInsert;
+export type SelectFormField = typeof formFields.$inferSelect;
+export type InsertFormField = typeof formFields.$inferInsert;
 
-export type SelectFormViews = typeof formViewsTable.$inferSelect;
-export type InsertFormViews = typeof formViewsTable.$inferInsert;
+export type SelectFormViews = typeof views.$inferSelect;
+export type InsertFormViews = typeof views.$inferInsert;
+
+
+export const formRelations = relations(forms, ({ one, many }) => ({
+    creator: one(users, {
+        fields: [forms.creatorId],
+        references: [users.id]
+    }),
+    fields: many(formFields)
+}))
+
+export const formFieldRelations = relations(formFields, ({ one }) => ({
+    form: one(forms, {
+        fields: [formFields.formId],
+        references: [forms.id]
+    })
+}))
+
+export const formViewsRelations = relations(views, ({ one }) => ({
+    form: one(forms, {
+        fields: [views.formId],
+        references: [forms.id]
+    })
+}))

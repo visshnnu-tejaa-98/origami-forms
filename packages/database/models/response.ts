@@ -6,8 +6,9 @@ import {
     integer,
     jsonb,
 } from "drizzle-orm/pg-core";
-import { formFieldsTable, formsTable } from "./forms";
+import { formFields, forms } from "./forms";
 import { responseStatusEnum } from "./enum";
+import { relations } from "drizzle-orm";
 
 
 type FormMetadata = {
@@ -18,9 +19,9 @@ type FormMetadata = {
     referrer?: string;
 };
 
-export const ResponsesTable = pgTable("responses", {
+export const formResponses = pgTable("responses", {
     id: uuid("id").primaryKey().defaultRandom(),
-    formId: uuid("form_id").notNull().references(() => formsTable.id),
+    formId: uuid("form_id").notNull().references(() => forms.id),
 
     status: responseStatusEnum("status").default("partial").notNull(),
     metaData: jsonb("metadata").$type<FormMetadata>().notNull(),
@@ -30,20 +31,40 @@ export const ResponsesTable = pgTable("responses", {
     CompletionTimeInSec: integer("completion_time"),
 });
 
-export const ResponseAnswersTable = pgTable("response_answers", {
+export const responseAnswers = pgTable("response_answers", {
     id: uuid().primaryKey().notNull(),
     responseId: uuid("response_id")
         .notNull()
-        .references(() => ResponsesTable.id),
+        .references(() => formResponses.id),
     formFieldId: uuid("form_field_id")
         .notNull()
-        .references(() => formFieldsTable.id),
+        .references(() => formFields.id),
     value: text("value").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
 })
 
-export type SelectResponse = typeof ResponsesTable.$inferSelect;
-export type InsertResponse = typeof ResponsesTable.$inferInsert;
+export type SelectResponse = typeof formResponses.$inferSelect;
+export type InsertResponse = typeof formResponses.$inferInsert;
 
-export type SelectResponseAnswers = typeof ResponseAnswersTable.$inferSelect;
-export type InsertResponseAnswers = typeof ResponseAnswersTable.$inferInsert;
+export type SelectResponseAnswers = typeof responseAnswers.$inferSelect;
+export type InsertResponseAnswers = typeof responseAnswers.$inferInsert;
+
+
+export const formResponsesRelations = relations(formResponses, ({ one, many }) => ({
+    form: one(forms, {
+        fields: [formResponses.formId],
+        references: [forms.id]
+    }),
+    answers: many(responseAnswers)
+}))
+
+export const responseAnswersRelations = relations(responseAnswers, ({ one }) => ({
+    response: one(formResponses, {
+        fields: [responseAnswers.responseId],
+        references: [formResponses.id]
+    }),
+    field: one(formFields, {
+        fields: [responseAnswers.formFieldId],
+        references: [formFields.id]
+    })
+}))

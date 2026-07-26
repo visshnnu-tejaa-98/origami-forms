@@ -1,6 +1,6 @@
 // Used for docs generation
 
-import { POST, GET, PUT, DELETE, PATCH } from "../constants";
+import { POST } from "../constants";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
 
