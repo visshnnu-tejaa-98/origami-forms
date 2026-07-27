@@ -21,23 +21,6 @@ export const slugSchema = z
     .max(255)
     .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "slug must be lowercase kebab-case, e.g. my-feedback-form");
 
-export const getFormByIdInputSchema = z.object({
-    creatorId: z.string().uuid().describe("creatorId of the user"),
-    role: z.enum(USER_ROLES).describe("role of the user"),
-    formId: z.string().uuid().describe("formId of the form"),
-});
-
-export type GetFormByIdProps = z.infer<typeof getFormByIdInputSchema>;
-
-export const getAllFormsByCreatorIdInputSchema = z.object({
-    creatorId: z.string().uuid().describe("creatorId of the user"),
-    role: z.enum(USER_ROLES).describe("role of the user"),
-    limit: z.number().int().positive().optional().default(10).describe("limit of the forms"),
-    offset: z.number().int().positive().optional().default(0).describe("offset of the forms"),
-});
-
-export type GetAllFormsByCreatorIdProps = z.infer<typeof getAllFormsByCreatorIdInputSchema>;
-
 export const optionsSchema = z.object({
     id: z.string().min(1).max(64),
     label: z.string().min(1).max(255).describe("label for the option"),
@@ -237,3 +220,37 @@ export const createFormOutputSchema = z.object({
 });
 
 export type CreateFormOutputSchemaType = z.infer<typeof createFormOutputSchema>;
+
+
+export const getFormByIdInputSchema = z.object({
+    creatorId: z.string().uuid().describe("creatorId of the user"),
+    role: z.enum(USER_ROLES).describe("role of the user"),
+    formId: z.string().uuid().describe("formId of the form"),
+});
+
+export type GetFormByIdProps = z.infer<typeof getFormByIdInputSchema>;
+
+export const getFormByIdOutputSchema = createFormOutputSchema;
+export type GetFormByIdOutputSchemaType = z.infer<typeof getFormByIdOutputSchema>;
+
+export const getAllFormsByCreatorIdInputSchema = z.object({
+    creatorId: z.string().uuid().describe("creatorId of the user"),
+    role: z.enum(USER_ROLES).describe("role of the user"),
+    limit: z.number().int().positive().optional().default(10).describe("limit of the forms"),
+    offset: z.number().int().positive().optional().default(0).describe("offset of the forms"),
+});
+
+export type GetAllFormsByCreatorIdProps = z.infer<typeof getAllFormsByCreatorIdInputSchema>;
+
+export const getAllFormsByCreatorIdOutputSchema = z.object({
+    forms: z.array(createFormOutputSchema),
+    totalCount: z.number(),
+    page: z.number(),
+    limit: z.number(),
+
+    // * Need to check this - which pagination approach will be approaching
+    // hasNextPage: z.boolean(),
+    // hasPrevPage: z.boolean()
+});
+
+export type GetAllFormsByCreatorIdOutputSchemaType = z.infer<typeof getAllFormsByCreatorIdOutputSchema>;

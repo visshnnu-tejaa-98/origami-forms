@@ -1,5 +1,5 @@
 import db, { and, asc, desc, eq, formFields, forms, isNull } from "@repo/database";
-import { CreateFormInputModel, GetAllFormsByCreatorIdProps, GetFormByIdProps } from "./model";
+import { CreateFormInputModel, GetAllFormsByCreatorIdProps, GetFormByIdOutputSchemaType, GetFormByIdProps } from "./model";
 import { ADMIN, CHECK_BOX, MULTI_SELECT, RADIO, SINGLE_SELECT } from "@repo/database/constants";
 import crypto from "node:crypto";
 
