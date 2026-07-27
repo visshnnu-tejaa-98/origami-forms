@@ -21,10 +21,10 @@ type FormMetadata = {
 
 export const formResponses = pgTable("responses", {
     id: uuid("id").primaryKey().defaultRandom(),
-    formId: uuid("form_id").notNull().references(() => forms.id),
+    formId: uuid("form_id").notNull().references(() => forms.id, { onDelete: "cascade" }),
 
     status: responseStatusEnum("status").default("partial").notNull(),
-    metaData: jsonb("metadata").$type<FormMetadata>().notNull(),
+    metaData: jsonb("metadata").$type<FormMetadata>(),
 
     startedAt: timestamp("started_at", { withTimezone: true }),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
@@ -32,15 +32,15 @@ export const formResponses = pgTable("responses", {
 });
 
 export const responseAnswers = pgTable("response_answers", {
-    id: uuid().primaryKey().notNull(),
+    id: uuid().primaryKey().defaultRandom(),
     responseId: uuid("response_id")
         .notNull()
-        .references(() => formResponses.id),
+        .references(() => formResponses.id, { onDelete: "cascade" }),
     formFieldId: uuid("form_field_id")
         .notNull()
-        .references(() => formFields.id),
+        .references(() => formFields.id, { onDelete: "cascade" }),
     value: text("value").notNull(),
-    createdAt: timestamp("created_at").defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 })
 
 export type SelectResponse = typeof formResponses.$inferSelect;

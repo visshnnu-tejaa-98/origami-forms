@@ -1,15 +1,21 @@
 import { pgEnum } from "drizzle-orm/pg-core";
+import {
+    FORM_STATUS_OPTIONS,
+    FORM_VISIBILITY_OPTIONS,
+    USER_ROLES,
+    FIELD_TYPES,
+    RESPONSE_STATUS,
+    ANALYTICS_EVENT_TYPES,
+} from "../constants";
 
-export const userRolesEnum = pgEnum("user_roles", ["admin", "subscriber", "starter"])
+export const userRolesEnum = pgEnum("user_roles", USER_ROLES);
 
-export const formStatusEnum = pgEnum("form_status", ["draft", "published", "archived"]);
+export const formStatusEnum = pgEnum("form_status", FORM_STATUS_OPTIONS);
 
-export const formVisibilityEnum = pgEnum("form_visibility", ["public", "unlisted"])
+export const formVisibilityEnum = pgEnum("form_visibility", FORM_VISIBILITY_OPTIONS);
 
-export const formFieldTypeEnum = pgEnum("field_type",
-    ["short_text", "long_text", "email", "number", "phone", "url", "date", "single_select", "multi_select", "check_box", "radio", "rating", "file_upload"]
-)
+export const formFieldTypeEnum = pgEnum("field_type", FIELD_TYPES);
 
-export const responseStatusEnum = pgEnum("response_statis", ["partial", "completed"])
+export const responseStatusEnum = pgEnum("response_status", RESPONSE_STATUS);
 
-export const analyticsEventTypeEnum = pgEnum("analytics_event_type", ["viewed", "started", "submitted", "abandoned", "email_sent"])
+export const analyticsEventTypeEnum = pgEnum("analytics_event_type", ANALYTICS_EVENT_TYPES);

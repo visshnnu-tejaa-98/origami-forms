@@ -1,11 +1,11 @@
 
-import db, { eq, usersTable } from "@repo/database";
+import db, { eq, users } from "@repo/database";
 import { createUserInputModel, CreateUserInputModelType } from "./model";
 
 export default class UserService {
 
     private async getUserByEmail(email: string) {
-        return await db.select().from(usersTable).where(eq(usersTable.email, email)).then(result => result[0] ?? null)
+        return await db.select().from(users).where(eq(users.email, email)).then(result => result[0] ?? null)
     }
 
     public async createUser(userData: CreateUserInputModelType) {
@@ -23,7 +23,7 @@ export default class UserService {
             role: existingUser.role
         }
 
-        return await db.insert(usersTable).values({
+        return await db.insert(users).values({
             clerkUserId,
             firstName: resolvedFirstName,
             lastName: lastName || null,
@@ -31,13 +31,13 @@ export default class UserService {
             avatarUrl: avatarUrl || null,
             role,
         }).returning({
-            id: usersTable.id,
-            clerkUserId: usersTable.clerkUserId,
-            firstName: usersTable.firstName,
-            lastName: usersTable.lastName,
-            email: usersTable.email,
-            avatarUrl: usersTable.avatarUrl,
-            role: usersTable.role
+            id: users.id,
+            clerkUserId: users.clerkUserId,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            avatarUrl: users.avatarUrl,
+            role: users.role
         }).then(result => result[0])
     }
 }

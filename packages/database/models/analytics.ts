@@ -7,11 +7,11 @@ export const formAnalyticsEvents = pgTable("analytics_events", {
     id: uuid("id").primaryKey().defaultRandom(),
     formId: uuid("form_id")
         .notNull()
-        .references(() => forms.id),
+        .references(() => forms.id, { onDelete: "cascade" }),
     eventType: analyticsEventTypeEnum("event_type").notNull(),
     formFieldId: uuid("form_field_id")
         .notNull()
-        .references(() => formFields.id),
+        .references(() => formFields.id, { onDelete: "cascade" }),
     metaData: text("metadata"),
     occuredAt: timestamp("occured_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),

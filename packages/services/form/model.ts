@@ -1,0 +1,151 @@
+import {
+    CHECK_BOX,
+    DATE,
+    FILE_UPLOAD,
+    FORM_VISIBILITY_OPTIONS,
+    MULTI_SELECT,
+    NUMBER_LIKE_FIELDS,
+    RADIO,
+    SINGLE_SELECT,
+    TEXT_LIKE_FIELDS,
+    UNLISTED,
+} from "@repo/database/constants";
+import { z } from "zod";
+
+export const slugSchema = z
+    .string()
+    .min(3)
+    .max(255)
+    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "slug must be lowercase kebab-case, e.g. my-feedback-form");
+
+export const optionsSchema = z.object({
+    id: z.string().min(1).max(64),
+    label: z.string().min(1).max(255).describe("label for the option"),
+    value: z.string().min(1).max(255).describe("value for the option"),
+});
+
+export const baseField = z.object({
+    label: z
+        .string()
+        .min(1, "Label must be atleast 1 character long")
+        .max(255, "Label cannot be longer than 255 characters")
+        .describe("label for the field"),
+    placeholder: z
+        .string()
+        .min(1, "Placeholder must be atleast 1 character long")
+        .max(255, "Placeholder cannot be longer than 255 characters")
+        .optional()
+        .describe("placeholder for the field"),
+    description: z.string().optional().describe("description for the field"),
+    helpText: z
+        .string()
+        .max(255, "Help text cannot be longer than 255 characters")
+        .optional()
+        .describe("help text for the field"),
+    required: z.boolean().optional().default(false).describe("whether the field is required"),
+    order: z
+        .number()
+        .describe("order of the field"),
+});
+
+export const textLikeField = {
+    ...baseField.shape,
+    type: z.enum(TEXT_LIKE_FIELDS),
+
+    defaultValue: z.string().optional(),
+    validation: z
+        .object({
+            minLength: z.number().positive("Minimum length must be a positive number").optional(),
+            maxLength: z.number().positive("Maximum length must be a positive number").optional(),
+            regex: z.string().optional(),
+        })
+        .optional(),
+};
+
+export const numberLikeFields = {
+    ...baseField.shape,
+    type: z.enum(NUMBER_LIKE_FIELDS),
+    defaultValue: z.coerce.string().optional(),
+    validation: z
+        .object({
+            min: z.number().optional(),
+            max: z.number().optional(),
+            step: z.number().positive().optional().default(1),
+        })
+        .optional(),
+};
+
+export const singleSelectFields = {
+    ...baseField.shape,
+    type: z.enum([SINGLE_SELECT, RADIO]),
+    options: z.array(optionsSchema).min(1, "Atleast 1 option is required"),
+    defaultValue: z.string().optional().describe("default value for the field"),
+    validation: z.object({}).optional(),
+};
+
+export const multiSelectFields = {
+    ...baseField.shape,
+    type: z.enum([MULTI_SELECT, CHECK_BOX]),
+    options: z.array(optionsSchema).min(1, "Atleast 1 option is required"),
+    defaultValue: z.array(z.string()).optional().describe("default value for the field"),
+    validation: z
+        .object({
+            minSelections: z.number().int().min(0).optional(),
+            maxSelections: z.number().int().min(1).optional(),
+        })
+        .optional(),
+};
+
+export const dateField = {
+    ...baseField.shape,
+    type: z.literal(DATE),
+    defaultValue: z.string().optional().describe("default value for the field"),
+    validation: z
+        .object({
+            min: z.coerce.date().optional().describe("minimum date"),
+            max: z.coerce.date().optional().describe("maximum date"),
+        })
+        .optional(),
+};
+
+export const fileUploadField = {
+    ...baseField.shape,
+    type: z.literal(FILE_UPLOAD),
+    validation: z
+        .object({
+            maxSizeMb: z.number().positive().max(100).default(10),
+            allowedFileTypes: z.array(z.string()).min(1).optional(),
+            maxFiles: z.number().int().positive().default(1),
+        })
+        .optional(),
+};
+
+export const createFieldSchema = z.discriminatedUnion("type", [
+    z.object(textLikeField),
+    z.object(numberLikeFields),
+    z.object(singleSelectFields),
+    z.object(multiSelectFields),
+    z.object(dateField),
+    z.object(fileUploadField),
+]);
+
+export const createFormInputModel = z.object({
+    title: z
+        .string()
+        .trim()
+        .min(2, "Title must be atleast 2 characters long")
+        .max(255, "Title cannot be longer than 255 characters")
+        .describe("title of the form"),
+    description: z.string().optional().describe("description of the form"),
+    logoUrl: z.string().url("Invalid URL").optional().describe("logo url of the form"),
+    visibility: z.enum(FORM_VISIBILITY_OPTIONS).default(UNLISTED).describe("visibility of the form"),
+    maxSubmissions: z
+        .number()
+        .int("Max submissions must be an integer")
+        .positive("Max submissions must be positive")
+        .optional()
+        .describe("max submissions for the form"),
+    fields: z.array(createFieldSchema).min(1),
+});
+
+export type CreateFormInputModel = z.infer<typeof createFormInputModel>;

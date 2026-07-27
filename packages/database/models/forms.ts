@@ -8,6 +8,7 @@ import {
     boolean,
     doublePrecision,
     uniqueIndex,
+    jsonb,
 } from "drizzle-orm/pg-core";
 import { users } from "./user";
 import { formFieldTypeEnum, formStatusEnum, formVisibilityEnum } from "./enum";
@@ -15,7 +16,7 @@ import { relations } from "drizzle-orm";
 
 export const forms = pgTable("forms", {
     id: uuid("id").primaryKey().defaultRandom(),
-    creatorId: uuid("creator_id").notNull().references(() => users.id),
+    creatorId: uuid("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
     logoUrl: text("logo_url"),
@@ -27,17 +28,17 @@ export const forms = pgTable("forms", {
     maxSubmissions: integer("max_submissions"),
     submissionCount: integer("submission_count").default(0).notNull(),
 
-    createdAt: timestamp("created_at").defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
-    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-    deletedAt: timestamp("deleted_at").$onUpdate(() => new Date()),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+    deletedAt: timestamp("deleted_at", { withTimezone: true })
 });
 
 export const formFields = pgTable("form_fields", {
     id: uuid("id").primaryKey().defaultRandom(),
-    formId: uuid("form_id").notNull().references(() => forms.id),
+    formId: uuid("form_id").notNull().references(() => forms.id, { onDelete: "cascade" }),
 
     type: formFieldTypeEnum("type").notNull(),
     label: varchar("label", { length: 255 }).notNull(),
@@ -47,11 +48,19 @@ export const formFields = pgTable("form_fields", {
     required: boolean("required").default(false),
     order: doublePrecision("number").notNull(),
     labelKey: varchar("label_key", { length: 255 }).notNull(),
+
+    validation: jsonb("validation").notNull().default({}),
+    options: jsonb("options").notNull().default({}),
+    defaultValue: text("default_value"),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+    deletedAt: timestamp("deleted_at", { withTimezone: true })
 })
 
 export const views = pgTable("form_views", {
     id: uuid("id").primaryKey().defaultRandom(),
-    formId: uuid("form_id").notNull().references(() => forms.id),
+    formId: uuid("form_id").notNull().references(() => forms.id, { onDelete: "cascade" }),
 
     sessionId: text("session_id").notNull(),
     viewedAt: timestamp("viewed_at", { withTimezone: true }).notNull().defaultNow(),
