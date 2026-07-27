@@ -13,12 +13,30 @@ import {
     UNLISTED,
 } from "@repo/database/constants";
 import { z } from "zod";
+import { USER_ROLES } from "../constants";
 
 export const slugSchema = z
     .string()
     .min(3)
     .max(255)
     .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "slug must be lowercase kebab-case, e.g. my-feedback-form");
+
+export const getFormByIdInputSchema = z.object({
+    creatorId: z.string().uuid().describe("creatorId of the user"),
+    role: z.enum(USER_ROLES).describe("role of the user"),
+    formId: z.string().uuid().describe("formId of the form"),
+});
+
+export type GetFormByIdProps = z.infer<typeof getFormByIdInputSchema>;
+
+export const getAllFormsByCreatorIdInputSchema = z.object({
+    creatorId: z.string().uuid().describe("creatorId of the user"),
+    role: z.enum(USER_ROLES).describe("role of the user"),
+    limit: z.number().int().positive().optional().default(10).describe("limit of the forms"),
+    offset: z.number().int().positive().optional().default(0).describe("offset of the forms"),
+});
+
+export type GetAllFormsByCreatorIdProps = z.infer<typeof getAllFormsByCreatorIdInputSchema>;
 
 export const optionsSchema = z.object({
     id: z.string().min(1).max(64),
@@ -45,9 +63,7 @@ export const baseField = z.object({
         .optional()
         .describe("help text for the field"),
     required: z.boolean().optional().default(false).describe("whether the field is required"),
-    order: z
-        .number()
-        .describe("order of the field"),
+    order: z.number().describe("order of the field"),
 });
 
 export const textLikeField = {
@@ -152,7 +168,6 @@ export const createFormInputModel = z.object({
 
 export type CreateFormInputModel = z.infer<typeof createFormInputModel>;
 
-
 export const formFieldOutputSchema = z.object({
     id: z.string().uuid(),
     formId: z.string().uuid(),
@@ -171,16 +186,14 @@ export const formFieldOutputSchema = z.object({
 
     createdAt: z.string().describe("created at"),
     updatedAt: z.string().describe("updated at"),
-})
+});
 
-export type FormFieldOutputSchemaType = z.infer<typeof formFieldOutputSchema>
+export type FormFieldOutputSchemaType = z.infer<typeof formFieldOutputSchema>;
 
 export const createFormOutputSchema = z.object({
     id: z.string().uuid(),
     creatorId: z.string().uuid(),
-    title: z
-        .string()
-        .describe("title of the form"),
+    title: z.string().describe("title of the form"),
     description: z.string().describe("description of the form"),
     logoUrl: z.string().nullable().describe("logo url of the form"),
     slug: z.string().describe("slug of the form"),
@@ -188,19 +201,39 @@ export const createFormOutputSchema = z.object({
     status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
     visibility: z.enum(FORM_VISIBILITY_OPTIONS).describe("visibility of the form"),
 
-    maxSubmissions: z
-        .number()
-        .describe("max submissions for the form"),
+    maxSubmissions: z.number().describe("max submissions for the form"),
     submissionCount: z.number().describe("submission count of the form"),
 
-    createdAt: z.coerce.date().transform((d) => d.toISOString()).describe("created at"),
-    expiresAt: z.coerce.date().transform((d) => d.toISOString()).nullable().describe("expires at"),
-    publishedAt: z.coerce.date().transform((d) => d.toISOString()).nullable().describe("published at"),
-    archivedAt: z.coerce.date().transform((d) => d.toISOString()).nullable().describe("archived at"),
-    updatedAt: z.coerce.date().transform((d) => d.toISOString()).describe("updated at"),
-    deletedAt: z.coerce.date().transform((d) => d.toISOString()).nullable().describe("deleted at"),
+    createdAt: z.coerce
+        .date()
+        .transform((d) => d.toISOString())
+        .describe("created at"),
+    expiresAt: z.coerce
+        .date()
+        .transform((d) => d.toISOString())
+        .nullable()
+        .describe("expires at"),
+    publishedAt: z.coerce
+        .date()
+        .transform((d) => d.toISOString())
+        .nullable()
+        .describe("published at"),
+    archivedAt: z.coerce
+        .date()
+        .transform((d) => d.toISOString())
+        .nullable()
+        .describe("archived at"),
+    updatedAt: z.coerce
+        .date()
+        .transform((d) => d.toISOString())
+        .describe("updated at"),
+    deletedAt: z.coerce
+        .date()
+        .transform((d) => d.toISOString())
+        .nullable()
+        .describe("deleted at"),
 
     fields: z.array(formFieldOutputSchema).describe("fields of the form"),
-})
+});
 
-export type CreateFormOutputSchemaType = z.infer<typeof createFormOutputSchema>
+export type CreateFormOutputSchemaType = z.infer<typeof createFormOutputSchema>;
