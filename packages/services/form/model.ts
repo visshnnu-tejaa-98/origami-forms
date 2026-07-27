@@ -1,7 +1,9 @@
 import {
     CHECK_BOX,
     DATE,
+    FIELD_TYPES,
     FILE_UPLOAD,
+    FORM_STATUS_OPTIONS,
     FORM_VISIBILITY_OPTIONS,
     MULTI_SELECT,
     NUMBER_LIKE_FIELDS,
@@ -149,3 +151,56 @@ export const createFormInputModel = z.object({
 });
 
 export type CreateFormInputModel = z.infer<typeof createFormInputModel>;
+
+
+export const formFieldOutputSchema = z.object({
+    id: z.string().uuid(),
+    formId: z.string().uuid(),
+    type: z.enum(FIELD_TYPES),
+    label: z.string().describe("label of the field"),
+    description: z.string().describe("description of the field"),
+
+    placeholder: z.string().describe("placeholder of the field"),
+    helpText: z.string().describe("help text of the field"),
+    required: z.boolean().describe("required of the field"),
+    order: z.number().describe("order of the field"),
+    labelKey: z.string().describe("label key of the field"),
+    validation: z.json().describe("validation of the field"),
+    options: z.union([z.array(optionsSchema), z.object({}).strict()]),
+    defaultValue: z.string().describe("default value of the field"), // can also have array of selected items in multi select
+
+    createdAt: z.string().describe("created at"),
+    updatedAt: z.string().describe("updated at"),
+})
+
+export type FormFieldOutputSchemaType = z.infer<typeof formFieldOutputSchema>
+
+export const createFormOutputSchema = z.object({
+    id: z.string().uuid(),
+    creatorId: z.string().uuid(),
+    title: z
+        .string()
+        .describe("title of the form"),
+    description: z.string().describe("description of the form"),
+    logoUrl: z.string().nullable().describe("logo url of the form"),
+    slug: z.string().describe("slug of the form"),
+
+    status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
+    visibility: z.enum(FORM_VISIBILITY_OPTIONS).describe("visibility of the form"),
+
+    maxSubmissions: z
+        .number()
+        .describe("max submissions for the form"),
+    submissionCount: z.number().describe("submission count of the form"),
+
+    createdAt: z.coerce.date().transform((d) => d.toISOString()).describe("created at"),
+    expiresAt: z.coerce.date().transform((d) => d.toISOString()).nullable().describe("expires at"),
+    publishedAt: z.coerce.date().transform((d) => d.toISOString()).nullable().describe("published at"),
+    archivedAt: z.coerce.date().transform((d) => d.toISOString()).nullable().describe("archived at"),
+    updatedAt: z.coerce.date().transform((d) => d.toISOString()).describe("updated at"),
+    deletedAt: z.coerce.date().transform((d) => d.toISOString()).nullable().describe("deleted at"),
+
+    fields: z.array(formFieldOutputSchema).describe("fields of the form"),
+})
+
+export type CreateFormOutputSchemaType = z.infer<typeof createFormOutputSchema>
