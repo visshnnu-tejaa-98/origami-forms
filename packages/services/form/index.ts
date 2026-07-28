@@ -13,8 +13,6 @@ import db, {
 import {
     CreateFormInputModel,
     GetFormByIdProps,
-    listFormsOutputSchema,
-    ListFormsOutputSchemaType,
     ListFormsProps,
     UpdateFormStatusInputProps,
 } from "./model";
@@ -115,12 +113,12 @@ export default class FormService {
     }
 
     public async getFormById(payload: GetFormByIdProps) {
-        const { formId, creatorId } = payload;
+        const { formId, requesterId } = payload;
 
-        const isAdmin = await this.isAdmin(creatorId);
+        const isAdmin = await this.isAdmin(requesterId);
 
         const condition = !isAdmin
-            ? and(eq(forms.id, formId), eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
+            ? and(eq(forms.id, formId), eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
             : and(eq(forms.id, formId), isNull(forms.deletedAt));
 
         return await db.query.forms.findFirst({
@@ -136,7 +134,7 @@ export default class FormService {
 
     public async listForms(payload: ListFormsProps) {
         const {
-            creatorId,
+            requesterId,
             search,
             status,
             visibility,
@@ -147,11 +145,11 @@ export default class FormService {
             pageSize,
         } = payload;
 
-        const isAdmin = await this.isAdmin(creatorId);
+        const isAdmin = await this.isAdmin(requesterId);
 
         const conditions = [isNull(forms.deletedAt)];
 
-        if (!isAdmin) conditions.push(eq(forms.creatorId, creatorId));
+        if (!isAdmin) conditions.push(eq(forms.creatorId, requesterId));
 
         if (search) conditions.push(ilike(forms.title, `%${search}%`));
 
@@ -197,9 +195,9 @@ export default class FormService {
     }
 
     public async updateFormStatus(payload: UpdateFormStatusInputProps) {
-        const { formId, creatorId, status } = payload;
+        const { formId, requesterId, status } = payload;
 
-        const form = await this.getFormById({ formId, creatorId });
+        const form = await this.getFormById({ formId, requesterId });
 
         if (!form) throw new Error("Form not found");
 
@@ -216,9 +214,9 @@ export default class FormService {
             }
         }
 
-        const isAdmin = await this.isAdmin(creatorId);
+        const isAdmin = await this.isAdmin(requesterId);
         const condition = !isAdmin
-            ? and(eq(forms.id, formId), eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
+            ? and(eq(forms.id, formId), eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
             : and(eq(forms.id, formId), isNull(forms.deletedAt));
 
         await db.update(forms).set({ status }).where(condition);

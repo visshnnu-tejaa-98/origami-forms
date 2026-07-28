@@ -222,7 +222,7 @@ export type CreateFormOutputSchemaType = z.infer<typeof createFormOutputSchema>;
 
 
 export const getFormByIdInputSchema = z.object({
-    creatorId: z.string().uuid().describe("creatorId of the user"),
+    requesterId: z.string().uuid().describe("id of the requesting user"),
     formId: z.string().uuid().describe("formId of the form"),
 });
 
@@ -241,7 +241,7 @@ export const LIST_FORMS_SORT_FIELDS = [
 ] as const;
 
 export const listFormsInputSchema = z.object({
-    creatorId: z.string().uuid().describe("id of the requesting user (admins see all forms)"),
+    requesterId: z.string().uuid().describe("id of the requesting user (admins see all forms)"),
     search: z.string().trim().min(1).max(255).optional().describe("search term matched against the title"),
     status: z.enum(FORM_STATUS_OPTIONS)
         .optional()
@@ -274,7 +274,7 @@ export type ListFormsOutputSchemaType = z.infer<typeof listFormsOutputSchema>;
 
 export const updateFormStatusInputSchema = z.object({
     formId: z.string().uuid().describe("formId of the form"),
-    creatorId: z.string().uuid().describe("creatorId of the user"),
+    requesterId: z.string().uuid().describe("id of the requesting user"),
     status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
 });
 
@@ -286,3 +286,5 @@ export const updateFormStatusOutputSchema = z.object({
 });
 
 export type UpdateFormStatusOutputSchemaType = z.infer<typeof updateFormStatusOutputSchema>;
+
+// export const deleteFormInputSchema = z.object
