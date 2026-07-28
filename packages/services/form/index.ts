@@ -1,5 +1,10 @@
-import db, { and, asc, desc, eq, formFields, forms, isNull } from "@repo/database";
-import { CreateFormInputModel, GetAllFormsByCreatorIdProps, GetFormByIdOutputSchemaType, GetFormByIdProps } from "./model";
+import db, { and, asc, desc, eq, formFields, forms, isNull, users } from "@repo/database";
+import {
+    CreateFormInputModel,
+    FilterFormsByStatusProps,
+    GetAllFormsByCreatorIdProps,
+    GetFormByIdProps,
+} from "./model";
 import { ADMIN, CHECK_BOX, MULTI_SELECT, RADIO, SINGLE_SELECT } from "@repo/database/constants";
 import crypto from "node:crypto";
 
@@ -22,6 +27,19 @@ function generateLabelKey() {
 }
 
 export default class FormService {
+    private async isAdmin(userId: string) {
+        const user = await db.query.users.findFirst({
+            where: eq(users.id, userId),
+            with: {
+                role: true,
+            },
+        });
+
+        if (!user) throw new Error("User not found");
+
+        return user.role === ADMIN;
+    }
+
     public async createForm(creatorId: string, formData: CreateFormInputModel) {
         return db.transaction(async (tx) => {
             const [form] = await tx
@@ -90,24 +108,44 @@ export default class FormService {
     }
 
     public async getAllFormsByCreatorId(props: GetAllFormsByCreatorIdProps) {
-        const { creatorId, role, limit = 10, offset = 0 } = props;
+        const { creatorId, pageSize = 10, page = 1 } = props;
 
-        const condition =
-            role !== ADMIN
-                ? and(eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
-                : isNull(forms.deletedAt);
+        const isAdmin = await this.isAdmin(creatorId);
+
+        const condition = !isAdmin
+            ? and(eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
+            : isNull(forms.deletedAt);
+
+        const orderBy = desc(forms.updatedAt)
+        const limit = pageSize
+        const offset = (page - 1) * pageSize
 
         return await db.query.forms.findMany({
             where: condition,
-            with: {
-                fields: {
-                    where: isNull(formFields.deletedAt),
-                    orderBy: asc(formFields.order),
-                },
-            },
-            orderBy: desc(forms.createdAt),
+            orderBy,
             limit,
             offset,
         });
+    }
+
+    public async filterFormsByStatus(props: FilterFormsByStatusProps) {
+        const { creatorId, status, page = 1, pageSize = 10 } = props;
+
+        const isAdmin = await this.isAdmin(creatorId);
+
+        const condition = !isAdmin
+            ? and(eq(forms.creatorId, creatorId), eq(forms.status, status), isNull(forms.deletedAt))
+            : and(eq(forms.status, status), isNull(forms.deletedAt));
+
+        const orderBy = desc(forms.updatedAt)
+        const limit = pageSize
+        const offset = (page - 1) * pageSize
+
+        return await db.query.forms.findMany({
+            where: condition,
+            orderBy,
+            limit,
+            offset
+        })
     }
 }
