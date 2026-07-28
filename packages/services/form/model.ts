@@ -231,46 +231,46 @@ export type GetFormByIdProps = z.infer<typeof getFormByIdInputSchema>;
 export const getFormByIdOutputSchema = createFormOutputSchema;
 export type GetFormByIdOutputSchemaType = z.infer<typeof getFormByIdOutputSchema>;
 
-export const getAllFormsByCreatorIdInputSchema = z.object({
-    creatorId: z.string().uuid().describe("creatorId of the user"),
+export const LIST_FORMS_SORT_FIELDS = [
+    "createdAt",
+    "updatedAt",
+    "title",
+    "submissionCount",
+    "maxSubmissions",
+    "status",
+] as const;
+
+export const listFormsInputSchema = z.object({
+    creatorId: z.string().uuid().describe("id of the requesting user (admins see all forms)"),
+    search: z.string().trim().min(1).max(255).optional().describe("search term matched against the title"),
+    status: z.enum(FORM_STATUS_OPTIONS)
+        .optional()
+        .describe("filter by one or more statuses"),
+
+    visibility: z.enum(FORM_VISIBILITY_OPTIONS)
+        .optional()
+        .describe("filter by one or more visibilities"),
+
+    maxSubmissions: z.number().int().nonnegative().describe("maximum submission count"),
+    sortBy: z.enum(LIST_FORMS_SORT_FIELDS).optional().default("updatedAt").describe("column to sort by"),
+    sortOrder: z.enum(["asc", "desc"]).optional().default("desc").describe("sort direction"),
     page: z.number().int().positive().optional().default(1).describe("page number"),
-    pageSize: z.number().int().positive().optional().default(10).describe("page size"),
-});
+    pageSize: z.number().int().positive().max(100).optional().default(10).describe("page size"),
+})
 
-export type GetAllFormsByCreatorIdProps = z.infer<typeof getAllFormsByCreatorIdInputSchema>;
+export type ListFormsProps = z.infer<typeof listFormsInputSchema>;
 
-export const getAllFormsByCreatorIdOutputSchema = z.object({
+export const listFormsOutputSchema = z.object({
     forms: z.array(createFormOutputSchema.omit({ fields: true, deletedAt: true })),
-    page: z.number().int().nonnegative().describe("page number"),
+    page: z.number().int().nonnegative().describe("current page number"),
     pageSize: z.number().int().nonnegative().describe("page size"),
+    totalItems: z.number().int().nonnegative().describe("total number of matching forms"),
     totalPages: z.number().int().nonnegative().describe("total number of pages"),
-    hasNextPage: z.boolean().describe("has next page"),
-    hasPrevPage: z.boolean().describe("has prev page"),
-    totalCount: z.number().int().nonnegative().describe("total number of forms"),
+    hasNextPage: z.boolean().describe("whether a next page exists"),
+    hasPrevPage: z.boolean().describe("whether a previous page exists"),
 });
 
-export type GetAllFormsByCreatorIdOutputSchemaType = z.infer<typeof getAllFormsByCreatorIdOutputSchema>;
-
-export const filterFormsInputSchema = z.object({
-    creatorId: z.string().uuid().describe("creatorId of the user"),
-    status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
-    page: z.number().int().positive().optional().default(1).describe("page number"),
-    pageSize: z.number().int().positive().optional().default(10).describe("page size"),
-});
-
-export type FilterFormsProps = z.infer<typeof filterFormsInputSchema>;
-
-export const filterFormsOutputSchema = z.object({
-    forms: z.array(createFormOutputSchema.omit({ fields: true, deletedAt: true })),
-    page: z.number().int().nonnegative().describe("page number"),
-    pageSize: z.number().int().nonnegative().describe("page size"),
-    totalCount: z.number().int().nonnegative().describe("total number of items"),
-    totalPages: z.number().int().nonnegative().describe("total number of pages"),
-    hasNextPage: z.boolean().describe("has next page"),
-    hasPrevPage: z.boolean().describe("has prev page"),
-});
-
-export type FilterFormsOutputSchemaType = z.infer<typeof filterFormsOutputSchema>;
+export type ListFormsOutputSchemaType = z.infer<typeof listFormsOutputSchema>;
 
 export const updateFormStatusInputSchema = z.object({
     formId: z.string().uuid().describe("formId of the form"),

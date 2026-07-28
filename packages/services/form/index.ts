@@ -1,9 +1,21 @@
-import db, { and, asc, desc, eq, formFields, forms, isNull, users } from "@repo/database";
+import db, {
+    and,
+    asc,
+    desc,
+    eq,
+    formFields,
+    forms,
+    ilike,
+    isNull,
+    lte,
+    users,
+} from "@repo/database";
 import {
     CreateFormInputModel,
-    FilterFormsProps,
-    GetAllFormsByCreatorIdProps,
     GetFormByIdProps,
+    listFormsOutputSchema,
+    ListFormsOutputSchemaType,
+    ListFormsProps,
     UpdateFormStatusInputProps,
 } from "./model";
 import {
@@ -122,77 +134,65 @@ export default class FormService {
         });
     }
 
-    public async getAllFormsByCreatorId(payload: GetAllFormsByCreatorIdProps) {
-        const { creatorId, pageSize = 10, page = 1 } = payload;
+    public async listForms(payload: ListFormsProps) {
+        const {
+            creatorId,
+            search,
+            status,
+            visibility,
+            maxSubmissions,
+            sortBy,
+            sortOrder,
+            page,
+            pageSize,
+        } = payload;
 
         const isAdmin = await this.isAdmin(creatorId);
 
-        const condition = !isAdmin
-            ? and(eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
-            : isNull(forms.deletedAt);
+        const conditions = [isNull(forms.deletedAt)];
 
-        const orderBy = desc(forms.updatedAt);
-        const limit = pageSize;
-        const offset = (page - 1) * pageSize;
+        if (!isAdmin) conditions.push(eq(forms.creatorId, creatorId));
 
-        const result = await db.query.forms.findMany({
-            where: condition,
-            orderBy,
-            limit,
-            offset,
-        });
+        if (search) conditions.push(ilike(forms.title, `%${search}%`));
 
-        const totalCount = await db.$count(forms, condition)
+        if (status) conditions.push(eq(forms.status, status));
 
-        const totalPages = Math.ceil(totalCount / pageSize);
-        const hasNextPage = page < totalPages;
-        const hasPrevPage = page > 1;
+        if (visibility) conditions.push(eq(forms.visibility, visibility));
 
-        return {
-            forms: result,
-            page,
-            pageSize,
-            totalCount,
-            totalPages,
-            hasNextPage,
-            hasPrevPage,
-        };
-    }
+        if (maxSubmissions !== undefined) conditions.push(lte(forms.submissionCount, maxSubmissions));
+        const condition = and(...conditions);
 
-    public async filterForms(payload: FilterFormsProps) {
-        const { creatorId, status, page = 1, pageSize = 10 } = payload;
+        const sortColumns = {
+            createdAt: forms.createdAt,
+            updatedAt: forms.updatedAt,
+            title: forms.title,
+            submissionCount: forms.submissionCount,
+            maxSubmissions: forms.maxSubmissions,
+            status: forms.status,
+        } as const;
+        const sortColumn = sortColumns[sortBy];
+        const orderBy = sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
 
-        const isAdmin = await this.isAdmin(creatorId);
+        const [rows, totalItems] = await Promise.all([
+            db.query.forms.findMany({
+                where: condition,
+                orderBy,
+                limit: pageSize,
+                offset: (page - 1) * pageSize,
+            }),
+            db.$count(forms, condition),
+        ]);
 
-        const condition = !isAdmin
-            ? and(eq(forms.creatorId, creatorId), eq(forms.status, status), isNull(forms.deletedAt))
-            : and(eq(forms.status, status), isNull(forms.deletedAt));
-
-        const orderBy = desc(forms.updatedAt);
-        const limit = pageSize;
-        const offset = (page - 1) * pageSize;
-
-        const result = await db.query.forms.findMany({
-            where: condition,
-            orderBy,
-            limit,
-            offset,
-        });
-
-        const totalCount = await db.$count(forms, condition);
-
-        const totalPages = Math.ceil(totalCount / pageSize);
-        const hasNextPage = page < totalPages;
-        const hasPrevPage = page > 1;
+        const totalPages = Math.ceil(totalItems / pageSize);
 
         return {
-            forms: result,
+            forms: rows,
             page,
             pageSize,
-            totalCount,
+            totalItems,
             totalPages,
-            hasNextPage,
-            hasPrevPage,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
         };
     }
 
