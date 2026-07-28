@@ -4,8 +4,17 @@ import {
     FilterFormsByStatusProps,
     GetAllFormsByCreatorIdProps,
     GetFormByIdProps,
+    UpdateFormStatusInputProps,
 } from "./model";
-import { ADMIN, CHECK_BOX, MULTI_SELECT, RADIO, SINGLE_SELECT } from "@repo/database/constants";
+import {
+    ADMIN,
+    CHECK_BOX,
+    DRAFT,
+    MULTI_SELECT,
+    PUBLISHED,
+    RADIO,
+    SINGLE_SELECT,
+} from "@repo/database/constants";
 import crypto from "node:crypto";
 
 export function slugify(input: string): string {
@@ -93,11 +102,17 @@ export default class FormService {
         });
     }
 
-    public async getFormById(props: GetFormByIdProps) {
-        const { formId } = props;
+    public async getFormById(payload: GetFormByIdProps) {
+        const { formId, creatorId } = payload;
+
+        const isAdmin = await this.isAdmin(creatorId);
+
+        const condition = !isAdmin
+            ? and(eq(forms.id, formId), eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
+            : and(eq(forms.id, formId), isNull(forms.deletedAt));
 
         return await db.query.forms.findFirst({
-            where: and(eq(forms.id, formId), isNull(forms.deletedAt)),
+            where: condition,
             with: {
                 fields: {
                     where: isNull(formFields.deletedAt),
@@ -107,8 +122,8 @@ export default class FormService {
         });
     }
 
-    public async getAllFormsByCreatorId(props: GetAllFormsByCreatorIdProps) {
-        const { creatorId, pageSize = 10, page = 1 } = props;
+    public async getAllFormsByCreatorId(payload: GetAllFormsByCreatorIdProps) {
+        const { creatorId, pageSize = 10, page = 1 } = payload;
 
         const isAdmin = await this.isAdmin(creatorId);
 
@@ -116,9 +131,9 @@ export default class FormService {
             ? and(eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
             : isNull(forms.deletedAt);
 
-        const orderBy = desc(forms.updatedAt)
-        const limit = pageSize
-        const offset = (page - 1) * pageSize
+        const orderBy = desc(forms.updatedAt);
+        const limit = pageSize;
+        const offset = (page - 1) * pageSize;
 
         return await db.query.forms.findMany({
             where: condition,
@@ -128,8 +143,8 @@ export default class FormService {
         });
     }
 
-    public async filterFormsByStatus(props: FilterFormsByStatusProps) {
-        const { creatorId, status, page = 1, pageSize = 10 } = props;
+    public async filterFormsByStatus(payload: FilterFormsByStatusProps) {
+        const { creatorId, status, page = 1, pageSize = 10 } = payload;
 
         const isAdmin = await this.isAdmin(creatorId);
 
@@ -137,15 +152,41 @@ export default class FormService {
             ? and(eq(forms.creatorId, creatorId), eq(forms.status, status), isNull(forms.deletedAt))
             : and(eq(forms.status, status), isNull(forms.deletedAt));
 
-        const orderBy = desc(forms.updatedAt)
-        const limit = pageSize
-        const offset = (page - 1) * pageSize
+        const orderBy = desc(forms.updatedAt);
+        const limit = pageSize;
+        const offset = (page - 1) * pageSize;
 
         return await db.query.forms.findMany({
             where: condition,
             orderBy,
             limit,
-            offset
-        })
+            offset,
+        });
+    }
+
+    public async updateFormStatus(payload: UpdateFormStatusInputProps) {
+        const { formId, creatorId, status } = payload;
+
+        const form = await this.getFormById({ formId, creatorId });
+
+        if (!form) throw new Error("Form not found");
+
+        if (form.status === status)
+            return {
+                success: false,
+                message: `Form already ${status}${status === DRAFT ? "ed" : ""}`,
+            };
+
+        const isAdmin = await this.isAdmin(creatorId);
+        const condition = !isAdmin
+            ? and(eq(forms.id, formId), eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
+            : and(eq(forms.id, formId), isNull(forms.deletedAt));
+
+        await db.update(forms).set({ status }).where(condition);
+
+        return {
+            success: true,
+            message: `Form ${status}${status === DRAFT ? "ed" : ""} successfully`,
+        };
     }
 }

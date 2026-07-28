@@ -272,3 +272,18 @@ export const filterFormsByStatusOutputSchema = z.object({
 });
 
 export type FilterFormsByStatusOutputSchemaType = z.infer<typeof filterFormsByStatusOutputSchema>;
+
+export const updateFormStatusInputSchema = z.object({
+    formId: z.string().uuid().describe("formId of the form"),
+    creatorId: z.string().uuid().describe("creatorId of the user"),
+    status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
+});
+
+export type UpdateFormStatusInputProps = z.infer<typeof updateFormStatusInputSchema>;
+
+export const updateFormStatusOutputSchema = z.object({
+    success: z.boolean().describe("Success status"),
+    message: z.string().describe("Message"),
+});
+
+export type UpdateFormStatusOutputSchemaType = z.infer<typeof updateFormStatusOutputSchema>;
