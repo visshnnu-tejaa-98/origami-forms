@@ -109,8 +109,9 @@ export default class FormService {
                 return row;
             });
 
-            const fieldRows = await tx.insert(formFields).values(fieldValues).returning();
-            return { form, fields: fieldRows };
+            await tx.insert(formFields).values(fieldValues).returning();
+
+            return { id: form.id }
         });
     }
 

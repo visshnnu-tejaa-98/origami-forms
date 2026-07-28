@@ -150,25 +150,28 @@ export const createFormInputModel = z.object({
 
 export type CreateFormInputModel = z.infer<typeof createFormInputModel>;
 
-// TODO: Need to change this and integrate it just to return formid
+// TODO: Need to change output schema according to our need in future
 export const formFieldOutputSchema = z.object({
+
     id: z.string().uuid(),
-    formId: z.string().uuid(),
-    type: z.enum(FIELD_TYPES),
-    label: z.string().describe("label of the field"),
-    description: z.string().optional().describe("description of the field"),
 
-    placeholder: z.string().optional().describe("placeholder of the field"),
-    helpText: z.string().optional().describe("help text of the field"),
-    required: z.boolean().describe("required of the field"),
-    order: z.number().describe("order of the field"),
-    labelKey: z.string().describe("label key of the field"),
-    validation: z.json().describe("validation of the field"),
-    options: z.union([z.array(optionsSchema), z.object({}).strict()]),
-    defaultValue: z.string().optional().describe("default value of the field"), // can also have array of selected items in multi select
+    // id: z.string().uuid(),
+    // formId: z.string().uuid(),
+    // type: z.enum(FIELD_TYPES),
+    // label: z.string().describe("label of the field"),
+    // description: z.string().optional().describe("description of the field"),
 
-    createdAt: z.coerce.date().transform(d => d.toISOString()).describe("created at"),
-    updatedAt: z.coerce.date().transform(d => d.toISOString()).describe("updated at"),
+    // placeholder: z.string().optional().describe("placeholder of the field"),
+    // helpText: z.string().optional().describe("help text of the field"),
+    // required: z.boolean().describe("required of the field"),
+    // order: z.number().describe("order of the field"),
+    // labelKey: z.string().describe("label key of the field"),
+    // validation: z.json().describe("validation of the field"),
+    // options: z.union([z.array(optionsSchema), z.object({}).strict()]),
+    // defaultValue: z.string().optional().describe("default value of the field"), // can also have array of selected items in multi select
+
+    // createdAt: z.coerce.date().transform(d => d.toISOString()).describe("created at"),
+    // updatedAt: z.coerce.date().transform(d => d.toISOString()).describe("updated at"),
 });
 
 export type FormFieldOutputSchemaType = z.infer<typeof formFieldOutputSchema>;
