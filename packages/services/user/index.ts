@@ -1,14 +1,22 @@
 
-import db, { eq, users } from "@repo/database";
-import { createUserInputModel, CreateUserInputModelType } from "./model";
+import db, { and, eq, formFields, forms, inArray, isNull, users } from "@repo/database";
+import { createUserInputModel } from "./model";
+import type { CreateUserInputProps, DeleteUserInputProps } from "./model";
+import { ADMIN } from "@repo/database/constants";
 
 export default class UserService {
 
     private async getUserByEmail(email: string) {
-        return await db.select().from(users).where(eq(users.email, email)).then(result => result[0] ?? null)
+        const condition = and(eq(users.email, email), isNull(users.deletedAt))
+        return await db.select().from(users).where(condition).then(result => result[0] ?? null)
     }
 
-    public async createUser(userData: CreateUserInputModelType) {
+    private async getUserById(id: string) {
+        const condition = and(eq(users.id, id), isNull(users.deletedAt))
+        return await db.select().from(users).where(condition).then(result => result[0] ?? null)
+    }
+
+    public async createUser(userData: CreateUserInputProps) {
         const { firstName, lastName, email, clerkUserId, avatarUrl, role } = await createUserInputModel.parseAsync(userData)
         const resolvedFirstName = firstName || email.split("@")[0]!
 
@@ -39,5 +47,66 @@ export default class UserService {
             avatarUrl: users.avatarUrl,
             role: users.role
         }).then(result => result[0])
+    }
+
+    public async isAdmin(userId: string) {
+        const user = await db.query.users.findFirst({
+            where: eq(users.id, userId),
+            columns: {
+                role: true,
+            },
+        });
+
+        if (!user) throw new Error("User not found");
+
+        return user.role === ADMIN;
+    }
+
+    public async deleteUser(payload: DeleteUserInputProps) {
+        const { userId, requesterId } = payload
+
+        const user = await this.getUserById(userId)
+
+        if (!user) return { isDeleted: false, message: "User not found" }
+
+        const isAdmin = await this.isAdmin(requesterId)
+
+        const now = new Date()
+
+        const condition = !isAdmin
+            ? and(eq(users.id, userId), eq(users.id, requesterId), isNull(users.deletedAt))
+            : and(eq(users.id, userId), isNull(users.deletedAt));
+
+        const result = await db.transaction(async (tx) => {
+            const [deletedUser] = await tx
+                .update(users)
+                .set({ deletedAt: now })
+                .where(condition)
+                .returning({ id: users.id });
+
+            if (!deletedUser) return null;
+
+            const deletedForms = await tx
+                .update(forms)
+                .set({ deletedAt: now })
+                .where(and(eq(forms.creatorId, deletedUser.id), isNull(forms.deletedAt)))
+                .returning({ id: forms.id });
+
+            if (deletedForms.length > 0) {
+                const formIds = deletedForms.map(f => f.id);
+                await tx
+                    .update(formFields)
+                    .set({ deletedAt: now })
+                    .where(and(inArray(formFields.formId, formIds), isNull(formFields.deletedAt)));
+            }
+            return deletedUser.id
+        });
+
+        if (!result) return {
+            isDeleted: false,
+            message: "Unauthorized or user already deleted.",
+        };
+
+        return { isDeleted: true, message: "User deleted successfully", id: userId }
     }
 }

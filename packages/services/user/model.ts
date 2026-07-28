@@ -22,21 +22,15 @@ export const createUserInputModel = z.object({
   role: z.enum(USER_ROLES).optional().default(STARTER_USER_ROLE).describe("role of the user"),
 });
 
-export type CreateUserInputModelType = z.infer<typeof createUserInputModel>;
+export type CreateUserInputProps = z.infer<typeof createUserInputModel>;
 
 export const createUserOutputModel = z.object({
-  id: z.string(),
+  id: z.string().uuid().describe("id of the user"),
   firstName: z
     .string()
-    .trim()
-    .min(2, "Firstname must be atleast 2 characters long")
-    .max(50, "Firstname cannot be longer than 50 characters")
     .describe("first name of the user"),
   lastName: z
     .string()
-    .trim()
-    .min(2, "Lastname must be atleast 2 characters long")
-    .max(50, "Lastname cannot be longer than 50 characters")
     .optional()
     .describe("last name of the user"),
   email: z.string().trim().email("Invalid email address").describe("email address of the user"),
@@ -46,3 +40,18 @@ export const createUserOutputModel = z.object({
 })
 
 export type CreateUserOutputModel = z.infer<typeof createUserInputModel>
+
+export const deleteUserInputSchema = z.object({
+  userId: z.string().uuid().describe("user id of the user to be deleted"),
+  requesterId: z.string().uuid().describe("requester id of the user")
+})
+
+export type DeleteUserInputProps = z.infer<typeof deleteUserInputSchema>
+
+export const deleteUserOutputSchema = z.object({
+  isDeleted: z.boolean().describe("true if user is deleted successfully"),
+  message: z.string().describe("success or error message"),
+  id: z.string().uuid().optional().describe("deleted user id"),
+})
+
+export type DeleteUserOutputProps = z.infer<typeof deleteUserOutputSchema>

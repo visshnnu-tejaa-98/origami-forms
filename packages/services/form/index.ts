@@ -8,7 +8,6 @@ import db, {
     ilike,
     isNull,
     lte,
-    users,
 } from "@repo/database";
 import {
     CloneFormInputProps,
@@ -28,6 +27,7 @@ import {
     SINGLE_SELECT,
 } from "@repo/database/constants";
 import crypto from "node:crypto";
+import UserService from "../user";
 
 export function slugify(input: string): string {
     const cleanSlug = input
@@ -48,18 +48,8 @@ function generateLabelKey() {
 }
 
 export default class FormService {
-    private async isAdmin(userId: string) {
-        const user = await db.query.users.findFirst({
-            where: eq(users.id, userId),
-            columns: {
-                role: true,
-            },
-        });
 
-        if (!user) throw new Error("User not found");
-
-        return user.role === ADMIN;
-    }
+    private readonly userService = new UserService();
 
     public async createForm(creatorId: string, formData: CreateFormInputModel) {
         return db.transaction(async (tx) => {
@@ -118,7 +108,7 @@ export default class FormService {
     public async getFormById(payload: GetFormByIdProps) {
         const { formId, requesterId } = payload;
 
-        const isAdmin = await this.isAdmin(requesterId);
+        const isAdmin = await this.userService.isAdmin(requesterId);
 
         const condition = !isAdmin
             ? and(eq(forms.id, formId), eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
@@ -148,7 +138,7 @@ export default class FormService {
             pageSize,
         } = payload;
 
-        const isAdmin = await this.isAdmin(requesterId);
+        const isAdmin = await this.userService.isAdmin(requesterId);
 
         const conditions = [isNull(forms.deletedAt)];
 
@@ -217,7 +207,7 @@ export default class FormService {
             };
         }
 
-        const isAdmin = await this.isAdmin(requesterId);
+        const isAdmin = await this.userService.isAdmin(requesterId);
         const condition = !isAdmin
             ? and(eq(forms.id, formId), eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
             : and(eq(forms.id, formId), isNull(forms.deletedAt));
@@ -312,7 +302,7 @@ export default class FormService {
 
 // const formService = new FormService();
 
-// formService.cloneForm({
+// formService.getFormById({
 //     formId: "c8b007a6-6b00-4530-8b95-f88ba017dae6",
 //     requesterId: "1f93d930-8e07-4154-93a3-ed380302570e",
 // }).then(data => console.log(data)).catch(err => console.log(err))
