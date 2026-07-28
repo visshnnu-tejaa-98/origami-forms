@@ -11,6 +11,7 @@ import db, {
     users,
 } from "@repo/database";
 import {
+    CloneFormInputProps,
     CreateFormInputModel,
     DeleteFormProps,
     GetFormByIdProps,
@@ -212,7 +213,7 @@ export default class FormService {
             return {
                 success: false,
                 message: "Cannot move published form to draft when there are submissions",
-            }
+            };
         }
 
         const isAdmin = await this.isAdmin(requesterId);
@@ -239,24 +240,78 @@ export default class FormService {
             return {
                 success: false,
                 message: "Cannot delete published form when there are submissions",
-            }
+            };
         }
 
         await db.transaction(async (tx) => {
-            const now = new Date()
-            const deleted = await tx.update(forms).set({ deletedAt: now }).where(eq(forms.id, formId)).returning({ id: forms.id });
+            const now = new Date();
+            const deleted = await tx
+                .update(forms)
+                .set({ deletedAt: now })
+                .where(eq(forms.id, formId))
+                .returning({ id: forms.id });
             if (deleted.length === 0) {
                 return tx.rollback();
             }
-            await tx.update(formFields).set({ deletedAt: now }).where(and(
-                eq(formFields.formId, formId),
-                isNull(formFields.deletedAt)
-            ))
-        })
+            await tx
+                .update(formFields)
+                .set({ deletedAt: now })
+                .where(and(eq(formFields.formId, formId), isNull(formFields.deletedAt)));
+        });
 
         return {
             success: true,
             message: "Form deleted successfully",
         };
     }
+
+    public async cloneForm(payload: CloneFormInputProps) {
+        const { formId, requesterId } = payload;
+
+        const form = await this.getFormById({ formId, requesterId });
+
+        if (!form) throw new Error("Form not found");
+
+        if (form.creatorId !== requesterId)
+            throw new Error("You are not authorized to clone this form");
+
+        const clonedFormTitle = `${form.title} - cloned from ${form.id}`;
+
+        const formFields = form.fields.map((field) => {
+            const uniqueLabelKey = generateLabelKey();
+            return {
+                type: field.type,
+                label: field.label,
+                placeholder: field.placeholder,
+                description: field.description,
+                helpText: field.helpText,
+                required: field.required,
+                order: field.order,
+                labelKey: uniqueLabelKey,
+                validation: field.validation,
+                options: field.options,
+                defaultValue: field.defaultValue,
+            };
+        });
+
+        const formData = {
+            createdId: requesterId,
+            title: clonedFormTitle,
+            description: form.description,
+            logoUrl: form.logoUrl,
+            visibility: form.visibility,
+            slug: slugify(clonedFormTitle),
+            maxSubmissions: form.maxSubmissions,
+            fields: formFields,
+        } as CreateFormInputModel;
+
+        return await this.createForm(requesterId, formData);
+    }
 }
+
+// const formService = new FormService();
+
+// formService.cloneForm({
+//     formId: "c8b007a6-6b00-4530-8b95-f88ba017dae6",
+//     requesterId: "1f93d930-8e07-4154-93a3-ed380302570e",
+// }).then(data => console.log(data)).catch(err => console.log(err))

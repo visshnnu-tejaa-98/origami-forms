@@ -150,6 +150,7 @@ export const createFormInputModel = z.object({
 
 export type CreateFormInputModel = z.infer<typeof createFormInputModel>;
 
+// TODO: Need to change this and integrate it just to return formid
 export const formFieldOutputSchema = z.object({
     id: z.string().uuid(),
     formId: z.string().uuid(),
@@ -300,3 +301,14 @@ export const deleteFormOutputSchema = z.object({
 });
 
 export type DeleteFormOutputSchemaType = z.infer<typeof deleteFormOutputSchema>;
+
+export const cloneFormInputSchema = z.object({
+    requesterId: z.string().uuid().describe("id of the requesting user"),
+    formId: z.string().uuid().describe("formId of the form")
+})
+
+export type CloneFormInputProps = z.infer<typeof cloneFormInputSchema>
+
+export const cloneFormOutputSchema = z.string().uuid().describe("formId of the form")
+
+export type CloneFormOutputProps = z.infer<typeof cloneFormOutputSchema>
