@@ -1,7 +1,7 @@
 import db, { and, asc, desc, eq, formFields, forms, isNull, users } from "@repo/database";
 import {
     CreateFormInputModel,
-    FilterFormsByStatusProps,
+    FilterFormsProps,
     GetAllFormsByCreatorIdProps,
     GetFormByIdProps,
     UpdateFormStatusInputProps,
@@ -39,7 +39,7 @@ export default class FormService {
     private async isAdmin(userId: string) {
         const user = await db.query.users.findFirst({
             where: eq(users.id, userId),
-            with: {
+            columns: {
                 role: true,
             },
         });
@@ -68,7 +68,7 @@ export default class FormService {
                 return tx.rollback();
             }
 
-            const fieldValues = formData.fields.map((field, i) => {
+            const fieldValues = formData.fields.map((field) => {
                 const uniqueLabelKey = generateLabelKey();
 
                 const row: typeof formFields.$inferInsert = {
@@ -135,15 +135,31 @@ export default class FormService {
         const limit = pageSize;
         const offset = (page - 1) * pageSize;
 
-        return await db.query.forms.findMany({
+        const result = await db.query.forms.findMany({
             where: condition,
             orderBy,
             limit,
             offset,
         });
+
+        const totalCount = await db.$count(forms, condition)
+
+        const totalPages = Math.ceil(totalCount / pageSize);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+
+        return {
+            forms: result,
+            page,
+            pageSize,
+            totalCount,
+            totalPages,
+            hasNextPage,
+            hasPrevPage,
+        };
     }
 
-    public async filterFormsByStatus(payload: FilterFormsByStatusProps) {
+    public async filterForms(payload: FilterFormsProps) {
         const { creatorId, status, page = 1, pageSize = 10 } = payload;
 
         const isAdmin = await this.isAdmin(creatorId);
@@ -156,12 +172,28 @@ export default class FormService {
         const limit = pageSize;
         const offset = (page - 1) * pageSize;
 
-        return await db.query.forms.findMany({
+        const result = await db.query.forms.findMany({
             where: condition,
             orderBy,
             limit,
             offset,
         });
+
+        const totalCount = await db.$count(forms, condition);
+
+        const totalPages = Math.ceil(totalCount / pageSize);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+
+        return {
+            forms: result,
+            page,
+            pageSize,
+            totalCount,
+            totalPages,
+            hasNextPage,
+            hasPrevPage,
+        };
     }
 
     public async updateFormStatus(payload: UpdateFormStatusInputProps) {
@@ -177,6 +209,13 @@ export default class FormService {
                 message: `Form already ${status}${status === DRAFT ? "ed" : ""}`,
             };
 
+        if (status === PUBLISHED && form.status == DRAFT && form.submissionCount > 0) {
+            return {
+                success: false,
+                message: "Cannot move published form to draft when there are submissions",
+            }
+        }
+
         const isAdmin = await this.isAdmin(creatorId);
         const condition = !isAdmin
             ? and(eq(forms.id, formId), eq(forms.creatorId, creatorId), isNull(forms.deletedAt))
@@ -186,7 +225,7 @@ export default class FormService {
 
         return {
             success: true,
-            message: `Form ${status}${status === DRAFT ? "ed" : ""} successfully`,
+            message: `Form updated to ${status}`,
         };
     }
 }

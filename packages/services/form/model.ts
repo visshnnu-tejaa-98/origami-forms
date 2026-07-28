@@ -155,19 +155,19 @@ export const formFieldOutputSchema = z.object({
     formId: z.string().uuid(),
     type: z.enum(FIELD_TYPES),
     label: z.string().describe("label of the field"),
-    description: z.string().describe("description of the field"),
+    description: z.string().optional().describe("description of the field"),
 
-    placeholder: z.string().describe("placeholder of the field"),
-    helpText: z.string().describe("help text of the field"),
+    placeholder: z.string().optional().describe("placeholder of the field"),
+    helpText: z.string().optional().describe("help text of the field"),
     required: z.boolean().describe("required of the field"),
     order: z.number().describe("order of the field"),
     labelKey: z.string().describe("label key of the field"),
     validation: z.json().describe("validation of the field"),
     options: z.union([z.array(optionsSchema), z.object({}).strict()]),
-    defaultValue: z.string().describe("default value of the field"), // can also have array of selected items in multi select
+    defaultValue: z.string().optional().describe("default value of the field"), // can also have array of selected items in multi select
 
-    createdAt: z.string().describe("created at"),
-    updatedAt: z.string().describe("updated at"),
+    createdAt: z.coerce.date().transform(d => d.toISOString()).describe("created at"),
+    updatedAt: z.coerce.date().transform(d => d.toISOString()).describe("updated at"),
 });
 
 export type FormFieldOutputSchemaType = z.infer<typeof formFieldOutputSchema>;
@@ -241,37 +241,36 @@ export type GetAllFormsByCreatorIdProps = z.infer<typeof getAllFormsByCreatorIdI
 
 export const getAllFormsByCreatorIdOutputSchema = z.object({
     forms: z.array(createFormOutputSchema.omit({ fields: true, deletedAt: true })),
-    page: z.number().int().positive().describe("page number"),
-    pageSize: z.number().int().positive().describe("page size"),
-    totalItems: z.number().int().positive().describe("total number of items"),
-    totalPages: z.number().int().positive().describe("total number of pages"),
+    page: z.number().int().nonnegative().describe("page number"),
+    pageSize: z.number().int().nonnegative().describe("page size"),
+    totalPages: z.number().int().nonnegative().describe("total number of pages"),
     hasNextPage: z.boolean().describe("has next page"),
     hasPrevPage: z.boolean().describe("has prev page"),
-    totalCount: z.number().int().positive().describe("total number of forms"),
+    totalCount: z.number().int().nonnegative().describe("total number of forms"),
 });
 
 export type GetAllFormsByCreatorIdOutputSchemaType = z.infer<typeof getAllFormsByCreatorIdOutputSchema>;
 
-export const filterFormsByStatusInputSchema = z.object({
+export const filterFormsInputSchema = z.object({
     creatorId: z.string().uuid().describe("creatorId of the user"),
     status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
     page: z.number().int().positive().optional().default(1).describe("page number"),
     pageSize: z.number().int().positive().optional().default(10).describe("page size"),
 });
 
-export type FilterFormsByStatusProps = z.infer<typeof filterFormsByStatusInputSchema>;
+export type FilterFormsProps = z.infer<typeof filterFormsInputSchema>;
 
-export const filterFormsByStatusOutputSchema = z.object({
+export const filterFormsOutputSchema = z.object({
     forms: z.array(createFormOutputSchema.omit({ fields: true, deletedAt: true })),
-    page: z.number().int().positive().describe("page number"),
-    pageSize: z.number().int().positive().describe("page size"),
-    totalItems: z.number().int().positive().describe("total number of items"),
-    totalPages: z.number().int().positive().describe("total number of pages"),
+    page: z.number().int().nonnegative().describe("page number"),
+    pageSize: z.number().int().nonnegative().describe("page size"),
+    totalCount: z.number().int().nonnegative().describe("total number of items"),
+    totalPages: z.number().int().nonnegative().describe("total number of pages"),
     hasNextPage: z.boolean().describe("has next page"),
     hasPrevPage: z.boolean().describe("has prev page"),
 });
 
-export type FilterFormsByStatusOutputSchemaType = z.infer<typeof filterFormsByStatusOutputSchema>;
+export type FilterFormsOutputSchemaType = z.infer<typeof filterFormsOutputSchema>;
 
 export const updateFormStatusInputSchema = z.object({
     formId: z.string().uuid().describe("formId of the form"),
