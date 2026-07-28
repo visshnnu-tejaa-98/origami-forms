@@ -12,6 +12,7 @@ import db, {
 } from "@repo/database";
 import {
     CreateFormInputModel,
+    DeleteFormProps,
     GetFormByIdProps,
     ListFormsProps,
     UpdateFormStatusInputProps,
@@ -207,7 +208,7 @@ export default class FormService {
                 message: `Form already ${status}${status === DRAFT ? "ed" : ""}`,
             };
 
-        if (status === PUBLISHED && form.status == DRAFT && form.submissionCount > 0) {
+        if (form.status === PUBLISHED && status === DRAFT && form.submissionCount > 0) {
             return {
                 success: false,
                 message: "Cannot move published form to draft when there are submissions",
@@ -224,6 +225,38 @@ export default class FormService {
         return {
             success: true,
             message: `Form updated to ${status}`,
+        };
+    }
+
+    public async deleteForm(payload: DeleteFormProps) {
+        const { requesterId, formId } = payload;
+
+        const form = await this.getFormById({ formId, requesterId });
+
+        if (!form) throw new Error("Form not found");
+
+        if (form.status === PUBLISHED && form.submissionCount > 0) {
+            return {
+                success: false,
+                message: "Cannot delete published form when there are submissions",
+            }
+        }
+
+        await db.transaction(async (tx) => {
+            const now = new Date()
+            const deleted = await tx.update(forms).set({ deletedAt: now }).where(eq(forms.id, formId)).returning({ id: forms.id });
+            if (deleted.length === 0) {
+                return tx.rollback();
+            }
+            await tx.update(formFields).set({ deletedAt: now }).where(and(
+                eq(formFields.formId, formId),
+                isNull(formFields.deletedAt)
+            ))
+        })
+
+        return {
+            success: true,
+            message: "Form deleted successfully",
         };
     }
 }

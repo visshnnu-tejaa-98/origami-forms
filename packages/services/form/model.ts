@@ -287,4 +287,16 @@ export const updateFormStatusOutputSchema = z.object({
 
 export type UpdateFormStatusOutputSchemaType = z.infer<typeof updateFormStatusOutputSchema>;
 
-// export const deleteFormInputSchema = z.object
+export const deleteFormInputSchema = z.object({
+    requesterId: z.string().uuid().describe("id of the requesting user"),
+    formId: z.string().uuid().describe("formId of the form"),
+});
+
+export type DeleteFormProps = z.infer<typeof deleteFormInputSchema>;
+
+export const deleteFormOutputSchema = z.object({
+    success: z.boolean().describe("Success status"),
+    message: z.string().describe("Message"),
+});
+
+export type DeleteFormOutputSchemaType = z.infer<typeof deleteFormOutputSchema>;
