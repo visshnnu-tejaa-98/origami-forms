@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { STARTER_USER_ROLE, USER_ROLES } from "../constants";
 
-export const createUserInputModel = z.object({
+export const createUserInputSchema = z.object({
   firstName: z
     .string()
     .trim()
@@ -22,9 +22,9 @@ export const createUserInputModel = z.object({
   role: z.enum(USER_ROLES).optional().default(STARTER_USER_ROLE).describe("role of the user"),
 });
 
-export type CreateUserInputProps = z.infer<typeof createUserInputModel>;
+export type CreateUserInputProps = z.infer<typeof createUserInputSchema>;
 
-export const createUserOutputModel = z.object({
+export const createUserOutputSchema = z.object({
   id: z.string().uuid().describe("id of the user"),
   firstName: z
     .string()
@@ -39,7 +39,7 @@ export const createUserOutputModel = z.object({
   role: z.enum(USER_ROLES).optional().default(STARTER_USER_ROLE).describe("role of the user"),
 })
 
-export type CreateUserOutputModel = z.infer<typeof createUserInputModel>
+export type CreateUserOutputSchemaType = z.infer<typeof createUserInputSchema>
 
 export const deleteUserInputSchema = z.object({
   userId: z.string().uuid().describe("user id of the user to be deleted"),
@@ -54,4 +54,24 @@ export const deleteUserOutputSchema = z.object({
   id: z.string().uuid().optional().describe("deleted user id"),
 })
 
-export type DeleteUserOutputProps = z.infer<typeof deleteUserOutputSchema>
+export type DeleteUserOutputSchemaType = z.infer<typeof deleteUserOutputSchema>
+
+export const updateUserInputSchema = z.object({
+  id: z.string().uuid().describe("id of the user"),
+  requesterId: z.string().uuid().describe("requester id of the user who is requesting"),
+  firstName: z.string().optional().describe("first name of the user"),
+  lastName: z.string().optional().describe("last name of the user"),
+  avatarUrl: z.string().url("Invalid URL").optional().describe("avatar url of the user"),
+})
+
+export type UpdateUserInputProps = z.infer<typeof updateUserInputSchema>
+
+export const updateUserOutputSchema = z.object({
+  id: z.string().uuid().describe("id of the user"),
+  firstName: z.string().describe("first name of the user"),
+  lastName: z.string().optional().describe("last name of the user"),
+  avatarUrl: z.string().url("Invalid URL").optional().describe("avatar url of the user"),
+  role: z.enum(USER_ROLES).optional().describe("role of the user"),
+})
+
+export type UpdateUserOutputSchemaType = z.infer<typeof updateUserOutputSchema>
