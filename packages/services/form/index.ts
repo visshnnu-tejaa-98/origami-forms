@@ -6,6 +6,7 @@ import db, {
     formFields,
     forms,
     ilike,
+    InsertFormField,
     isNull,
     lte,
 } from "@repo/database";
@@ -16,6 +17,7 @@ import {
     GetFormByIdProps,
     ListFormsProps,
     UpdateFormProps,
+    UpSertFormFieldsInputProps,
 } from "./model";
 import {
     ADMIN,
@@ -102,7 +104,7 @@ export default class FormService {
 
             await tx.insert(formFields).values(fieldValues).returning();
 
-            return { id: form.id }
+            return { id: form.id };
         });
     }
 
@@ -189,7 +191,17 @@ export default class FormService {
     }
 
     public async updateForm(payload: UpdateFormProps) {
-        const { formId, requesterId, title, description, logoUrl, status, visibility, maxSubmissions, expiresAt } = payload;
+        const {
+            formId,
+            requesterId,
+            title,
+            description,
+            logoUrl,
+            status,
+            visibility,
+            maxSubmissions,
+            expiresAt,
+        } = payload;
 
         const form = await this.getFormById({ formId, requesterId });
 
@@ -200,14 +212,14 @@ export default class FormService {
                 return {
                     success: false,
                     message: "Cannot move published form to draft when there are submissions",
-                    formData: null
-                }
+                    formData: null,
+                };
             }
         }
 
-        const now = new Date()
+        const now = new Date();
 
-        const updatedValues: Partial<typeof forms.$inferInsert> = {}
+        const updatedValues: Partial<typeof forms.$inferInsert> = {};
 
         if (title !== undefined) updatedValues.title = title;
         if (description !== undefined) updatedValues.description = description;
@@ -217,17 +229,17 @@ export default class FormService {
         if (expiresAt !== undefined) updatedValues.expiresAt = expiresAt;
 
         if (status !== undefined && status !== form.status) {
-            updatedValues.status = status
-            if (status === PUBLISHED && !form.publishedAt) updatedValues.publishedAt = now
-            if (status === ARCHIVED) updatedValues.archivedAt = now
+            updatedValues.status = status;
+            if (status === PUBLISHED && !form.publishedAt) updatedValues.publishedAt = now;
+            if (status === ARCHIVED) updatedValues.archivedAt = now;
         }
 
         if (Object.keys(updatedValues).length === 0) {
             return {
                 success: false,
                 message: "No changes to update",
-                formData: null
-            }
+                formData: null,
+            };
         }
 
         const isAdmin = await this.userService.isAdmin(requesterId);
@@ -235,11 +247,7 @@ export default class FormService {
             ? and(eq(forms.id, formId), eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
             : and(eq(forms.id, formId), isNull(forms.deletedAt));
 
-        const [updatedForm] = await db
-            .update(forms)
-            .set(updatedValues)
-            .where(condition)
-            .returning();
+        const [updatedForm] = await db.update(forms).set(updatedValues).where(condition).returning();
 
         if (!updatedForm) throw new Error("Failed to update form");
 
@@ -257,7 +265,7 @@ export default class FormService {
                 visibility: updatedForm.visibility,
                 maxSubmissions: updatedForm.maxSubmissions,
                 expiresAt: updatedForm.expiresAt,
-            }
+            },
         };
     }
 
@@ -304,7 +312,7 @@ export default class FormService {
 
         if (!form) throw new Error("Form not found");
 
-        const isAdmin = await this.userService.isAdmin(requesterId)
+        const isAdmin = await this.userService.isAdmin(requesterId);
 
         if (!isAdmin && form.creatorId !== requesterId)
             throw new Error("You are not authorized to clone this form");
@@ -339,7 +347,77 @@ export default class FormService {
             fields: formFields,
         } as CreateFormInputModel;
 
-        return (await this.createForm(requesterId, formData));
+        return await this.createForm(requesterId, formData);
+    }
+
+    public async upsertFormField(payload: UpSertFormFieldsInputProps) {
+        const {
+            id,
+            formId,
+            requesterId,
+            type,
+            label,
+            description,
+            placeholder,
+            helpText,
+            required,
+            order,
+            validation,
+            options,
+            defaultValue,
+        } = payload;
+
+        const form = await this.getFormById({ formId, requesterId });
+
+        if (!form) throw new Error("Form not found");
+
+        const labelKey = generateLabelKey();
+
+        if (id) {
+            const updates: Partial<typeof formFields.$inferInsert> = {};
+            if (formId !== undefined) updates.formId = formId;
+            if (type !== undefined) updates.type = type;
+            if (label !== undefined) updates.label = label;
+            if (description !== undefined) updates.description = description;
+            if (placeholder !== undefined) updates.placeholder = placeholder;
+            if (helpText !== undefined) updates.helpText = helpText;
+            if (required !== undefined) updates.required = required;
+            if (order !== undefined) updates.order = order;
+            if (validation !== undefined) updates.validation = validation;
+            if (options !== undefined) updates.options = options;
+            if (defaultValue !== undefined) updates.defaultValue = defaultValue;
+            if (labelKey !== undefined) updates.labelKey = labelKey;
+
+            const [field] = await db
+                .update(formFields)
+                .set(updates)
+                .where(and(eq(formFields.id, id), eq(formFields.formId, formId)))
+                .returning();
+
+            return { success: true, message: "Form field updated successfully", fieldData: field };
+        }
+
+        if (type === undefined || label === undefined || order === undefined) {
+            throw new Error("type, label and order are required to create a form field");
+        }
+
+        const values: InsertFormField = {
+            formId,
+            type,
+            label,
+            description,
+            placeholder,
+            helpText,
+            required,
+            order,
+            validation,
+            options,
+            defaultValue,
+            labelKey: generateLabelKey(),
+        };
+
+        const [field] = await db.insert(formFields).values(values).returning();
+        return { success: true, message: "Form field created successfully", fieldData: field };
     }
 }
 

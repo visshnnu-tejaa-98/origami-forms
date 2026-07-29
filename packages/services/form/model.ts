@@ -342,3 +342,44 @@ export const cloneFormOutputSchema = z.object({
 })
 
 export type CloneFormOutputSchemaType = z.infer<typeof cloneFormOutputSchema>
+
+
+export const upSertFormFieldsInputSchema = z.object({
+    requesterId: z.string().uuid().describe("id of the requesting user"),
+    id: z.string().uuid().optional().nullable().describe("id of the field"),
+    formId: z.string().uuid().describe("formId of the form"),
+    type: z.enum(FIELD_TYPES).optional().describe("type of the field"),
+    label: z.string().optional().describe("label of the field"),
+    description: z.string().nullable().optional().describe("description of the field"),
+    placeholder: z.string().nullable().optional().describe("placeholder of the field"),
+    helpText: z.string().nullable().optional().describe("help text of the field"),
+    required: z.boolean().optional().describe("whether the field is required"),
+    order: z.number().int().nonnegative().optional().describe("order of the field"),
+    validation: z.object({}).optional().describe("validation of the field"),
+    options: z.object({}).optional().describe("options of the field"),
+    defaultValue: z.string().optional().nullable().describe("default value of the field"),
+})
+
+export type UpSertFormFieldsInputProps = z.infer<typeof upSertFormFieldsInputSchema>
+
+export const upSertFormFieldsOutputSchema = z.object({
+    success: z.boolean().describe("success status of the upsert operation"),
+    message: z.string().describe("message describing the result of the operation"),
+    formFields: z.object({
+        id: z.string().uuid().optional().nullable().describe("id of the field"),
+        formId: z.string().uuid().describe("formId of the form"),
+        type: z.enum(FIELD_TYPES).optional().describe("type of the field"),
+        description: z.string().nullable().optional().describe("description of the field"),
+        label: z.string().optional().describe("label of the field"),
+        labelKey: z.string().optional().describe("label key of the field"),
+        placeholder: z.string().nullable().optional().describe("placeholder of the field"),
+        helpText: z.string().nullable().optional().describe("help text of the field"),
+        required: z.boolean().optional().describe("whether the field is required"),
+        order: z.number().int().nonnegative().optional().describe("order of the field"),
+        validation: z.object({}).optional().describe("validation of the field"),
+        options: z.object({}).optional().describe("options of the field"),
+        defaultValue: z.string().optional().nullable().describe("default value of the field"),
+    })
+})
+
+export type UpsertFormFieldsOutputSchemaType = z.infer<typeof upSertFormFieldsOutputSchema>
