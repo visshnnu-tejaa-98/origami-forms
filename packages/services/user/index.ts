@@ -135,13 +135,21 @@ export default class UserService {
             ? and(eq(users.id, id), eq(users.id, requesterId), isNull(users.deletedAt))
             : and(eq(users.id, id), isNull(users.deletedAt));
 
+        const updatedValues: Partial<typeof users.$inferInsert> = {};
+        if (firstName !== undefined) updatedValues.firstName = firstName;
+        if (lastName !== undefined) updatedValues.lastName = lastName;
+        if (avatarUrl !== undefined) updatedValues.avatarUrl = avatarUrl;
+
+        if (Object.keys(updatedValues).length === 0)
+            return {
+                success: false,
+                message: "No changes to update",
+                userData: null,
+            };
+
         const [updatedUser] = await db
             .update(users)
-            .set({
-                firstName: firstName || user.firstName,
-                lastName: lastName || user.lastName,
-                avatarUrl: avatarUrl || user.avatarUrl,
-            })
+            .set(updatedValues)
             .where(condition)
             .returning({
                 id: users.id,
@@ -153,6 +161,10 @@ export default class UserService {
 
         if (!updatedUser) throw new Error("Not authorised to perform update operation");
 
-        return updatedUser;
+        return {
+            success: true,
+            message: "User updated successfully",
+            userData: updatedUser,
+        };
     }
 }

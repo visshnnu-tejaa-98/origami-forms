@@ -331,6 +331,8 @@ export const cloneFormInputSchema = z.object({
 
 export type CloneFormInputProps = z.infer<typeof cloneFormInputSchema>
 
-export const cloneFormOutputSchema = z.string().uuid().describe("formId of the form")
+export const cloneFormOutputSchema = z.object({
+    id: z.string().uuid().describe("formId of the form")
+})
 
 export type CloneFormOutputSchemaType = z.infer<typeof cloneFormOutputSchema>

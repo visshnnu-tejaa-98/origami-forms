@@ -302,7 +302,9 @@ export default class FormService {
 
         if (!form) throw new Error("Form not found");
 
-        if (form.creatorId !== requesterId)
+        const isAdmin = await this.userService.isAdmin(requesterId)
+
+        if (!isAdmin && form.creatorId !== requesterId)
             throw new Error("You are not authorized to clone this form");
 
         const clonedFormTitle = `${form.title} - cloned from ${form.id}`;
@@ -325,7 +327,7 @@ export default class FormService {
         });
 
         const formData = {
-            createdId: requesterId,
+            creatorId: requesterId,
             title: clonedFormTitle,
             description: form.description,
             logoUrl: form.logoUrl,
@@ -335,7 +337,7 @@ export default class FormService {
             fields: formFields,
         } as CreateFormInputModel;
 
-        return await this.createForm(requesterId, formData);
+        return (await this.createForm(requesterId, formData));
     }
 }
 
