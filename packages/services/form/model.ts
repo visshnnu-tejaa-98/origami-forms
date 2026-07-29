@@ -285,6 +285,7 @@ export const updateFormInputSchema = z.object({
     status: z.enum(FORM_STATUS_OPTIONS).optional().describe("status of the form"),
     visibility: z.enum(FORM_VISIBILITY_OPTIONS).optional().describe("visibility of the form"),
     maxSubmissions: z.number().int().nonnegative().nullable().optional().describe("max submissions for the form (null to clear)"),
+    expiresAt: z.coerce.date().nullable().optional().describe("expiry date of the form (null to clear)"),
 });
 
 export type UpdateFormProps = z.infer<typeof updateFormInputSchema>;
@@ -303,6 +304,11 @@ export const updateFormOutputSchema = z.object({
             status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
             visibility: z.enum(FORM_VISIBILITY_OPTIONS).describe("visibility of the form"),
             maxSubmissions: z.number().int().nullable().describe("max submissions for the form"),
+            expiresAt: z.coerce
+                .date()
+                .transform((d) => d.toISOString())
+                .nullable()
+                .describe("expiry date of the form"),
         })
         .nullable()
         .describe("updated form data, or null when no update was performed"),

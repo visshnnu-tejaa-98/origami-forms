@@ -189,7 +189,7 @@ export default class FormService {
     }
 
     public async updateForm(payload: UpdateFormProps) {
-        const { formId, requesterId, title, description, logoUrl, status, visibility, maxSubmissions } = payload;
+        const { formId, requesterId, title, description, logoUrl, status, visibility, maxSubmissions, expiresAt } = payload;
 
         const form = await this.getFormById({ formId, requesterId });
 
@@ -214,6 +214,7 @@ export default class FormService {
         if (logoUrl !== undefined) updatedValues.logoUrl = logoUrl;
         if (visibility !== undefined) updatedValues.visibility = visibility;
         if (maxSubmissions !== undefined) updatedValues.maxSubmissions = maxSubmissions;
+        if (expiresAt !== undefined) updatedValues.expiresAt = expiresAt;
 
         if (status !== undefined && status !== form.status) {
             updatedValues.status = status
@@ -255,6 +256,7 @@ export default class FormService {
                 status: updatedForm.status,
                 visibility: updatedForm.visibility,
                 maxSubmissions: updatedForm.maxSubmissions,
+                expiresAt: updatedForm.expiresAt,
             }
         };
     }
