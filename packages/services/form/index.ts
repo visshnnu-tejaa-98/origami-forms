@@ -15,10 +15,11 @@ import {
     DeleteFormProps,
     GetFormByIdProps,
     ListFormsProps,
-    UpdateFormStatusInputProps,
+    UpdateFormProps,
 } from "./model";
 import {
     ADMIN,
+    ARCHIVED,
     CHECK_BOX,
     DRAFT,
     MULTI_SELECT,
@@ -187,24 +188,45 @@ export default class FormService {
         };
     }
 
-    public async updateFormStatus(payload: UpdateFormStatusInputProps) {
-        const { formId, requesterId, status } = payload;
+    public async updateForm(payload: UpdateFormProps) {
+        const { formId, requesterId, title, description, logoUrl, status, visibility, maxSubmissions } = payload;
 
         const form = await this.getFormById({ formId, requesterId });
 
         if (!form) throw new Error("Form not found");
 
-        if (form.status === status)
-            return {
-                success: false,
-                message: `Form already ${status}${status === DRAFT ? "ed" : ""}`,
-            };
+        if (status && status !== form.status) {
+            if (form.status === PUBLISHED && status === DRAFT && form.submissionCount > 0) {
+                return {
+                    success: false,
+                    message: "Cannot move published form to draft when there are submissions",
+                    formData: null
+                }
+            }
+        }
 
-        if (form.status === PUBLISHED && status === DRAFT && form.submissionCount > 0) {
+        const now = new Date()
+
+        const updatedValues: Partial<typeof forms.$inferInsert> = {}
+
+        if (title !== undefined) updatedValues.title = title;
+        if (description !== undefined) updatedValues.description = description;
+        if (logoUrl !== undefined) updatedValues.logoUrl = logoUrl;
+        if (visibility !== undefined) updatedValues.visibility = visibility;
+        if (maxSubmissions !== undefined) updatedValues.maxSubmissions = maxSubmissions;
+
+        if (status !== undefined && status !== form.status) {
+            updatedValues.status = status
+            if (status === PUBLISHED && !form.publishedAt) updatedValues.publishedAt = now
+            if (status === ARCHIVED) updatedValues.archivedAt = now
+        }
+
+        if (Object.keys(updatedValues).length === 0) {
             return {
                 success: false,
-                message: "Cannot move published form to draft when there are submissions",
-            };
+                message: "No changes to update",
+                formData: null
+            }
         }
 
         const isAdmin = await this.userService.isAdmin(requesterId);
@@ -212,11 +234,28 @@ export default class FormService {
             ? and(eq(forms.id, formId), eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
             : and(eq(forms.id, formId), isNull(forms.deletedAt));
 
-        await db.update(forms).set({ status }).where(condition);
+        const [updatedForm] = await db
+            .update(forms)
+            .set(updatedValues)
+            .where(condition)
+            .returning();
+
+        if (!updatedForm) throw new Error("Failed to update form");
 
         return {
             success: true,
-            message: `Form updated to ${status}`,
+            message: "Form updated successfully",
+            formData: {
+                formId: updatedForm.id,
+                creatorId: updatedForm.creatorId,
+                title: updatedForm.title,
+                description: updatedForm.description,
+                logoUrl: updatedForm.logoUrl,
+                slug: updatedForm.slug,
+                status: updatedForm.status,
+                visibility: updatedForm.visibility,
+                maxSubmissions: updatedForm.maxSubmissions,
+            }
         };
     }
 

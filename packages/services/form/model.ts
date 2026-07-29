@@ -255,7 +255,7 @@ export const listFormsInputSchema = z.object({
         .optional()
         .describe("filter by one or more visibilities"),
 
-    maxSubmissions: z.number().int().nonnegative().describe("maximum submission count"),
+    maxSubmissions: z.number().int().nonnegative().optional().describe("maximum submission count"),
     sortBy: z.enum(LIST_FORMS_SORT_FIELDS).optional().default("updatedAt").describe("column to sort by"),
     sortOrder: z.enum(["asc", "desc"]).optional().default("desc").describe("sort direction"),
     page: z.number().int().positive().optional().default(1).describe("page number"),
@@ -276,20 +276,39 @@ export const listFormsOutputSchema = z.object({
 
 export type ListFormsOutputSchemaType = z.infer<typeof listFormsOutputSchema>;
 
-export const updateFormStatusInputSchema = z.object({
+export const updateFormInputSchema = z.object({
     formId: z.string().uuid().describe("formId of the form"),
     requesterId: z.string().uuid().describe("id of the requesting user"),
-    status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
+    title: z.string().min(2).max(255).optional().describe("title of the form"),
+    description: z.string().nullable().optional().describe("description of the form (null to clear)"),
+    logoUrl: z.string().url().nullable().optional().describe("logo url of the form (null to clear)"),
+    status: z.enum(FORM_STATUS_OPTIONS).optional().describe("status of the form"),
+    visibility: z.enum(FORM_VISIBILITY_OPTIONS).optional().describe("visibility of the form"),
+    maxSubmissions: z.number().int().nonnegative().nullable().optional().describe("max submissions for the form (null to clear)"),
 });
 
-export type UpdateFormStatusInputProps = z.infer<typeof updateFormStatusInputSchema>;
+export type UpdateFormProps = z.infer<typeof updateFormInputSchema>;
 
-export const updateFormStatusOutputSchema = z.object({
-    success: z.boolean().describe("Success status"),
-    message: z.string().describe("Message"),
+export const updateFormOutputSchema = z.object({
+    success: z.boolean().describe("true or false based on if update was successfull"),
+    message: z.string().describe("Success or error message"),
+    formData: z
+        .object({
+            formId: z.string().uuid().describe("formId of the form"),
+            creatorId: z.string().uuid().describe("creator id of the form"),
+            title: z.string().describe("title of the form"),
+            description: z.string().nullable().describe("description of the form"),
+            logoUrl: z.string().nullable().describe("logo url of the form"),
+            slug: z.string().describe("slug of the form"),
+            status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
+            visibility: z.enum(FORM_VISIBILITY_OPTIONS).describe("visibility of the form"),
+            maxSubmissions: z.number().int().nullable().describe("max submissions for the form"),
+        })
+        .nullable()
+        .describe("updated form data, or null when no update was performed"),
 });
 
-export type UpdateFormStatusOutputSchemaType = z.infer<typeof updateFormStatusOutputSchema>;
+export type UpdateFormOutputSchemaType = z.infer<typeof updateFormOutputSchema>;
 
 export const deleteFormInputSchema = z.object({
     requesterId: z.string().uuid().describe("id of the requesting user"),
