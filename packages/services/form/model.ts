@@ -383,3 +383,17 @@ export const upSertFormFieldsOutputSchema = z.object({
 })
 
 export type UpsertFormFieldsOutputSchemaType = z.infer<typeof upSertFormFieldsOutputSchema>
+
+export const deleteFormFieldInputSchema = z.object({
+    id: z.string().uuid().describe("id for the form field"),
+    requesterId: z.string().uuid().describe("id of the requesting user")
+})
+
+export type DeleteFormFieldInputProps = z.infer<typeof deleteFormFieldInputSchema>
+
+export const deleteFormFieldOutputSchema = z.object({
+    success: z.boolean().describe("success status of the delete operation"),
+    message: z.string().describe("message describing the result of the operation"),
+})
+
+export type DeleteFormFieldOutputSchemaType = z.infer<typeof deleteFormFieldOutputSchema>

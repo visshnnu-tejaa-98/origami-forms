@@ -13,6 +13,7 @@ import db, {
 import {
     CloneFormInputProps,
     CreateFormInputModel,
+    DeleteFormFieldInputProps,
     DeleteFormProps,
     GetFormByIdProps,
     ListFormsProps,
@@ -388,13 +389,13 @@ export default class FormService {
             if (defaultValue !== undefined) updates.defaultValue = defaultValue;
             if (labelKey !== undefined) updates.labelKey = labelKey;
 
-            const [field] = await db
+            const [formField] = await db
                 .update(formFields)
                 .set(updates)
                 .where(and(eq(formFields.id, id), eq(formFields.formId, formId)))
                 .returning();
 
-            return { success: true, message: "Form field updated successfully", fieldData: field };
+            return { success: true, message: "Form field updated successfully", fieldData: formField };
         }
 
         if (type === undefined || label === undefined || order === undefined) {
@@ -416,8 +417,32 @@ export default class FormService {
             labelKey: generateLabelKey(),
         };
 
-        const [field] = await db.insert(formFields).values(values).returning();
-        return { success: true, message: "Form field created successfully", fieldData: field };
+        const [formField] = await db.insert(formFields).values(values).returning();
+        return { success: true, message: "Form field created successfully", fieldData: formField };
+    }
+
+    public async deleteFormField(payload: DeleteFormFieldInputProps) {
+        const { id, requesterId } = payload;
+
+        const field = await db.query.formFields.findFirst({
+            where: and(eq(formFields.id, id), isNull(formFields.deletedAt)),
+        });
+
+        if (!field) throw new Error("Form field not found");
+
+        const form = await this.getFormById({ formId: field.formId, requesterId });
+
+        if (!form) throw new Error("You are not authorized to delete this form field");
+
+        const [deleted] = await db
+            .update(formFields)
+            .set({ deletedAt: new Date() })
+            .where(and(eq(formFields.id, id), isNull(formFields.deletedAt)))
+            .returning({ id: formFields.id });
+
+        if (!deleted) throw new Error("Failed to delete form field");
+
+        return { success: true, message: "Form field deleted successfully" };
     }
 }
 
