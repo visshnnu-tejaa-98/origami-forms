@@ -1,13 +1,15 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { getAuth } from "@clerk/express";
+import { userService } from "./services";
 
 export async function createContext({ req }: CreateExpressContextOptions) {
-  // `clerkMiddleware()` (mounted in apps/api) validates the incoming token and
-  // populates the auth object; here we just read the authenticated user id.
-  const { userId } = getAuth(req);
+  const { userId: clerkUserId } = getAuth(req);
+  const user = clerkUserId ? await userService.getByClerkId(clerkUserId) : null;
 
   return {
-    clerkUserId: userId ?? null,
+    clerkUserId: clerkUserId ?? null,
+    userId: user?.id ?? null,
+    role: user?.role ?? null,
   };
 }
 

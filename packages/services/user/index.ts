@@ -61,6 +61,19 @@ export default class UserService {
             .then((result) => result[0]);
     }
 
+    public async getByClerkId(clerkUserId: string) {
+        const condition = and(eq(users.clerkUserId, clerkUserId), isNull(users.deletedAt));
+        return await db.query.users.findFirst({
+            where: condition,
+            columns: {
+                id: true,
+                clerkUserId: true,
+                email: true,
+                role: true,
+            },
+        });
+    }
+
     public async isAdmin(userId: string) {
         const user = await db.query.users.findFirst({
             where: eq(users.id, userId),
