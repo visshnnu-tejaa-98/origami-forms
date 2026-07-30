@@ -1,4 +1,4 @@
-import { createUserInputModel, createUserOutputModel } from "@repo/services/user/model";
+import { createUserInputSchema, createUserOutputSchema } from "@repo/services/user/model";
 import { createUserMeta } from "@repo/services/user/meta";
 import { z, zodUndefinedModel } from "../../schema";
 import { userService } from "../../services";
@@ -12,8 +12,8 @@ const getPath = generatePath("/authentication");
 export const authRouter = router({
   createUser: publicProcedure
     .meta(createUserMeta({ getPathFn: () => "/auth/user", tags: TAGS }))
-    .input(createUserInputModel)
-    .output(createUserOutputModel)
+    .input(createUserInputSchema)
+    .output(createUserOutputSchema)
     .mutation(async ({ input }) => {
       const { firstName, lastName, email, clerkUserId, avatarUrl, role } = input;
 

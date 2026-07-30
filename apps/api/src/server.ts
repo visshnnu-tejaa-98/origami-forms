@@ -3,6 +3,7 @@ import { logger } from "@repo/logger";
 import cors from "cors";
 
 import * as trpcExpress from "@trpc/server/adapters/express";
+import { clerkMiddleware } from "@clerk/express";
 
 // TODO: What does trpc-to-openapi package does
 import { generateOpenApiDocument, createOpenApiExpressMiddleware } from "trpc-to-openapi";
@@ -29,6 +30,7 @@ if (env.NODE_ENV !== "prod") {
 }
 
 app.use(express.json());
+app.use(clerkMiddleware());
 
 app.get("/", (req, res) => {
   return res.json({ message: "Origami Forms API's is up and running..." });

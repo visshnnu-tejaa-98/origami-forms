@@ -4,10 +4,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import React, { useState } from "react";
 import { OrigamiToaster } from "~/components/origami/toast";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, useAuth } from "@clerk/nextjs";
 
 import { trpc } from "~/trpc/client";
-import { createTRPCHttpBatchClientClient } from "~/trpc/create-client";
+import { createTRPCHttpBatchClient } from "~/trpc/create-client";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,12 +18,24 @@ const queryClient = new QueryClient({
   },
 });
 
-export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Must live inside <ClerkProvider> so it can read the Clerk session token and
+// attach it as a Bearer header on every tRPC request.
+const TRPCProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { getToken } = useAuth();
   const [trpcClient] = useState(() =>
     trpc.createClient({
-      links: [createTRPCHttpBatchClientClient()],
+      links: [createTRPCHttpBatchClient({ getToken: () => getToken() })],
     }),
   );
+
+  return (
+    <trpc.Provider queryClient={queryClient} client={trpcClient}>
+      {children}
+    </trpc.Provider>
+  );
+};
+
+export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <NextThemesProvider
@@ -32,12 +44,12 @@ export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({ child
         enableSystem
         disableTransitionOnChange
       >
-        <trpc.Provider queryClient={queryClient} client={trpcClient}>
-          <ClerkProvider>
+        <ClerkProvider>
+          <TRPCProvider>
             {children}
             <OrigamiToaster />
-          </ClerkProvider>
-        </trpc.Provider>
+          </TRPCProvider>
+        </ClerkProvider>
       </NextThemesProvider>
     </QueryClientProvider>
   );
