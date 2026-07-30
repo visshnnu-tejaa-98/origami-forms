@@ -29,33 +29,42 @@
 .db-shell .rsp-head .sub { color: var(--ink-3); font-size: 0.92rem; font-style: italic; margin-top: 6px; }
 .db-shell .rsp-head .head-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-/* ====== TOOLS ROW ====== */
-.db-shell .rsp-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+/* ====== TOOLBAR (filter tabs + search) ====== */
+/* Same pill treatment as the forms page toolbar, so the two
+   pages filter identically. */
+.db-shell .rsp-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.db-shell .rsp-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.db-shell .rsp-tab {
+  border: 1px solid transparent; background: transparent; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.86rem; font-weight: 600; color: var(--ink-3);
+  padding: 7px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px;
+  transition: background 160ms, color 160ms, border-color 160ms;
+}
+.db-shell .rsp-tab:hover { background: var(--bg-elevated); color: var(--ink-1); }
+.db-shell .rsp-tab.active {
+  background: var(--surface-card); color: var(--ink-1);
+  border-color: var(--rule-line); box-shadow: var(--shadow-paper-1);
+}
+.db-shell .rsp-tab .tab-count {
+  font-size: 0.7rem; font-weight: 700; color: var(--ink-3);
+  background: var(--bg-sunken); border-radius: 999px; padding: 1px 7px;
+}
+.db-shell .rsp-tab.active .tab-count { background: var(--accent-soft); color: var(--accent-deep); }
+
+.db-shell .rsp-toolbar .spacer { margin-left: auto; }
+
+/* search sits in the header beside the actions, as on the forms page */
 .db-shell .rsp-search {
   display: flex; align-items: center; gap: 8px;
-  background: var(--surface-card); border: 1px solid var(--rule-line);
+  background: var(--bg-elevated); border: 1px solid var(--rule-line);
   border-radius: 10px; padding: 7px 12px;
-  flex: 1; min-width: 220px; color: var(--ink-3);
+  width: 220px; flex: none; color: var(--ink-3);
 }
 .db-shell .rsp-search input {
   border: 0; outline: 0; background: transparent; flex: 1; min-width: 0;
   font-family: var(--font-body); font-size: 0.86rem; color: var(--ink-1);
 }
 .db-shell .rsp-search input::placeholder { color: var(--ink-4); }
-
-.db-shell .rsp-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  border: 1px solid var(--rule-line); background: var(--bg-elevated);
-  color: var(--ink-3); cursor: pointer;
-  font-family: var(--font-body); font-size: 0.8rem; font-weight: 600;
-  padding: 6px 12px; border-radius: 999px;
-  transition: background 160ms, color 160ms, border-color 160ms;
-}
-.db-shell .rsp-chip:hover { color: var(--ink-1); border-color: var(--rule-strong); }
-.db-shell .rsp-chip.active {
-  background: var(--ink-1); border-color: var(--ink-1); color: var(--paper-0);
-}
-.db-shell .rsp-chip .n { font-size: 0.7rem; font-weight: 700; opacity: 0.75; }
 
 /* ====== BULK BAR ====== */
 .db-shell .rsp-bulk {
@@ -344,30 +353,29 @@
 .db-shell .sk-av { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; }
 
 /* ====== RESPONSIVE ====== */
-@media (max-width: 1320px) {
-  .db-shell .rsp-page { grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; }
+@media (max-width: 1460px) {
+  .db-shell .rsp-page { grid-template-columns: minmax(0, 1fr) 350px; gap: 20px; }
   .db-shell .rsp-th,
   .db-shell .rsp-tr { grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) minmax(0, 1fr) 84px 26px; }
   .db-shell .rsp-th .col-head,
   .db-shell .rsp-tr .cell.col-head { display: none; }
 }
-@media (max-width: 1120px) {
-  .db-shell .rsp-th,
-  .db-shell .rsp-tr { grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) 84px 26px; }
-  .db-shell .rsp-th .col-hype,
-  .db-shell .rsp-tr .cell.col-hype { display: none; }
-}
-/* below the two-pane threshold the detail drops under the list */
-@media (max-width: 980px) {
+/* Two panes stop paying for themselves once the table is squeezed —
+   below this the detail drops under the list and columns come back. */
+@media (max-width: 1240px) {
   .db-shell .rsp-page { grid-template-columns: minmax(0, 1fr); }
   .db-shell .rsp-detail-pane { position: static; max-height: none; overflow: visible; order: 2; }
   .db-shell .rsp-th,
   .db-shell .rsp-tr { grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) 92px minmax(0, 1fr) 84px 26px; }
   .db-shell .rsp-th .col-head,
-  .db-shell .rsp-tr .cell.col-head,
+  .db-shell .rsp-tr .cell.col-head { display: block; }
+  .db-shell .rsp-meta { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 980px) {
+  .db-shell .rsp-th,
+  .db-shell .rsp-tr { grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) 84px 26px; }
   .db-shell .rsp-th .col-hype,
-  .db-shell .rsp-tr .cell.col-hype { display: block; }
-  .db-shell .rsp-meta { grid-template-columns: 1fr 1fr 1fr; }
+  .db-shell .rsp-tr .cell.col-hype { display: none; }
 }
 @media (max-width: 760px) {
   .db-shell .rsp-th,
@@ -379,6 +387,7 @@
   .db-shell .rsp-th .col-hype,
   .db-shell .rsp-tr .cell.col-hype { display: none; }
   .db-shell .rsp-deco { display: none; }
-  .db-shell .rsp-search { min-width: 100%; }
+  .db-shell .rsp-head .head-actions { width: 100%; }
+  .db-shell .rsp-search { width: 100%; }
   .db-shell .rsp-meta { grid-template-columns: 1fr 1fr; }
 }

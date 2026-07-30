@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Icon } from "../components/icons";
+import { Icon, type IconName } from "../components/icons";
 import { ResponsesSkeleton } from "./skeletons";
 import "./responses.css";
 
@@ -58,11 +58,11 @@ const SEED: Response[] = [
   { id: "14", name: "Emi Sato", email: "emi@example.com", initial: "E", tint: "coral", status: "completed", picked: "April 6 · cherry blossoms", headcount: 2, hype: 3, hypeLabel: "medium", bring: ["extra cups", "a picnic blanket"], note: "we'll stay behind to help pack up.", time: "5 days ago", rank: 13, duration: "2m 31s", device: "iPad · Tablet", city: "Kanazawa, Japan", answered: "9 / 9", pages: "Page 1, 2" },
 ];
 
-const CHIPS: { key: Status | "all"; label: string }[] = [
-  { key: "all", label: "all" },
-  { key: "completed", label: "completed" },
-  { key: "partial", label: "partial" },
-  { key: "flagged", label: "flagged" },
+const TABS: { key: Status | "all"; label: string; icon: IconName }[] = [
+  { key: "all", label: "All", icon: "mail" },
+  { key: "completed", label: "Completed", icon: "check" },
+  { key: "partial", label: "Partial", icon: "clock" },
+  { key: "flagged", label: "Flagged", icon: "star" },
 ];
 
 const PAGE_SIZE = 10;
@@ -260,6 +260,14 @@ const Responses = () => {
             </div>
           </div>
           <div className="head-actions">
+            <div className="rsp-search">
+              <Icon name="search" size={16} />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search responses…"
+              />
+            </div>
             <button className="o-btn o-btn--sm" onClick={() => exportCsv(visible)}>
               <Icon name="download" size={14} /> Export CSV
             </button>
@@ -269,26 +277,24 @@ const Responses = () => {
           </div>
         </header>
 
-        {/* TOOLS */}
-        <div className="rsp-tools">
-          <div className="rsp-search">
-            <Icon name="search" size={16} />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name, email, answer…"
-            />
+        {/* TOOLBAR — same tab pills as the forms page */}
+        <div className="rsp-toolbar">
+          <div className="rsp-tabs">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                className={`rsp-tab${filter === t.key ? " active" : ""}`}
+                onClick={() => setFilter(t.key)}
+              >
+                <Icon name={t.icon} size={14} />
+                {t.label}
+                <span className="tab-count">{counts[t.key] ?? 0}</span>
+              </button>
+            ))}
           </div>
-          {CHIPS.map((c) => (
-            <button
-              key={c.key}
-              className={`rsp-chip${filter === c.key ? " active" : ""}`}
-              onClick={() => setFilter(c.key)}
-            >
-              {c.label}
-              <span className="n">{counts[c.key] ?? 0}</span>
-            </button>
-          ))}
+
+          <span className="spacer" />
+
           <button className="o-btn o-btn--sm o-btn--ghost">
             <Icon name="filter" size={14} /> Filters
           </button>
