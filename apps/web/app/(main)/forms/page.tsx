@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { Icon, type IconName } from "../components/icons";
+import { FormsGridSkeleton, FormsTableSkeleton } from "./skeletons";
 import "./forms.css";
 
 type Status = "published" | "draft" | "unlisted" | "archived";
@@ -72,11 +73,22 @@ const Forms = () => {
   const [sort, setSort] = useState<"recent" | "responses" | "name">("recent");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   // Reset to the first page whenever the result set changes.
   useEffect(() => {
     setPage(1);
   }, [tab, query, sort]);
+
+  // Simulate a server fetch on mount / tab / sort / page / view change.
+  // Swap this effect for your real data-fetching (React Query, tRPC, etc.).
+  // NOTE: `view` is here so toggling grid/list previews its skeleton — a real
+  // backend wouldn't need to refetch on a client-only view switch.
+  useEffect(() => {
+    setLoading(true);
+    const t = setTimeout(() => setLoading(false), 750);
+    return () => clearTimeout(t);
+  }, [tab, sort, page, view]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: forms.length };
@@ -196,7 +208,9 @@ const Forms = () => {
       </div>
 
       {/* GRID / LIST */}
-      {visible.length === 0 ? (
+      {loading ? (
+        view === "list" ? <FormsTableSkeleton /> : <FormsGridSkeleton />
+      ) : visible.length === 0 ? (
         <div className="forms-empty">
           <span className="art"><Icon name="crane" size={72} /></span>
           <h3>{empty.title}</h3>

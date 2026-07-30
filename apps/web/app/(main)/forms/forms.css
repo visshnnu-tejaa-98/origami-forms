@@ -309,6 +309,25 @@
 }
 .db-shell .pager-btn .flip { transform: rotate(180deg); }
 
+/* ============================================================
+   LOADING · origami skeletons
+   Loader + shimmer atoms live in shell.css (shared); the shapes
+   below mirror this page's card and table.
+   ============================================================ */
+.db-shell .sk-ic { width: 46px; height: 46px; flex: none; border-radius: 13px; }
+.db-shell .sk-ic-sm { width: 40px; height: 40px; flex: none; border-radius: 11px; }
+.db-shell .sk-dot { width: 30px; height: 30px; border-radius: 8px; }
+
+/* skeleton grid card mirrors the real card */
+.db-shell .form-card.sk-card { transform: none; pointer-events: none; }
+.db-shell .form-card.sk-card .ct-txt { flex: 1; }
+.db-shell .sk-stats { display: flex; gap: 26px; }
+.db-shell .sk-foot { display: flex; align-items: center; gap: 6px; border-top: 1px dashed var(--rule-line); padding-top: 14px; margin-top: auto; }
+.db-shell .sk-foot .sk-foot-spacer { margin-left: auto; }
+
+/* skeleton table row */
+.db-shell .otable-row.sk-row { cursor: default; }
+
 /* ====== RESPONSIVE ====== */
 @media (max-width: 1100px) {
   .db-shell .otable-head,

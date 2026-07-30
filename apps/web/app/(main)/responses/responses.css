@@ -1,0 +1,384 @@
+/* ============================================================
+   RESPONSES · the pile of returned letters
+   Two panes: a scanning table on the left, one unfolded
+   response on the right. Renders inside the (main) shell
+   layout (shell.css), on the Origami tokens (origami.css).
+   ============================================================ */
+
+/* ====== PAGE FRAME ====== */
+/* The shell's <main> is the scroll container, so the detail pane
+   sticks rather than owning its own viewport-height column. */
+.db-shell .rsp-page {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 26px;
+  align-items: start;
+}
+.db-shell .rsp-list-pane { position: relative; z-index: 1; min-width: 0; }
+
+/* ====== FLOATING DECO ====== */
+.db-shell .rsp-deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.db-shell .rsp-deco .rd { position: absolute; }
+.db-shell .rsp-deco .rd-crane { top: 30px; left: 38%; color: var(--accent); opacity: 0.12; transform: rotate(-9deg); animation: paperFloat 7s ease-in-out infinite; }
+.db-shell .rsp-deco .rd-sakura { bottom: 12%; left: 6%; color: var(--sakura-deep); opacity: 0.14; animation: paperFloat 9s 0.4s ease-in-out infinite; }
+
+/* ====== HEADER ====== */
+.db-shell .rsp-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.db-shell .rsp-head h1 { font-family: var(--font-hand); font-size: 2.6rem; line-height: 1; margin: 0; color: var(--ink-1); }
+.db-shell .rsp-head .sub { color: var(--ink-3); font-size: 0.92rem; font-style: italic; margin-top: 6px; }
+.db-shell .rsp-head .head-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* ====== TOOLS ROW ====== */
+.db-shell .rsp-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.db-shell .rsp-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-card); border: 1px solid var(--rule-line);
+  border-radius: 10px; padding: 7px 12px;
+  flex: 1; min-width: 220px; color: var(--ink-3);
+}
+.db-shell .rsp-search input {
+  border: 0; outline: 0; background: transparent; flex: 1; min-width: 0;
+  font-family: var(--font-body); font-size: 0.86rem; color: var(--ink-1);
+}
+.db-shell .rsp-search input::placeholder { color: var(--ink-4); }
+
+.db-shell .rsp-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--rule-line); background: var(--bg-elevated);
+  color: var(--ink-3); cursor: pointer;
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px;
+  transition: background 160ms, color 160ms, border-color 160ms;
+}
+.db-shell .rsp-chip:hover { color: var(--ink-1); border-color: var(--rule-strong); }
+.db-shell .rsp-chip.active {
+  background: var(--ink-1); border-color: var(--ink-1); color: var(--paper-0);
+}
+.db-shell .rsp-chip .n { font-size: 0.7rem; font-weight: 700; opacity: 0.75; }
+
+/* ====== BULK BAR ====== */
+.db-shell .rsp-bulk {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  background: var(--accent-soft); border: 1px dashed var(--accent);
+  border-radius: 10px; padding: 8px 12px; margin-bottom: 12px;
+}
+.db-shell .rsp-bulk .cnt { font-size: 0.84rem; color: var(--accent-deep); margin-right: auto; }
+.db-shell .rsp-bulk .cnt strong { font-family: var(--font-hand); font-size: 1.2rem; }
+.db-shell .rsp-bulk .bulk-clear {
+  border: 0; background: transparent; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.78rem; color: var(--accent-deep);
+  text-decoration: underline; text-underline-offset: 2px;
+}
+
+/* ====== TABLE ====== */
+.db-shell .rsp-table {
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-paper-2);
+}
+/* washi tape peeking off the top-right corner */
+.db-shell .rsp-table .rsp-table-tape {
+  top: -11px; right: 38px; left: auto; margin-left: 0;
+  transform: rotate(7deg); z-index: 4;
+  background-color: rgba(237, 157, 174, 0.82);
+}
+
+.db-shell .rsp-th,
+.db-shell .rsp-tr {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) 92px minmax(0, 1fr) 84px 26px;
+  gap: 14px;
+  align-items: center;
+  padding: 11px 16px;
+}
+
+.db-shell .rsp-th {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--rule-line);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.db-shell .rsp-tr {
+  border-bottom: 1px dashed var(--rule-line);
+  cursor: pointer;
+  transition: background 160ms;
+  outline: none;
+}
+.db-shell .rsp-tr:last-child { border-bottom: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); }
+.db-shell .rsp-tr:hover { background: var(--bg-elevated); }
+.db-shell .rsp-tr:focus-visible { box-shadow: var(--glow-focus) inset; }
+.db-shell .rsp-tr.selected { background: var(--accent-soft); }
+/* the selected letter gets an accent rail, like a bookmark */
+.db-shell .rsp-tr.selected { position: relative; }
+.db-shell .rsp-tr.selected::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent);
+}
+
+/* checkbox */
+.db-shell .rsp-check {
+  width: 18px; height: 18px; flex: none; padding: 0;
+  border: 1.4px solid var(--ink-5); border-radius: 4px;
+  background: transparent; color: var(--paper-0);
+  cursor: pointer; display: grid; place-items: center;
+  transition: background 140ms, border-color 140ms;
+}
+.db-shell .rsp-check:hover { border-color: var(--ink-3); }
+.db-shell .rsp-check.on { background: var(--ink-1); border-color: var(--ink-1); }
+
+/* respondent */
+.db-shell .rsp-tr .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.db-shell .rsp-tr .who .txt { min-width: 0; }
+.db-shell .rsp-tr .who .nm {
+  display: flex; align-items: center; gap: 5px;
+  font-weight: 600; color: var(--ink-1); font-size: 0.92rem; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.db-shell .rsp-tr .who .nm .flag { flex: none; display: inline-flex; color: var(--highlighter-deep); }
+.db-shell .rsp-tr .who .em {
+  display: block; font-size: 0.74rem; color: var(--ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* value cells */
+.db-shell .rsp-tr .cell { min-width: 0; }
+.db-shell .rsp-tr .cell .val {
+  display: block; font-size: 0.86rem; color: var(--ink-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.db-shell .rsp-tr .cell .val .st { color: var(--highlighter-deep); letter-spacing: 1px; }
+.db-shell .rsp-tr .cell .o-badge { font-size: 0.64rem; padding: 3px 8px; }
+.db-shell .rsp-tr .time { font-family: var(--font-hand); font-size: 1.05rem; color: var(--ink-1); white-space: nowrap; }
+.db-shell .rsp-tr .chev { color: var(--ink-4); display: flex; justify-content: flex-end; }
+.db-shell .rsp-tr:hover .chev { color: var(--ink-2); }
+
+/* avatars — one tint per respondent */
+.db-shell .rsp-av {
+  width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--font-hand); font-size: 1rem; font-weight: 600;
+  background: var(--accent-soft); color: var(--accent-deep);
+}
+.db-shell .rsp-av.lg { width: 44px; height: 44px; flex: 0 0 44px; font-size: 1.35rem; }
+.db-shell .rsp-av.t-sakura { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .rsp-av.t-matcha { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .rsp-av.t-peach { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .rsp-av.t-lavender { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .rsp-av.t-indigo { background: var(--indigo-soft); color: var(--indigo-deep); }
+.db-shell .rsp-av.t-coral { background: var(--coral-soft); color: var(--coral-deep); }
+.db-shell .rsp-av.t-highlighter { background: var(--highlighter-soft); color: var(--highlighter-deep); }
+
+/* ====== PAGINATION ====== */
+.db-shell .rsp-pager {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--rule-line);
+}
+.db-shell .rsp-pager .pager-info { font-size: 0.84rem; color: var(--ink-3); }
+.db-shell .rsp-pager .pager-info strong { color: var(--ink-1); font-weight: 700; }
+.db-shell .rsp-pager .pager-controls { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.db-shell .rsp-pager .pager-btn,
+.db-shell .rsp-pager .pager-num {
+  border: 1px solid var(--rule-line); background: var(--bg-elevated); color: var(--ink-2);
+  cursor: pointer; font-family: var(--font-body); font-size: 0.84rem; font-weight: 600;
+  border-radius: 9px; transition: color 160ms, border-color 160ms, background 160ms;
+}
+.db-shell .rsp-pager .pager-btn { padding: 6px 11px; display: inline-flex; align-items: center; gap: 5px; }
+.db-shell .rsp-pager .pager-num { width: 32px; height: 32px; display: grid; place-items: center; }
+.db-shell .rsp-pager .pager-btn:hover:not(:disabled),
+.db-shell .rsp-pager .pager-num:hover { color: var(--ink-1); border-color: var(--rule-strong); }
+.db-shell .rsp-pager .pager-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.db-shell .rsp-pager .pager-num.active {
+  background: var(--accent-soft); color: var(--accent-deep); border-color: var(--accent);
+  font-family: var(--font-hand); font-size: 1.05rem;
+}
+.db-shell .rsp-pager .pager-btn .flip { transform: rotate(180deg); }
+
+/* ====== EMPTY STATE (list) ====== */
+.db-shell .rsp-empty { text-align: center; padding: 56px 24px; max-width: 420px; margin: 16px auto; }
+.db-shell .rsp-empty .art { color: var(--accent); display: inline-block; margin-bottom: 8px; animation: paperFloat 6s ease-in-out infinite; }
+.db-shell .rsp-empty h3 { font-family: var(--font-hand); font-size: 2rem; color: var(--ink-1); margin: 0 0 8px; }
+.db-shell .rsp-empty p { color: var(--ink-3); font-size: 0.95rem; line-height: 1.55; margin: 0 auto; max-width: 34ch; }
+.db-shell .rsp-empty em { font-style: italic; color: var(--ink-2); }
+
+/* ============================================================
+   DETAIL PANE · one response, unfolded
+   ============================================================ */
+.db-shell .rsp-detail-pane {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  align-self: start;
+  /* shell <main> pads 28px top / 80px bottom */
+  max-height: calc(100vh - 44px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-paper-2);
+}
+
+.db-shell .rsp-detail-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--rule-line);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  position: sticky; top: 0; z-index: 2;
+}
+.db-shell .rsp-detail-head .who-block { flex: 1; min-width: 0; }
+.db-shell .rsp-detail-head .who-block .nm {
+  font-family: var(--font-hand); font-size: 1.4rem; line-height: 1.1; color: var(--ink-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.db-shell .rsp-detail-head .who-block .em {
+  font-size: 0.76rem; color: var(--ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.db-shell .rsp-detail-head .actions { display: flex; gap: 4px; flex: none; }
+.db-shell .rsp-detail-head .actions button {
+  width: 30px; height: 30px; display: grid; place-items: center;
+  background: transparent; border: 1px solid var(--rule-line); border-radius: 8px;
+  color: var(--ink-3); cursor: pointer;
+  transition: color 140ms, background 140ms, border-color 140ms;
+}
+.db-shell .rsp-detail-head .actions button:hover { background: var(--bg-elevated); color: var(--ink-1); border-color: var(--rule-strong); }
+.db-shell .rsp-detail-head .actions button.on { color: var(--highlighter-deep); border-color: var(--highlighter); }
+
+.db-shell .rsp-detail-body { padding: 16px 18px 24px; }
+
+/* meta grid */
+.db-shell .rsp-meta {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px;
+  background: var(--surface-card);
+  border: 1px dashed var(--rule-line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+.db-shell .rsp-meta .item { font-size: 0.72rem; color: var(--ink-3); min-width: 0; }
+.db-shell .rsp-meta .item b {
+  display: block; color: var(--ink-1); font-weight: 600; font-size: 0.88rem; margin-bottom: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* answer blocks */
+.db-shell .rsp-ans {
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: 12px;
+  padding: 11px 13px;
+  margin-bottom: 10px;
+}
+.db-shell .rsp-ans .q-lbl {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 5px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-4);
+}
+.db-shell .rsp-ans .type-pill {
+  font-size: 0.62rem; padding: 1px 6px; border-radius: 4px;
+  background: var(--accent-soft); color: var(--accent-deep);
+}
+.db-shell .rsp-ans .type-pill.t-sakura { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .rsp-ans .type-pill.t-matcha { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .rsp-ans .type-pill.t-peach { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .rsp-ans .type-pill.t-lavender { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .rsp-ans .type-pill.t-indigo { background: var(--indigo-soft); color: var(--indigo-deep); }
+.db-shell .rsp-ans .type-pill.t-highlighter { background: var(--highlighter-soft); color: var(--highlighter-deep); }
+
+.db-shell .rsp-ans .q {
+  font-family: var(--font-body); font-weight: 600; color: var(--ink-1);
+  font-size: 0.9rem; line-height: 1.35; margin-bottom: 6px;
+}
+
+/* the answer itself — handwritten and highlighted by default */
+.db-shell .rsp-ans .a {
+  display: inline-block;
+  font-family: var(--font-hand); font-size: 1.35rem; line-height: 1.2;
+  color: var(--accent-deep);
+  background: var(--highlighter-soft);
+  padding: 3px 6px; border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+/* names, emails, numbers read better as plain ink */
+.db-shell .rsp-ans .a.plain { background: transparent; color: var(--ink-1); padding: 0; }
+.db-shell .rsp-ans .a.skipped {
+  background: transparent; padding: 0;
+  font-family: var(--font-body); font-size: 0.84rem; font-style: italic; color: var(--ink-4);
+}
+.db-shell .rsp-ans .a.stars { background: transparent; padding: 0; display: inline-flex; align-items: center; gap: 3px; }
+.db-shell .rsp-ans .a.stars .on { color: var(--highlighter-deep); fill: currentColor; }
+.db-shell .rsp-ans .a.stars .off { color: var(--ink-5); }
+.db-shell .rsp-ans .a.stars .stars-label { margin-left: 6px; font-family: var(--font-hand); font-size: 1.1rem; color: var(--accent-deep); }
+
+.db-shell .rsp-ans .a-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.db-shell .rsp-ans .a-chips span {
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent-deep);
+  font-size: 0.8rem; font-weight: 500;
+}
+.db-shell .rsp-ans .a-long {
+  font-family: var(--font-body); font-size: 0.9rem; font-style: italic;
+  color: var(--ink-2); line-height: 1.55; margin: 0;
+}
+
+/* sticky reminder + footer actions */
+.db-shell .rsp-detail-body .rsp-sticky { font-size: 1rem; transform: rotate(-1deg); }
+.db-shell .rsp-detail-foot { display: flex; gap: 8px; margin-top: 16px; }
+.db-shell .rsp-detail-foot > * { flex: 1; justify-content: center; }
+
+/* ====== EMPTY STATE (detail) ====== */
+.db-shell .rsp-detail-empty { text-align: center; padding: 56px 22px; }
+.db-shell .rsp-detail-empty .art { color: var(--indigo-deep); opacity: 0.5; display: inline-block; animation: paperFloat 7s ease-in-out infinite; }
+.db-shell .rsp-detail-empty h3 { font-family: var(--font-hand); font-size: 1.6rem; color: var(--ink-1); margin: 10px 0 6px; }
+.db-shell .rsp-detail-empty p { font-size: 0.86rem; color: var(--ink-3); line-height: 1.5; margin: 0 auto; max-width: 26ch; }
+
+/* ====== SKELETON SHAPES (mirror the real row) ====== */
+.db-shell .rsp-tr.sk-row { cursor: default; }
+.db-shell .rsp-tr.sk-row::before { content: none; }
+.db-shell .sk-av { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1320px) {
+  .db-shell .rsp-page { grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; }
+  .db-shell .rsp-th,
+  .db-shell .rsp-tr { grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) minmax(0, 1fr) 84px 26px; }
+  .db-shell .rsp-th .col-head,
+  .db-shell .rsp-tr .cell.col-head { display: none; }
+}
+@media (max-width: 1120px) {
+  .db-shell .rsp-th,
+  .db-shell .rsp-tr { grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) 84px 26px; }
+  .db-shell .rsp-th .col-hype,
+  .db-shell .rsp-tr .cell.col-hype { display: none; }
+}
+/* below the two-pane threshold the detail drops under the list */
+@media (max-width: 980px) {
+  .db-shell .rsp-page { grid-template-columns: minmax(0, 1fr); }
+  .db-shell .rsp-detail-pane { position: static; max-height: none; overflow: visible; order: 2; }
+  .db-shell .rsp-th,
+  .db-shell .rsp-tr { grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) 92px minmax(0, 1fr) 84px 26px; }
+  .db-shell .rsp-th .col-head,
+  .db-shell .rsp-tr .cell.col-head,
+  .db-shell .rsp-th .col-hype,
+  .db-shell .rsp-tr .cell.col-hype { display: block; }
+  .db-shell .rsp-meta { grid-template-columns: 1fr 1fr 1fr; }
+}
+@media (max-width: 760px) {
+  .db-shell .rsp-th,
+  .db-shell .rsp-tr { grid-template-columns: 20px minmax(0, 1fr) 84px 26px; gap: 12px; padding: 12px 14px; }
+  .db-shell .rsp-th .col-picked,
+  .db-shell .rsp-tr .cell.col-picked,
+  .db-shell .rsp-th .col-head,
+  .db-shell .rsp-tr .cell.col-head,
+  .db-shell .rsp-th .col-hype,
+  .db-shell .rsp-tr .cell.col-hype { display: none; }
+  .db-shell .rsp-deco { display: none; }
+  .db-shell .rsp-search { min-width: 100%; }
+  .db-shell .rsp-meta { grid-template-columns: 1fr 1fr; }
+}

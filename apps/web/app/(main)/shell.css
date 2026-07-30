@@ -142,6 +142,41 @@
   transform: translateY(-1px);
 }
 
+/* ============================================================
+   LOADING ATOMS · shared by every page in the shell
+   (page-specific skeleton shapes live in that page's own CSS)
+   ============================================================ */
+.db-shell .ori-loader { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 8px 0 26px; }
+.db-shell .ori-loader-row { display: flex; gap: 18px; align-items: flex-end; }
+.db-shell .ori-loader .ori-piece { display: inline-flex; animation: oriBob 1.5s ease-in-out infinite; }
+.db-shell .ori-loader .ori-piece.p1 { color: var(--sakura-deep); animation-delay: 0s; }
+.db-shell .ori-loader .ori-piece.p2 { color: var(--matcha-deep); animation-delay: 0.12s; }
+.db-shell .ori-loader .ori-piece.p3 { color: var(--peach-deep); animation-delay: 0.24s; }
+.db-shell .ori-loader .ori-piece.p4 { color: var(--accent-deep); animation-delay: 0.36s; }
+.db-shell .ori-loader .ori-piece.p5 { color: var(--lavender-deep); animation-delay: 0.48s; }
+.db-shell .ori-loader-cap { font-family: var(--font-hand); font-size: 1.25rem; color: var(--ink-3); margin: 0; }
+
+@keyframes oriBob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-9px) rotate(3deg); }
+}
+
+/* shimmer atoms */
+.db-shell .sk { display: block; border-radius: 6px; background: var(--bg-elevated); }
+.db-shell .sk-shimmer { position: relative; overflow: hidden; }
+.db-shell .sk-shimmer::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  animation: skShimmer 1.4s infinite;
+}
+[data-theme="dark"] .db-shell .sk-shimmer::after { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent); }
+@keyframes skShimmer { 100% { transform: translateX(100%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .ori-loader .ori-piece,
+  .db-shell .sk-shimmer::after { animation: none; }
+}
+
 /* ====== RESPONSIVE ====== */
 @media (max-width: 1080px) {
   .db-shell {
