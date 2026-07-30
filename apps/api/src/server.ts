@@ -1,7 +1,7 @@
 import express from "express";
 import { logger } from "@repo/logger";
 import cors from "cors";
-
+import cookieParser from "cookie-parser"
 import * as trpcExpress from "@trpc/server/adapters/express";
 
 // TODO: What does trpc-to-openapi package does
@@ -28,6 +28,7 @@ if (env.NODE_ENV !== "prod") {
   );
 }
 
+app.use(cookieParser());
 app.use(express.json());
 
 app.get("/", (req, res) => {

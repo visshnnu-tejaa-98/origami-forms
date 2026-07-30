@@ -1,14 +1,33 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import React from "react";
 import { Icon } from "../components/icons";
 import "./dashboard.css";
+import Cookies from "js-cookie";
 
 const Dashboard = () => {
   const { user } = useUser();
   const firstName = user?.firstName ?? "there";
+
+  const setUserCookie = async () => {
+    const authData = useAuth()
+    const token = await authData.getToken()
+    if (token) {
+      Cookies.set("user_session_token", token, {
+        path: "/",
+        httpOnly: true,
+        expires: 7,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 13 * 30 * 24 * 60 * 60 // 1 year
+      });
+    }
+  }
+  setUserCookie()
+
+
 
   return (
     <>
