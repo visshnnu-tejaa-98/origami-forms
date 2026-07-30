@@ -3,6 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import '../status.css'
+// import { auth, useAuth } from '@clerk/nextjs'
 
 const CrumpledPaper = () => (
     <svg viewBox="0 0 240 180" fill="none" role="img" aria-label="A crumpled sheet of paper">
@@ -29,6 +30,13 @@ const CrumpledPaper = () => (
 )
 
 const Page = () => {
+    //  TODO: Remove this
+    // const getUserToken = async () => {
+    //     const authData = useAuth()
+    //     console.log({ token: await authData.getToken() })
+    //     console.log({ authData })
+    // }
+    // getUserToken()
     return (
         <main className="o-status o-page">
             <div className="o-status-inner">

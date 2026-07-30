@@ -33,7 +33,6 @@ export function useCurrentUser() {
 }
 
 export function useGetUser() {
-    console.log("debug flow", 888)
     const {
         mutateAsync: createUserAsync,
         mutate: createUser,
