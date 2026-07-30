@@ -26,6 +26,15 @@ export type IconName =
     | 'clip'
     | 'plane'
     | 'trash'
+    | 'star'
+    | 'share'
+    | 'copy'
+    | 'more'
+    | 'grid'
+    | 'list'
+    | 'archive'
+    | 'users'
+    | 'calendar'
 
 const paths: Record<IconName, React.ReactNode> = {
     plus: <path d="M12 5v14M5 12h14" />,
@@ -105,6 +114,55 @@ const paths: Record<IconName, React.ReactNode> = {
     clip: <path d="M16 7v9a4 4 0 0 1-8 0V6a2.5 2.5 0 0 1 5 0v9a1 1 0 0 1-2 0V7" />,
     plane: <path d="M3 11 21 3l-8 18-2-7z" />,
     trash: <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13h10l1-13" />,
+    star: <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z" />,
+    share: (
+        <>
+            <circle cx="6" cy="12" r="2.5" />
+            <circle cx="18" cy="6" r="2.5" />
+            <circle cx="18" cy="18" r="2.5" />
+            <path d="M8.2 10.8 15.8 7.2M8.2 13.2 15.8 16.8" />
+        </>
+    ),
+    copy: (
+        <>
+            <rect x="8" y="8" width="12" height="12" rx="2" />
+            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+        </>
+    ),
+    more: (
+        <>
+            <circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none" />
+            <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+            <circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none" />
+        </>
+    ),
+    grid: (
+        <>
+            <rect x="4" y="4" width="7" height="7" rx="1.5" />
+            <rect x="13" y="4" width="7" height="7" rx="1.5" />
+            <rect x="4" y="13" width="7" height="7" rx="1.5" />
+            <rect x="13" y="13" width="7" height="7" rx="1.5" />
+        </>
+    ),
+    list: <path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" />,
+    archive: (
+        <>
+            <rect x="4" y="4" width="16" height="4" rx="1" />
+            <path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4" />
+        </>
+    ),
+    users: (
+        <>
+            <circle cx="9" cy="8" r="3" />
+            <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.5a3 3 0 0 1 0 5.5M17 14c2.4.5 4 2.6 4 5" />
+        </>
+    ),
+    calendar: (
+        <>
+            <rect x="4" y="5" width="16" height="16" rx="2" />
+            <path d="M4 9h16M8 3v4M16 3v4" />
+        </>
+    ),
 }
 
 export const Icon = ({
