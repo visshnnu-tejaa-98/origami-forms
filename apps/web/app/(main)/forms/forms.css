@@ -198,17 +198,51 @@
   margin-left: auto;
 }
 
-.db-shell .forms-sort {
-  background: var(--bg-elevated);
-  border: 1px solid var(--rule-line);
-  border-radius: 10px;
-  padding: 8px 10px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--ink-2);
-  font-family: var(--font-body);
+/* sort chips ---------------------------------------------------------- */
+.db-shell .sort-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-sunken);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.db-shell .sort-chip {
+  border: 1px solid transparent;
+  background: transparent;
   cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding: 6px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
   outline: 0;
+  transition:
+    background 160ms,
+    color 160ms,
+    border-color 160ms;
+}
+
+.db-shell .sort-chip:hover {
+  background: var(--bg-elevated);
+  color: var(--ink-1);
+}
+
+.db-shell .sort-chip.active {
+  background: var(--surface-card);
+  border-color: var(--rule-line);
+  color: var(--ink-1);
+  box-shadow: var(--shadow-paper-1);
+}
+
+.db-shell .sort-chip.active svg {
+  color: var(--accent-deep);
 }
 
 .db-shell .view-toggle {

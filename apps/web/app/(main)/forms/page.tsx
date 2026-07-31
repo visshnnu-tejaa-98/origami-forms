@@ -22,6 +22,14 @@ const TABS: { key: Status | "all"; label: string; icon: IconName }[] = [
   { key: ARCHIVED, label: "Archived", icon: "archive" },
 ];
 
+type SortField = "updatedAt" | "title" | "submissionCount";
+
+const SORTS: { key: SortField; label: string }[] = [
+  { key: "updatedAt", label: "Last modified" },
+  { key: "title", label: "A–Z" },
+  { key: "submissionCount", label: "Responses" },
+];
+
 const EMPTY_COPY: Record<Status | "all", { title: string; body: string }> = {
   all: {
     title: "Your drawer is empty.",
@@ -45,9 +53,8 @@ const Forms = () => {
   const [forms, setForms] = useState<Form[]>([]);
   const [tab, setTab] = useState<Status | "all">("all");
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<
-    "createdAt" | "updatedAt" | "title" | "status" | "maxSubmissions" | "submissionCount"
-  >("createdAt");
+  const [sort, setSort] = useState<SortField>("updatedAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [page, setPage] = useState(1);
   const [pageOptions, setPageOptions] = useState({});
@@ -61,7 +68,18 @@ const Forms = () => {
       status: tab !== "all" ? tab : undefined,
       search: query !== "" ? query : undefined,
       sortBy: sort,
+      sortOrder,
     });
+
+  const handleSort = (key: SortField) => {
+    if (key === sort) {
+      setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
+    } else {
+      setSort(key);
+      setSortOrder("asc");
+    }
+    setPage(1);
+  };
 
   useEffect(() => {
     if (listFormsIsSuccess) {
@@ -155,16 +173,29 @@ const Forms = () => {
 
         <span className="spacer" />
 
-        <select
-          className="forms-sort"
-          value={sort}
-          onChange={(e) => setSort(e.target.value as typeof sort)}
-          aria-label="Sort forms"
-        >
-          <option value="createdAt">Recently updated</option>
-          <option value="submissionCount">Most responses</option>
-          <option value="title">Title (A–Z)</option>
-        </select>
+        <div className="sort-group" role="group" aria-label="Sort forms">
+          {SORTS.map((s) => {
+            const active = sort === s.key;
+            return (
+              <button
+                key={s.key}
+                className={`sort-chip${active ? " active" : ""}`}
+                onClick={() => handleSort(s.key)}
+                aria-pressed={active}
+                title={
+                  active
+                    ? `Sorted by ${s.label} — ${sortOrder === "asc" ? "ascending" : "descending"}`
+                    : `Sort by ${s.label}`
+                }
+              >
+                {s.label}
+                {active && (
+                  <Icon name={sortOrder === "asc" ? "arrow-down" : "arrow-up"} size={13} />
+                )}
+              </button>
+            );
+          })}
+        </div>
 
         <div className="view-toggle" role="group" aria-label="View mode">
           <button

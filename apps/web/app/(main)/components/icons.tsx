@@ -37,6 +37,8 @@ export type IconName =
     | 'calendar'
     | 'download'
     | 'x'
+    | 'arrow-down'
+    | 'arrow-up'
 
 const paths: Record<IconName, React.ReactNode> = {
     plus: <path d="M12 5v14M5 12h14" />,
@@ -167,6 +169,8 @@ const paths: Record<IconName, React.ReactNode> = {
     ),
     download: <path d="M12 4v10M8 11l4 4 4-4M5 19h14" />,
     x: <path d="M6 6l12 12M18 6L6 18" />,
+    "arrow-down": <path d="M12 5v13M6.5 12.5 12 18l5.5-5.5" />,
+    "arrow-up": <path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" />,
 }
 
 export const Icon = ({
