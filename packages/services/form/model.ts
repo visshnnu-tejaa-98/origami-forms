@@ -176,6 +176,11 @@ export const formFieldOutputSchema = z.object({
 
 export type FormFieldOutputSchemaType = z.infer<typeof formFieldOutputSchema>;
 
+export const isoDateSchema = z.coerce
+    .date()
+    .transform((d) => d.toISOString())
+    .pipe(z.iso.datetime());
+
 export const createFormOutputSchema = z.object({
     id: z.string().uuid(),
     creatorId: z.string().uuid(),
@@ -190,34 +195,12 @@ export const createFormOutputSchema = z.object({
     maxSubmissions: z.number().describe("max submissions for the form"),
     submissionCount: z.number().describe("submission count of the form"),
 
-    createdAt: z.coerce
-        .date()
-        .transform((d) => d.toISOString())
-        .describe("created at"),
-    expiresAt: z.coerce
-        .date()
-        .transform((d) => d.toISOString())
-        .nullable()
-        .describe("expires at"),
-    publishedAt: z.coerce
-        .date()
-        .transform((d) => d.toISOString())
-        .nullable()
-        .describe("published at"),
-    archivedAt: z.coerce
-        .date()
-        .transform((d) => d.toISOString())
-        .nullable()
-        .describe("archived at"),
-    updatedAt: z.coerce
-        .date()
-        .transform((d) => d.toISOString())
-        .describe("updated at"),
-    deletedAt: z.coerce
-        .date()
-        .transform((d) => d.toISOString())
-        .nullable()
-        .describe("deleted at"),
+    createdAt: isoDateSchema.describe("created at"),
+    expiresAt: isoDateSchema.nullable().describe("expires at"),
+    publishedAt: isoDateSchema.nullable().describe("published at"),
+    archivedAt: isoDateSchema.nullable().describe("archived at"),
+    updatedAt: isoDateSchema.describe("updated at"),
+    deletedAt: isoDateSchema.nullable().describe("deleted at"),
 
     fields: z.array(formFieldOutputSchema).describe("fields of the form"),
 });
@@ -263,6 +246,7 @@ export const listFormsInputSchema = z.object({
 })
 
 export type ListFormsProps = z.infer<typeof listFormsInputSchema>;
+export type ListFormsInput = z.input<typeof listFormsInputSchema>;
 
 export const listFormsOutputSchema = z.object({
     forms: z.array(createFormOutputSchema.omit({ fields: true, deletedAt: true })),
@@ -304,11 +288,7 @@ export const updateFormOutputSchema = z.object({
             status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
             visibility: z.enum(FORM_VISIBILITY_OPTIONS).describe("visibility of the form"),
             maxSubmissions: z.number().int().nullable().describe("max submissions for the form"),
-            expiresAt: z.coerce
-                .date()
-                .transform((d) => d.toISOString())
-                .nullable()
-                .describe("expiry date of the form"),
+            expiresAt: isoDateSchema.nullable().describe("expiry date of the form"),
         })
         .nullable()
         .describe("updated form data, or null when no update was performed"),

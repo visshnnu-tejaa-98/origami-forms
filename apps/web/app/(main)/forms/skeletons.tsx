@@ -22,7 +22,7 @@ const Bar = ({ w, h = 10 }: { w: string; h?: number }) => (
 /* GRID · skeleton paper cards (mirrors the real card layout). */
 export const FormsGridSkeleton = ({ count = 6 }: { count?: number }) => (
   <>
-    <OrigamiLoader />
+    {/* <OrigamiLoader /> */}
     <div className="forms-grid" aria-hidden>
       {Array.from({ length: count }).map((_, i) => (
         <article key={i} className="form-card sk-card">
@@ -57,7 +57,7 @@ export const FormsGridSkeleton = ({ count = 6 }: { count?: number }) => (
 /* LIST · skeleton table rows (mirrors the real table columns). */
 export const FormsTableSkeleton = ({ count = 8 }: { count?: number }) => (
   <>
-    <OrigamiLoader />
+    {/* <OrigamiLoader /> */}
     <div className="otable" aria-hidden>
       <div className="otable-head">
         <span>Form</span>

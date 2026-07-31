@@ -30,7 +30,12 @@ if (env.NODE_ENV !== "prod") {
 }
 
 app.use(express.json());
-app.use(clerkMiddleware());
+app.use(
+  clerkMiddleware({
+    publishableKey: env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    secretKey: env.CLERK_SECRET_KEY,
+  }),
+);
 
 app.get("/", (req, res) => {
   return res.json({ message: "Origami Forms API's is up and running..." });

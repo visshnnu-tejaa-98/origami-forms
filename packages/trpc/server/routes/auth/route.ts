@@ -1,13 +1,9 @@
 import { createUserInputSchema, createUserOutputSchema } from "@repo/services/user/model";
 import { createUserMeta } from "@repo/services/user/meta";
-import { z, zodUndefinedModel } from "../../schema";
 import { userService } from "../../services";
-// import { getAuthenticationMethodOutputSchema } from "@repo/services/user/model";
 import { publicProcedure, router } from "../../trpc";
-import { generatePath } from "../../utils/path-generator";
 
 const TAGS = ["Authentication"];
-const getPath = generatePath("/authentication");
 
 export const authRouter = router({
   createUser: publicProcedure
