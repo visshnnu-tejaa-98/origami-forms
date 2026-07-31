@@ -134,6 +134,28 @@
   color: var(--ink-4);
 }
 
+.db-shell .forms-search .search-clear {
+  border: 0;
+  background: var(--bg-sunken);
+  color: var(--ink-3);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  padding: 0;
+  flex: none;
+  transition:
+    background 160ms,
+    color 160ms;
+}
+
+.db-shell .forms-search .search-clear:hover {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
 /* ====== TOOLBAR (tabs + view + sort) ====== */
 .db-shell .forms-toolbar {
   display: flex;

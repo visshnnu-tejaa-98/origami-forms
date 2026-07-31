@@ -7,6 +7,7 @@ import { FormsGridSkeleton, FormsTableSkeleton } from "./skeletons";
 import "./forms.css";
 import { useUser } from "@clerk/nextjs";
 import { useListForms } from "~/hooks/use-form";
+import { useDebounce } from "~/hooks/use-debounce";
 import { Form, Status } from "../types";
 import { toUiForm, updatePageOptions } from "../utils";
 import ErrorComponent from "./components/ErrorComponent";
@@ -60,13 +61,18 @@ const Forms = () => {
   const [pageOptions, setPageOptions] = useState({});
   const { isLoaded: isUserLoaded, isSignedIn: isUserSignedIn } = useUser();
 
-  // TODO: Add debounce effect for search input
+  const debouncedQuery = useDebounce(query.trim(), 400);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, sort]);
+
   const { formsData, listFormsIsSuccess, listFormsIsPending, listFormsError, refetchForms } =
     useListForms({
       page,
       pageSize: 10,
       status: tab !== "all" ? tab : undefined,
-      search: query !== "" ? query : undefined,
+      search: debouncedQuery !== "" ? debouncedQuery : undefined,
       sortBy: sort,
       sortOrder,
     });
@@ -78,7 +84,6 @@ const Forms = () => {
       setSort(key);
       setSortOrder("asc");
     }
-    setPage(1);
   };
 
   useEffect(() => {
@@ -99,7 +104,7 @@ const Forms = () => {
         );
       }
     }
-  }, [formsData, tab, query, sort]);
+  }, [formsData, tab, debouncedQuery, sort]);
 
   const loading = !isUserLoaded || listFormsIsPending;
 
@@ -142,12 +147,22 @@ const Forms = () => {
         <div className="head-actions">
           <div className="forms-search">
             <Icon name="search" size={16} />
-            {/* TODO: Add clear search text for search box */}
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search your forms…"
             />
+            {query !== "" && (
+              <button
+                type="button"
+                className="search-clear"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                title="Clear search"
+              >
+                <Icon name="x" size={13} />
+              </button>
+            )}
           </div>
           <Link href="#" className="o-btn o-btn--accent">
             <Icon name="plus" size={15} /> New form
