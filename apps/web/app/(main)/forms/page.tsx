@@ -15,6 +15,7 @@ import FromListView from "./components/FormListView";
 import FormGridView from "./components/FormGridView";
 import Pagination from "../components/Pagination";
 import { ARCHIVED, DRAFT, PUBLISHED } from "../constants";
+import Toolbar from "./components/Toolbar";
 
 const TABS: { key: Status | "all"; label: string; icon: IconName }[] = [
   { key: "all", label: "All", icon: "forms" },
@@ -141,7 +142,7 @@ const Forms = () => {
           <h1>Your paper drawer</h1>
           <div className="sub">
             {/* TODO: This length comes ander analytics, need to work on this, this data changes wrt to teh filter based on status */}
-            {forms.length} forms folded · {totalResponses} responses gathered so far
+            {formsData?.totalItems} forms folded · {totalResponses} responses gathered so far
           </div>
         </div>
         <div className="head-actions">
@@ -171,66 +172,7 @@ const Forms = () => {
       </header>
 
       {/* TOOLBAR */}
-      <div className="forms-toolbar">
-        <div className="forms-tabs">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              className={`forms-tab${tab === t.key ? " active" : ""}`}
-              onClick={() => setTab(t.key)}
-            >
-              <Icon name={t.icon} size={14} />
-              {t.label}
-              {/* <span className="tab-count">{counts[t.key] ?? 0}</span> */}
-            </button>
-          ))}
-        </div>
-
-        <span className="spacer" />
-
-        <div className="sort-group" role="group" aria-label="Sort forms">
-          {SORTS.map((s) => {
-            const active = sort === s.key;
-            return (
-              <button
-                key={s.key}
-                className={`sort-chip${active ? " active" : ""}`}
-                onClick={() => handleSort(s.key)}
-                aria-pressed={active}
-                title={
-                  active
-                    ? `Sorted by ${s.label} — ${sortOrder === "asc" ? "ascending" : "descending"}`
-                    : `Sort by ${s.label}`
-                }
-              >
-                {s.label}
-                {active && (
-                  <Icon name={sortOrder === "asc" ? "arrow-down" : "arrow-up"} size={13} />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="view-toggle" role="group" aria-label="View mode">
-          <button
-            className={view === "grid" ? "active" : ""}
-            onClick={() => setView("grid")}
-            aria-label="Grid view"
-            title="Grid view"
-          >
-            <Icon name="grid" size={16} />
-          </button>
-          <button
-            className={view === "list" ? "active" : ""}
-            onClick={() => setView("list")}
-            aria-label="List view"
-            title="List view"
-          >
-            <Icon name="list" size={16} />
-          </button>
-        </div>
-      </div>
+      <Toolbar tab={tab} setTab={setTab} handleSort={handleSort} sortOrder={sortOrder} setView={setView} view={view} sort={sort} />
 
       {/* GRID / LIST */}
       {loading ? (

@@ -1,7 +1,17 @@
 import { IconName } from "./components/icons";
-import { ARCHIVED, DRAFT, PUBLISHED } from "./constants";
+import {
+    ALL,
+    ARCHIVED,
+    ASC,
+    DESC,
+    DRAFT,
+    PUBLISHED,
+    SUBMISSION_COUNT,
+    TITLE_SORT,
+    UPDATED_AT,
+} from "./constants";
 
-export type Status = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED
+export type Status = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED;
 
 export type Form = {
     id: string;
@@ -18,11 +28,24 @@ export type Form = {
 };
 
 export type PageOptions = {
-    totalPages: number
-    hasNextPage: boolean
-    hasPrevPage: boolean
-    page: number
-    pageSize: number
-    totalItems: number
-}
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    page: number;
+    pageSize: number;
+    totalItems: number;
+};
 
+export type SortField = typeof UPDATED_AT | typeof TITLE_SORT | typeof SUBMISSION_COUNT;
+export type SelectionAll = typeof ALL;
+export type SORT_ORDER = typeof ASC | typeof DESC;
+
+export type ToolbarProps = {
+    tab: Status | SelectionAll;
+    setTab: (tab: Status | SelectionAll) => void;
+    handleSort: (sort: SortField) => void;
+    sortOrder: SORT_ORDER;
+    setView: (view: "grid" | "list") => void;
+    view: "grid" | "list";
+    sort: SortField;
+};
