@@ -2,35 +2,20 @@
 
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
-import { Icon, type IconName } from "../components/icons";
+import { Icon } from "../components/icons";
 import { FormsGridSkeleton, FormsTableSkeleton } from "./skeletons";
 import "./forms.css";
 import { useUser } from "@clerk/nextjs";
 import { useListForms } from "~/hooks/use-form";
 import { useDebounce } from "~/hooks/use-debounce";
+import { useToolbar } from "~/hooks/use-toolbar";
 import { Form, Status } from "../types";
 import { toUiForm, updatePageOptions } from "../utils";
 import ErrorComponent from "./components/ErrorComponent";
 import FromListView from "./components/FormListView";
 import FormGridView from "./components/FormGridView";
 import Pagination from "../components/Pagination";
-import { ARCHIVED, DRAFT, PUBLISHED } from "../constants";
 import Toolbar from "./components/Toolbar";
-
-const TABS: { key: Status | "all"; label: string; icon: IconName }[] = [
-  { key: "all", label: "All", icon: "forms" },
-  { key: PUBLISHED, label: "Live", icon: "eye" },
-  { key: DRAFT, label: "Drafts", icon: "edit" },
-  { key: ARCHIVED, label: "Archived", icon: "archive" },
-];
-
-type SortField = "updatedAt" | "title" | "submissionCount";
-
-const SORTS: { key: SortField; label: string }[] = [
-  { key: "updatedAt", label: "Last modified" },
-  { key: "title", label: "A–Z" },
-  { key: "submissionCount", label: "Responses" },
-];
 
 const EMPTY_COPY: Record<Status | "all", { title: string; body: string }> = {
   all: {
@@ -53,39 +38,28 @@ const EMPTY_COPY: Record<Status | "all", { title: string; body: string }> = {
 
 const Forms = () => {
   const [forms, setForms] = useState<Form[]>([]);
-  const [tab, setTab] = useState<Status | "all">("all");
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortField>("updatedAt");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [view, setView] = useState<"grid" | "list">("grid");
   const [page, setPage] = useState(1);
+  const { toolbarProps, tab, sort, sortOrder, view, status } = useToolbar();
   const [pageOptions, setPageOptions] = useState({});
   const { isLoaded: isUserLoaded, isSignedIn: isUserSignedIn } = useUser();
 
   const debouncedQuery = useDebounce(query.trim(), 400);
 
+  // any change to the filters/sort invalidates the current page number
   useEffect(() => {
     setPage(1);
-  }, [debouncedQuery, sort]);
+  }, [debouncedQuery, tab, sort, sortOrder]);
 
   const { formsData, listFormsIsSuccess, listFormsIsPending, listFormsError, refetchForms } =
     useListForms({
       page,
       pageSize: 10,
-      status: tab !== "all" ? tab : undefined,
+      status,
       search: debouncedQuery !== "" ? debouncedQuery : undefined,
       sortBy: sort,
       sortOrder,
     });
-
-  const handleSort = (key: SortField) => {
-    if (key === sort) {
-      setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
-    } else {
-      setSort(key);
-      setSortOrder("asc");
-    }
-  };
 
   useEffect(() => {
     if (listFormsIsSuccess) {
@@ -172,7 +146,7 @@ const Forms = () => {
       </header>
 
       {/* TOOLBAR */}
-      <Toolbar tab={tab} setTab={setTab} handleSort={handleSort} sortOrder={sortOrder} setView={setView} view={view} sort={sort} />
+      <Toolbar {...toolbarProps} />
 
       {/* GRID / LIST */}
       {loading ? (
