@@ -49,6 +49,7 @@ export const updatePageOptions = (props: PageOptions) => {
         hasNextPage,
         hasPrevPage,
         page,
+        currentPage: page,
         pageSize,
         totalItems,
         rangeStart,

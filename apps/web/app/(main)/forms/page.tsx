@@ -9,8 +9,9 @@ import { useUser } from "@clerk/nextjs";
 import { useListForms } from "~/hooks/use-form";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useToolbar } from "~/hooks/use-toolbar";
+import { usePagination } from "~/hooks/use-pagination";
 import { Form, Status } from "../types";
-import { toUiForm, updatePageOptions } from "../utils";
+import { toUiForm } from "../utils";
 import ErrorComponent from "./components/ErrorComponent";
 import FromListView from "./components/FormListView";
 import FormGridView from "./components/FormGridView";
@@ -39,47 +40,33 @@ const EMPTY_COPY: Record<Status | "all", { title: string; body: string }> = {
 const Forms = () => {
   const [forms, setForms] = useState<Form[]>([]);
   const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
   const { toolbarProps, tab, sort, sortOrder, view, status } = useToolbar();
-  const [pageOptions, setPageOptions] = useState({});
   const { isLoaded: isUserLoaded, isSignedIn: isUserSignedIn } = useUser();
 
   const debouncedQuery = useDebounce(query.trim(), 400);
 
-  // any change to the filters/sort invalidates the current page number
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedQuery, tab, sort, sortOrder]);
+  const { page, pageSize, setPage, getPaginationProps } = usePagination({
+    pageSize: 10,
+    resetOn: [debouncedQuery, tab, sort, sortOrder],
+  });
 
   const { formsData, listFormsIsSuccess, listFormsIsPending, listFormsError, refetchForms } =
     useListForms({
       page,
-      pageSize: 10,
+      pageSize,
       status,
       search: debouncedQuery !== "" ? debouncedQuery : undefined,
       sortBy: sort,
       sortOrder,
     });
 
+  const { pageOptions, showPagination } = getPaginationProps(formsData);
+
   useEffect(() => {
     if (listFormsIsSuccess) {
-      console.log({ formsData });
       setForms(formsData?.forms.map(toUiForm) || []);
-      if (formsData) {
-        const { page, pageSize, totalPages, hasNextPage, hasPrevPage, totalItems } = formsData;
-        setPageOptions(
-          updatePageOptions({
-            page,
-            pageSize,
-            totalPages,
-            hasNextPage,
-            hasPrevPage,
-            totalItems,
-          }),
-        );
-      }
     }
-  }, [formsData, tab, debouncedQuery, sort]);
+  }, [formsData, listFormsIsSuccess]);
 
   const loading = !isUserLoaded || listFormsIsPending;
 
@@ -180,7 +167,7 @@ const Forms = () => {
           )}
 
           {/* PAGINATION — only when the filtered result set exceeds one page */}
-          {formsData && formsData?.totalPages > 1 && (
+          {showPagination && (
             <Pagination data={formsData} setPage={setPage} pageOptions={pageOptions} />
           )}
         </>
