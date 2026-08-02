@@ -8,12 +8,6 @@ type UsePaginationOptions = {
     resetOn?: unknown[];
 };
 
-/**
- * Owns the page number and derives everything <Pagination /> needs.
- *
- * `page`/`pageSize` feed the list query; once the query has returned, call
- * `getPaginationProps(data)` to get the props to spread into <Pagination />.
- */
 export function usePagination({ pageSize = 10, resetOn = [] }: UsePaginationOptions = {}) {
     const [page, setPage] = useState(1);
 
@@ -26,7 +20,6 @@ export function usePagination({ pageSize = 10, resetOn = [] }: UsePaginationOpti
             data,
             pageOptions: data ? updatePageOptions(data) : null,
             setPage,
-            /** render <Pagination /> only when there's more than one page to move between */
             showPagination: (data?.totalPages ?? 0) > 1,
         }),
         [],
