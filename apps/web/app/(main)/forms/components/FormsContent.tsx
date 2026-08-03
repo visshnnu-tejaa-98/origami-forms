@@ -2,7 +2,7 @@ import React from "react";
 import { FormsContentProps } from "../../types";
 import { EMPTY_COPY, LIST } from "../../constants";
 import { FormsGridSkeleton, FormsTableSkeleton } from "../skeletons";
-import ErrorComponent from "./ErrorComponent";
+import ErrorComponent from "../../components/ErrorComponent";
 import EmptyTemplate from "./EmptyTemplate";
 import { useRouter } from "next/navigation";
 import FromListView from "./FormListView";

@@ -39,6 +39,8 @@ export type IconName =
     | 'x'
     | 'arrow-down'
     | 'arrow-up'
+    | 'empty-box'
+    | 'error'
 
 const paths: Record<IconName, React.ReactNode> = {
     plus: <path d="M12 5v14M5 12h14" />,
@@ -171,6 +173,22 @@ const paths: Record<IconName, React.ReactNode> = {
     x: <path d="M6 6l12 12M18 6L6 18" />,
     "arrow-down": <path d="M12 5v13M6.5 12.5 12 18l5.5-5.5" />,
     "arrow-up": <path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" />,
+    /* an unfolded, empty paper box — lids open, nothing inside */
+    "empty-box": (
+        <>
+            <path d="M3.5 9.5 12 13.5l8.5-4L12 5.5z" />
+            <path d="M3.5 9.5v7L12 20.5l8.5-4v-7M12 13.5v7" />
+            <path d="M7.5 7.4 4 3.9M16.5 7.4 20 3.9" />
+        </>
+    ),
+    /* a torn sheet of paper — the fold that didn't hold */
+    error: (
+        <>
+            <path d="M13 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V9z" />
+            <path d="M13 3.5V9h5.5" />
+            <path d="M10.5 11.5 13 13.5l-2.5 1.5 2.5 2" />
+        </>
+    ),
 }
 
 export const Icon = ({

@@ -1,5 +1,5 @@
 import React from "react";
-import { Icon } from "../../components/icons";
+import { Icon } from "./icons";
 
 type ErrorComponentProps = {
   message: string;
@@ -11,7 +11,7 @@ const ErrorComponent = (props: ErrorComponentProps) => {
   return (
     <div className="forms-empty">
       <span className="art">
-        <Icon name="crane" size={72} />
+        <Icon name="error" size={72} />
       </span>
       <h3>That didn&apos;t unfold.</h3>
       <p>{message}</p>

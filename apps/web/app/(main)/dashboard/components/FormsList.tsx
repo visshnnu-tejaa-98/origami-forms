@@ -1,115 +1,92 @@
-import React from 'react'
+"use client"
+
+import React, { useMemo } from 'react'
 import { Icon } from '../../components/icons'
 import Link from 'next/link'
+import { useListForms } from '~/hooks/use-form'
+import { DESC, UPDATED_AT } from '../../constants'
+import { RecentFormsSkeleton } from '../skeletons'
+import ErrorComponent from '../../components/ErrorComponent'
+import { STATUS_BADGE, toUiForm } from '../../utils'
+import EmptyComponent from '../../components/EmptyComponent'
 
 const FormsList = () => {
+    const { formsData, listFormsIsPending, listFormsError, refetchForms } = useListForms({
+        page: 1,
+        pageSize: 5,
+        sortBy: UPDATED_AT,
+        sortOrder: DESC,
+    })
+
+    const forms = useMemo(() => {
+        if (!formsData?.forms) return []
+        return formsData.forms.map(toUiForm);
+    }, [formsData]);
+
     return (
         <div className="panel">
             <div className="panel-head">
                 <h3>Recent forms</h3>
                 <span className="sub">last week · pinned + edited</span>
                 <div className="head-actions">
-                    <button className="o-btn o-btn--sm o-btn--ghost">
-                        <Icon name="filter" size={13} /> Filter
-                    </button>
-                    <Link className="o-btn o-btn--sm" href="#">
+                    <Link className="o-btn o-btn--sm o-btn--ghost" href={"/forms"}>
                         See all <Icon name="arrow" size={13} />
                     </Link>
                 </div>
             </div>
 
-            {[
-                {
-                    k: "k1",
-                    icon: "sakura",
-                    name: "Sakura Festival RSVP",
-                    sub: "9 fields · last edited 2h ago by you",
-                    badge: "o-badge--matcha",
-                    status: "published",
-                    resp: "218",
-                    col: "complete",
-                    p: "89%",
-                    note: "89%",
-                },
-                {
-                    k: "k2",
-                    icon: "sparkles",
-                    name: "Startup Feedback Survey",
-                    sub: "12 fields · 4 days ago",
-                    badge: "o-badge--matcha",
-                    status: "published",
-                    resp: "86",
-                    col: "complete",
-                    p: "72%",
-                    note: "72%",
-                },
-                {
-                    k: "k3",
-                    icon: "zap",
-                    name: "Gaming Tournament Signup",
-                    sub: "11 fields · last edited yesterday",
-                    badge: "o-badge--peach",
-                    status: "unlisted",
-                    resp: "34",
-                    col: "complete",
-                    p: "64%",
-                    note: "64%",
-                },
-                {
-                    k: "k4",
-                    icon: "mail",
-                    name: "Quiet Newsletter Signup",
-                    sub: "3 fields · published 2 weeks ago",
-                    badge: "o-badge--matcha",
-                    status: "published",
-                    resp: "1,402",
-                    col: "complete",
-                    p: "94%",
-                    note: "94%",
-                },
-                {
-                    k: "k5",
-                    icon: "edit",
-                    name: "Hiring · Senior Designer (draft)",
-                    sub: "14 fields · saved 30m ago",
-                    badge: "o-badge--sakura",
-                    status: "draft",
-                    resp: "—",
-                    col: "progress",
-                    p: "48%",
-                    note: "build 48%",
-                },
-            ].map((f) => (
-                <div key={f.name} className={`form-row ${f.k}`}>
+
+
+            {listFormsIsPending && <RecentFormsSkeleton count={7} />}
+
+            {listFormsError &&
+                <ErrorComponent
+                    onClick={refetchForms}
+                    message={listFormsError?.message || "Failed to load forms"}
+                />
+            }
+
+            {forms.length === 0 &&
+                <EmptyComponent
+                    title="Nothing on the desk yet."
+                    message="Your recent folds will gather here. Make the first one and watch this panel fill up."
+                    onClick={() => { }}
+                />
+            }
+
+            {forms && forms.map((f) => {
+                const badge = STATUS_BADGE[f.status];
+                const isDraft = f.status === "draft";
+                return <div key={f.title} className={`form-row ${f.tint}`}>
                     <span className="ic">
-                        <Icon name={f.icon as any} size={20} />
+                        <Icon name={f.icon} size={20} />
                     </span>
                     <div>
-                        <div className="name">{f.name}</div>
-                        <div className="sub">{f.sub}</div>
+                        <div className="name">{f.title}</div>
+                        <div className="sub">{f.edited}</div>
                     </div>
                     <div className="col">
                         <div className="lbl">status</div>
-                        <span className={`o-badge ${f.badge}`}>{f.status}</span>
+                        <span className={`o-badge ${badge.cls}`}>{f.status}</span>
                     </div>
                     <div className="col">
                         <div className="lbl">responses</div>
-                        <div className="num">{f.resp}</div>
+                        <div className="num">{f.responses}</div>
                     </div>
                     <div className="col" style={{ minWidth: "120px" }}>
-                        <div className="lbl">{f.col}</div>
+                        <div className="lbl">Complete</div>
                         <div className="o-progress" style={{ marginTop: "4px" }}>
-                            <div className="bar" style={{ "--p": f.p } as React.CSSProperties} />
+                            <div className="bar" style={{ "--p": f.completion } as React.CSSProperties} />
                         </div>
                         <div className="sub" style={{ marginTop: "3px" }}>
-                            {f.note}
+                            {f.completion}
                         </div>
                     </div>
                     <span className="ellipsis">
                         <Icon name="chevron" size={16} />
                     </span>
                 </div>
-            ))}
+            })}
         </div>
 
     )

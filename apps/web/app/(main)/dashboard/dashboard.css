@@ -309,6 +309,13 @@
 .db-shell .form-row:hover {
   background: var(--bg-elevated);
 }
+/* skeleton rows are not interactive */
+.db-shell .form-row.sk-row {
+  cursor: default;
+}
+.db-shell .form-row.sk-row:hover {
+  background: transparent;
+}
 .db-shell .form-row + .form-row {
   border-top: 1px dashed var(--rule-line);
 }
