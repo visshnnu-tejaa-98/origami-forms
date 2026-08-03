@@ -1,45 +1,49 @@
 "use client";
-import { useCallback, useMemo, useState } from "react";
-import { ALL, ASC, DESC, UPDATED_AT } from "~/app/(main)/constants";
+import { useCallback, useMemo } from "react";
+import {
+    ALL,
+    ASC,
+    DESC,
+    FORM_STATUS_OPTIONS,
+    GRID,
+    SORTS,
+    UPDATED_AT,
+} from "~/app/(main)/constants";
 import type { SORT_ORDER, SelectionAll, SortField, Status, ToolbarProps } from "~/app/(main)/types";
+import { useQueryParams } from "./use-query-params";
+import { useViewHydrated, useViewStore } from "~/stores/view-store";
 
-type ViewMode = ToolbarProps["view"];
+const TAB_VALUES = [ALL, ...FORM_STATUS_OPTIONS] as readonly (Status | SelectionAll)[];
+const SORT_VALUES = SORTS.map((s) => s.key) as readonly SortField[];
+const ORDER_VALUES = [ASC, DESC] as readonly SORT_ORDER[];
 
-type UseToolbarOptions = {
-    initialTab?: Status | SelectionAll;
-    initialSort?: SortField;
-    initialSortOrder?: SORT_ORDER;
-    initialView?: ViewMode;
-};
+export function useToolbar() {
+    const { getParam, setParams } = useQueryParams();
 
-/**
- * Owns the state behind <Toolbar /> (status tab, sort field + direction, view mode)
- * so any listing page can drop the toolbar in with `<Toolbar {...toolbarProps} />`.
- */
-export function useToolbar(options: UseToolbarOptions = {}) {
-    const {
-        initialTab = ALL,
-        initialSort = UPDATED_AT,
-        initialSortOrder = DESC,
-        initialView = "grid",
-    } = options;
+    const tab = getParam("tab", ALL as Status | SelectionAll, TAB_VALUES);
+    const sort = getParam("sort", UPDATED_AT as SortField, SORT_VALUES);
+    const sortOrder = getParam("order", DESC as SORT_ORDER, ORDER_VALUES);
 
-    const [tab, setTab] = useState<Status | SelectionAll>(initialTab);
-    const [sort, setSort] = useState<SortField>(initialSort);
-    const [sortOrder, setSortOrder] = useState<SORT_ORDER>(initialSortOrder);
-    const [view, setView] = useState<ViewMode>(initialView);
+    const storedView = useViewStore((s) => s.view);
+    const setView = useViewStore((s) => s.setView);
+    const hydrated = useViewHydrated();
+    // until localStorage is read, render what the server rendered
+    const view = hydrated ? storedView : GRID;
+
+    const setTab = useCallback(
+        (next: Status | SelectionAll) => {
+            setParams({ tab: next === ALL ? null : next, page: null });
+        },
+        [setParams],
+    );
 
     // same field flips the direction, a new field starts ascending
     const handleSort = useCallback(
         (key: SortField) => {
-            if (key === sort) {
-                setSortOrder((o) => (o === ASC ? DESC : ASC));
-            } else {
-                setSort(key);
-                setSortOrder(ASC);
-            }
+            const nextOrder = key === sort ? (sortOrder === ASC ? DESC : ASC) : ASC;
+            setParams({ sort: key, order: nextOrder, page: null });
         },
-        [sort],
+        [sort, sortOrder, setParams],
     );
 
     const toolbarProps: ToolbarProps = useMemo(
@@ -50,9 +54,9 @@ export function useToolbar(options: UseToolbarOptions = {}) {
             sortOrder,
             handleSort,
             view,
-            setView
+            setView,
         }),
-        [tab, sort, sortOrder, handleSort, view],
+        [tab, setTab, sort, sortOrder, handleSort, view, setView],
     );
 
     return {
@@ -64,7 +68,6 @@ export function useToolbar(options: UseToolbarOptions = {}) {
         setTab,
         setView,
         handleSort,
-        /** ready to spread into useListForms — `status` is undefined on the "all" tab */
         status: tab !== ALL ? (tab as Status) : undefined,
     };
 }

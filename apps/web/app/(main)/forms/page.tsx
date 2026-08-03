@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Icon } from "../components/icons";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import "./forms.css";
+import { FormsGridSkeleton } from "./skeletons";
 import { useUser } from "@clerk/nextjs";
 import { useListForms } from "~/hooks/use-form";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useToolbar } from "~/hooks/use-toolbar";
 import { usePagination } from "~/hooks/use-pagination";
+import { useQueryParams } from "~/hooks/use-query-params";
 import { Form } from "../types";
 import { toUiForm } from "../utils";
 import Toolbar from "./components/Toolbar";
@@ -15,29 +16,31 @@ import FormsHeader from "./components/FormsHeader";
 import FormsContent from "./components/FormsContent";
 import FloatingOrigamiDecorations from "../components/FloatingOrigamiDecorations";
 
-
 const Forms = () => {
-  const [query, setQuery] = useState("");
+  const { searchParams, setParams } = useQueryParams();
   const { toolbarProps, tab, sort, sortOrder, view, status } = useToolbar();
-  const { isLoaded: isUserLoaded, isSignedIn: isUserSignedIn } = useUser();
+  const { isLoaded: isUserLoaded } = useUser();
 
+  const urlSearch = searchParams.get("search") ?? "";
+
+  const [query, setQuery] = useState(urlSearch);
   const debouncedQuery = useDebounce(query.trim(), 400);
 
-  const { page, pageSize, getPaginationProps } = usePagination({
-    pageSize: 10,
-    resetOn: [debouncedQuery, tab, sort, sortOrder],
+  useEffect(() => {
+    if (debouncedQuery === urlSearch) return;
+    setParams({ search: debouncedQuery || null, page: null });
+  }, [debouncedQuery, urlSearch, setParams]);
+
+  const { page, pageSize, getPaginationProps } = usePagination({ pageSize: 10 });
+
+  const { formsData, listFormsIsPending, listFormsError, refetchForms } = useListForms({
+    page,
+    pageSize,
+    status,
+    search: debouncedQuery !== "" ? debouncedQuery : undefined,
+    sortBy: sort,
+    sortOrder,
   });
-
-  const { formsData, listFormsIsPending, listFormsError, refetchForms } =
-    useListForms({
-      page,
-      pageSize,
-      status,
-      search: debouncedQuery !== "" ? debouncedQuery : undefined,
-      sortBy: sort,
-      sortOrder,
-    });
-
 
   const forms = useMemo<Form[]>(() => formsData?.forms.map(toUiForm) ?? [], [formsData]);
 
@@ -46,7 +49,7 @@ const Forms = () => {
   const totalResponses = forms.reduce((s, f) => s + f.responses, 0);
 
   return (
-    <div className="forms-page">=
+    <div className="forms-page">
       <FloatingOrigamiDecorations />
       <FormsHeader
         query={query}
@@ -68,4 +71,10 @@ const Forms = () => {
   );
 };
 
-export default Forms;
+const FormsPage = () => (
+  <Suspense fallback={<FormsGridSkeleton />}>
+    <Forms />
+  </Suspense>
+);
+
+export default FormsPage;
