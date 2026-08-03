@@ -27,7 +27,6 @@ const FormsList = () => {
         <div className="panel">
             <div className="panel-head">
                 <h3>Recent forms</h3>
-                <span className="sub">last week · pinned + edited</span>
                 <div className="head-actions">
                     <Link className="o-btn o-btn--sm o-btn--ghost" href={"/forms"}>
                         See all <Icon name="arrow" size={13} />
