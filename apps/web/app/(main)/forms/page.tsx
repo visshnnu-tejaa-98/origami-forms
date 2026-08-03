@@ -13,6 +13,7 @@ import { toUiForm } from "../utils";
 import Toolbar from "./components/Toolbar";
 import FormsHeader from "./components/FormsHeader";
 import FormsContent from "./components/FormsContent";
+import FloatingOrigamiDecorations from "../components/FloatingOrigamiDecorations";
 
 
 const Forms = () => {
@@ -45,35 +46,15 @@ const Forms = () => {
   const totalResponses = forms.reduce((s, f) => s + f.responses, 0);
 
   return (
-    <div className="forms-page">
-      {/* floating origami decorations */}
-      <div className="forms-deco" aria-hidden>
-        <span className="fd fd-crane">
-          <Icon name="crane" size={78} />
-        </span>
-        <span className="fd fd-plane">
-          <Icon name="plane" size={48} />
-        </span>
-        <span className="fd fd-sakura">
-          <Icon name="sakura" size={36} />
-        </span>
-        <span className="fd fd-sakura2">
-          <Icon name="sakura" size={22} />
-        </span>
-      </div>
-
-      {/* HEADER */}
+    <div className="forms-page">=
+      <FloatingOrigamiDecorations />
       <FormsHeader
         query={query}
         setQuery={setQuery}
         totalForms={formsData?.totalItems ?? 0}
         totalResponses={totalResponses}
       />
-
-      {/* TOOLBAR */}
       <Toolbar {...toolbarProps} />
-
-      {/* GRID / LIST */}
       <FormsContent
         loading={loading}
         selectedTab={tab}
