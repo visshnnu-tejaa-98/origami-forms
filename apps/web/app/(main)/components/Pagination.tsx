@@ -1,7 +1,9 @@
 import React from "react";
 import { Icon } from "./icons";
+import type { PaginationProps } from "../types";
 
-const Pagination = ({ data, pageOptions, setPage }: any) => {
+const Pagination = ({ data, pageOptions, setPage }: Omit<PaginationProps, "showPagination">) => {
+    if (!data || !pageOptions) return null;
     const { rangeStart, rangeEnd, currentPage, totalPages } = pageOptions;
     return (
         <nav className="forms-pager" aria-label="Forms pagination">

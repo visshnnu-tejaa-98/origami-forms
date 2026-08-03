@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import { IconName } from "./components/icons";
 import {
     ALL,
@@ -5,6 +6,8 @@ import {
     ASC,
     DESC,
     DRAFT,
+    GRID,
+    LIST,
     PUBLISHED,
     SUBMISSION_COUNT,
     TITLE_SORT,
@@ -49,3 +52,46 @@ export type ToolbarProps = {
     view: "grid" | "list";
     sort: SortField;
 };
+
+
+export type FormHeaderProps = {
+    query: string
+    setQuery: (query: string) => void
+    totalForms: number
+    totalResponses: number
+}
+
+export type View = typeof GRID | typeof LIST
+
+/** what `updatePageOptions` derives from a paginated response */
+export type PaginationOptions = PageOptions & {
+    currentPage: number
+    rangeStart: number
+    rangeEnd: number
+}
+
+/** produced by `usePagination().getPaginationProps(data)` */
+export type PaginationProps = {
+    data?: PageOptions
+    pageOptions: PaginationOptions | null
+    setPage: Dispatch<SetStateAction<number>>
+    showPagination: boolean
+}
+
+export type FormsContentProps = {
+    loading: boolean
+    selectedTab: Status | typeof ALL
+    forms: Form[]
+    view: View
+    listFormsError: { message: string } | null | any;
+    refetchForms: () => void
+    pagination: PaginationProps
+}
+
+export type EmptyScreenProps = {
+    title: string,
+    description: string,
+    icon: IconName,
+    cta: string,
+    onClick: () => void
+}

@@ -31,3 +31,25 @@ export const SORTS: { key: SortField; label: string }[] = [
     { key: TITLE_SORT, label: "A–Z" },
     { key: SUBMISSION_COUNT, label: "Responses" },
 ];
+
+export const LIST = "list"
+export const GRID = "grid"
+
+export const EMPTY_COPY: Record<Status | typeof ALL, { title: string; description: string }> = {
+    all: {
+        title: "Your drawer is empty.",
+        description: "No forms match that search. Try a different word, or fold a fresh sheet to begin.",
+    },
+    published: {
+        title: "Nothing live yet.",
+        description: "Publish a draft and it'll show up here, ready to collect its first response.",
+    },
+    draft: {
+        title: "No drafts on the desk.",
+        description: "Every masterpiece starts as a rough fold. Begin a new one whenever inspiration strikes.",
+    },
+    archived: {
+        title: "The archive is spotless.",
+        description: "Forms you retire will rest here, safe and out of the way.",
+    },
+};

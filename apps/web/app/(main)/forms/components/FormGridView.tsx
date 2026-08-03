@@ -4,7 +4,7 @@ import { STATUS_BADGE, TAPE } from "../../utils";
 import { Icon } from "../../components/icons";
 import { Form } from "../../types";
 
-const FormGridView = ({ forms, togglePin }: { forms: Form[]; togglePin: (id: string) => void }) => {
+const FormGridView = ({ forms }: { forms: Form[] }) => {
     return (
         <div className="forms-grid">
             {forms.map((f, idx) => {
@@ -26,14 +26,6 @@ const FormGridView = ({ forms, togglePin }: { forms: Form[]; togglePin: (id: str
                                     <span className="title" title={f.title}>
                                         {f.title}
                                     </span>
-                                    <button
-                                        className={`pin${f.pinned ? " pinned" : ""}`}
-                                        onClick={() => togglePin(f.id)}
-                                        title={f.pinned ? "Unpin" : "Pin to top"}
-                                        aria-label={f.pinned ? "Unpin form" : "Pin form"}
-                                    >
-                                        <Icon name="star" size={16} />
-                                    </button>
                                 </div>
                                 <div className="meta">
                                     <span className={`o-badge ${badge.cls}`}>{badge.label}</span>

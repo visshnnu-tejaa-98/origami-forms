@@ -3,7 +3,7 @@ import { Icon } from "../../components/icons";
 import { STATUS_BADGE } from "../../utils";
 import { Form } from "../../types";
 
-const FromListView = ({ forms, togglePin }: { forms: Form[]; togglePin: (id: string) => void }) => {
+const FromListView = ({ forms }: { forms: Form[] }) => {
     return (
         <div className="otable" role="table" aria-label="Your forms">
             <span className="o-tape table-tape tape-matcha" aria-hidden />
@@ -58,14 +58,6 @@ const FromListView = ({ forms, togglePin }: { forms: Form[]; togglePin: (id: str
                         <div className="c-updated">{f.edited}</div>
 
                         <div className="c-actions">
-                            <button
-                                className={`pin${f.pinned ? " pinned" : ""}`}
-                                onClick={() => togglePin(f.id)}
-                                title={f.pinned ? "Unpin" : "Pin to top"}
-                                aria-label={f.pinned ? "Unpin form" : "Pin form"}
-                            >
-                                <Icon name="star" size={15} />
-                            </button>
                             <span className="row-tools">
                                 <button
                                     className="tool"

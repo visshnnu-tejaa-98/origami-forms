@@ -1,6 +1,6 @@
 "use client";
 import { trpc } from "~/trpc/client";
-import { ListFormsInput } from "../../../packages/services/form/model";
+import { ListFormsInput } from "@repo/services/form/model";
 
 export function useListForms(props: Omit<ListFormsInput, 'requesterId'>) {
     const queryProps = {} as Omit<ListFormsInput, 'requesterId'>
