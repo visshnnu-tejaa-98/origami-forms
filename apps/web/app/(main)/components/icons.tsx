@@ -41,6 +41,16 @@ export type IconName =
     | 'arrow-up'
     | 'empty-box'
     | 'error'
+    | 'arrow-left'
+    | 'text'
+    | 'align'
+    | 'hash'
+    | 'layers'
+    | 'drag'
+    | 'phone'
+    | 'link'
+    | 'upload'
+    | 'toggle'
 
 const paths: Record<IconName, React.ReactNode> = {
     plus: <path d="M12 5v14M5 12h14" />,
@@ -187,6 +197,41 @@ const paths: Record<IconName, React.ReactNode> = {
             <path d="M13 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V9z" />
             <path d="M13 3.5V9h5.5" />
             <path d="M10.5 11.5 13 13.5l-2.5 1.5 2.5 2" />
+        </>
+    ),
+    'arrow-left': <path d="M19 12H5M11.5 5.5 5 12l6.5 6.5" />,
+    /* ====== field-type glyphs (form builder palette) ====== */
+    text: <path d="M5 4h14M12 4v16M9 20h6" />,
+    align: <path d="M4 6h16M4 12h11M4 18h16" />,
+    hash: <path d="M4 9h16M4 15h16M10 3l-2 18M16 3l-2 18" />,
+    layers: (
+        <>
+            <path d="M12 3l9 5-9 5-9-5z" />
+            <path d="M3 13l9 5 9-5" />
+        </>
+    ),
+    drag: (
+        <>
+            <circle cx="9" cy="6" r="1.3" fill="currentColor" />
+            <circle cx="9" cy="12" r="1.3" fill="currentColor" />
+            <circle cx="9" cy="18" r="1.3" fill="currentColor" />
+            <circle cx="15" cy="6" r="1.3" fill="currentColor" />
+            <circle cx="15" cy="12" r="1.3" fill="currentColor" />
+            <circle cx="15" cy="18" r="1.3" fill="currentColor" />
+        </>
+    ),
+    phone: <path d="M7 3h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM10.5 17.5h3" />,
+    link: (
+        <>
+            <path d="M10 13.5a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 0 0-5-5l-1.2 1.2" />
+            <path d="M14 10.5a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 0 0 5 5l1.2-1.2" />
+        </>
+    ),
+    upload: <path d="M12 17V5M8 8.5 12 4.5l4 4M5 19h14" />,
+    toggle: (
+        <>
+            <rect x="2.5" y="7" width="19" height="10" rx="5" />
+            <circle cx="16.5" cy="12" r="2.6" fill="currentColor" stroke="none" />
         </>
     ),
 }
