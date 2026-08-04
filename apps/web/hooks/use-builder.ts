@@ -27,7 +27,7 @@ function blankField(type: BlockType): BuilderField {
     options: OPTION_TYPES.includes(type)
       ? DEFAULT_OPTIONS.map((label) => ({ id: uid("o"), label }))
       : [],
-    ...(type === "rating" ? { rating: 0 } : {}),
+    rating: 4,
   };
 }
 
@@ -103,7 +103,6 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
     return {
       questions: questions.length,
       pages: form.fields.filter((f) => f.type === "page-break").length + 1,
-      rules: form.fields.filter((f) => f.logic).length,
       validations: questions.filter((f) => f.required).length,
     };
   }, [form.fields]);

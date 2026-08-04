@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import "./builder.css";
 import { useBuilder } from "~/hooks/use-builder";
 import CanvasHead from "./components/CanvasHead";
@@ -8,10 +8,8 @@ import FieldPalette from "./components/FieldPalette";
 import FormCanvas from "./components/FormCanvas";
 import Inspector from "./components/Inspector";
 import Topbar from "./components/Topbar";
-import { BuilderTab } from "./types";
 
 const BuilderPage = () => {
-  const [tab, setTab] = useState<BuilderTab>("build");
   const {
     form,
     stats,
@@ -35,15 +33,13 @@ const BuilderPage = () => {
         slug={form.slug}
         status={form.status}
         editedLabel={form.editedLabel}
-        tab={tab}
-        setTab={setTab}
       />
 
       <div className="b-main">
         <FieldPalette addField={addField} />
 
         <main className="b-center">
-          <CanvasHead pages={stats.pages} questions={stats.questions} rules={stats.rules} />
+          <CanvasHead questions={stats.questions} />
           <FormCanvas
             form={form}
             setTitle={setTitle}

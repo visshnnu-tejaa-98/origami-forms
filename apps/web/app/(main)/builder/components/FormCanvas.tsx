@@ -42,7 +42,7 @@ const FormCanvas = (props: FormCanvasProps) => {
       {form.fields.map((field) => {
         if (field.type === "page-break") {
           return (
-            <div className="page-break" key={field.id}>
+            <div className="page-break cursor-pointer" key={field.id} onClick={() => selectField(field.id)}>
               <span>↓ page break · &ldquo;{field.label}&rdquo;</span>
             </div>
           );

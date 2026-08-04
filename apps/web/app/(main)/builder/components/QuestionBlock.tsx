@@ -34,7 +34,6 @@ const QuestionBlock = (props: QuestionBlockProps) => {
             {meta?.label.toLowerCase() ?? field.type}
           </span>
           {field.required && <span className="req">required</span>}
-          {selected && <span className="editing-note">← editing this one</span>}
         </div>
 
         <div className="q-title">{field.label || "Untitled question"}</div>
@@ -56,6 +55,7 @@ const QuestionBlock = (props: QuestionBlockProps) => {
             onDuplicate();
           }}
         >
+          {/* TODO: Change this to duplicate icon svg */}
           <Icon name="copy" size={14} />
         </button>
         <button

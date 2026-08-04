@@ -22,7 +22,6 @@ const FieldPalette = ({ addField }: FieldPaletteProps) => {
     <aside className="b-left">
       <div className="pl-head">
         Add field
-        <Icon name="search" size={14} />
       </div>
       <div className="pl-grid">
         {FIELD_TYPES.map((block) => (
@@ -30,19 +29,20 @@ const FieldPalette = ({ addField }: FieldPaletteProps) => {
         ))}
       </div>
 
-      <div className="pl-head pl-head--spaced">Layout</div>
+      <div className="pl-head pl-head--spaced">Add Layout</div>
       <div className="pl-grid">
         {LAYOUT_BLOCKS.map((block) => (
           <Chip key={block.key} block={block as FieldTypeMeta} onAdd={addField} />
         ))}
       </div>
 
-      <div className="ai-card">
+      {/* TODO: Implement this once all application features are completed. */}
+      {/* <div className="ai-card">
         <div className="lbl">✶ ai sketch</div>
         <h4>Describe &amp; fold.</h4>
         <p>&ldquo;RSVP for a sakura picnic, 8 questions, friendly tone&rdquo;</p>
         <button type="button">Try it ↗</button>
-      </div>
+      </div> */}
     </aside>
   );
 };

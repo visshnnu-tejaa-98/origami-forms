@@ -1,11 +1,10 @@
 import React from "react";
 import Link from "next/link";
 import { Icon } from "../../components/icons";
-import { BUILDER_TABS } from "../constants";
-import { BuilderTab, TopbarProps } from "../types";
+import { TopbarProps } from "../types";
 
 const Topbar = (props: TopbarProps) => {
-  const { title, setTitle, slug, status, editedLabel, tab, setTab } = props;
+  const { title, setTitle, slug, status, editedLabel } = props;
 
   return (
     <header className="b-top">
@@ -26,21 +25,6 @@ const Topbar = (props: TopbarProps) => {
           <span>· {slug}</span>
           <span>· {editedLabel}</span>
         </div>
-      </div>
-
-      <div className="b-tabs" role="tablist" aria-label="Builder sections">
-        {BUILDER_TABS.map((t) => (
-          <button
-            key={t.key}
-            role="tab"
-            aria-selected={tab === t.key}
-            className={tab === t.key ? "active" : ""}
-            onClick={() => setTab(t.key as BuilderTab)}
-          >
-            <Icon name={t.icon} size={14} />
-            {t.label}
-          </button>
-        ))}
       </div>
 
       <div className="right">

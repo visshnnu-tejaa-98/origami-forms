@@ -1,7 +1,6 @@
 import { IconName } from "../components/icons";
 import type { BuilderForm, FieldTypeMeta, Tint } from "./types";
 
-/* ====== the field palette on the left rail ====== */
 export const FIELD_TYPES = [
   { key: "short-text", label: "Short text", icon: "text", tint: "accent" },
   { key: "long-text", label: "Long text", icon: "align", tint: "pink" },
@@ -15,12 +14,12 @@ export const FIELD_TYPES = [
   { key: "url", label: "URL", icon: "link", tint: "matcha" },
   { key: "file", label: "File upload", icon: "upload", tint: "accent" },
   { key: "boolean", label: "Yes / No", icon: "toggle", tint: "pink" },
-] as const satisfies readonly { key: string; label: string; icon: IconName; tint: Tint }[];
+]
 
 export const LAYOUT_BLOCKS = [
   { key: "page-break", label: "Page break", icon: "layers", tint: "accent" },
   { key: "heading", label: "Heading", icon: "text", tint: "accent" },
-] as const satisfies readonly { key: string; label: string; icon: IconName; tint: Tint }[];
+];
 
 /** every block type keyed by name — used for pills, icons and defaults */
 export const BLOCK_META: Record<string, FieldTypeMeta> = Object.fromEntries(
@@ -32,15 +31,6 @@ export const OPTION_TYPES = ["single-select", "multi-select"];
 
 /** field types that render no question chrome on the canvas */
 export const LAYOUT_TYPES = ["page-break", "heading"];
-
-/* ====== top bar tabs ====== */
-export const BUILDER_TABS = [
-  { key: "build", label: "Build", icon: "edit" },
-  { key: "preview", label: "Preview", icon: "eye" },
-  { key: "theme", label: "Theme", icon: "themes" },
-  { key: "share", label: "Share", icon: "share" },
-  { key: "responses", label: "Responses", icon: "analytics" },
-] as const satisfies readonly { key: string; label: string; icon: IconName }[];
 
 /** placeholder copy shown per field type in the canvas preview */
 export const PREVIEW_PLACEHOLDER: Record<string, string> = {

@@ -1,11 +1,10 @@
 import { IconName } from "../components/icons";
-import { BUILDER_TABS, FIELD_TYPES, LAYOUT_BLOCKS } from "./constants";
+import { DRAFT, PUBLISHED } from "../constants";
+import { FIELD_TYPES, LAYOUT_BLOCKS } from "./constants";
 
 export type FieldType = (typeof FIELD_TYPES)[number]["key"];
 export type LayoutType = (typeof LAYOUT_BLOCKS)[number]["key"];
 export type BlockType = FieldType | LayoutType;
-
-export type BuilderTab = (typeof BUILDER_TABS)[number]["key"];
 
 /** the washi tint a field type wears in the palette and on its type pill */
 export type Tint = "accent" | "pink" | "matcha" | "peach" | "lavender" | "indigo" | "highlighter";
@@ -41,7 +40,7 @@ export type BuilderForm = {
   title: string;
   description: string;
   slug: string;
-  status: "draft" | "published";
+  status: typeof DRAFT | typeof PUBLISHED;
   editedLabel: string;
   fields: BuilderField[];
 };
@@ -52,8 +51,6 @@ export type TopbarProps = {
   slug: string;
   status: BuilderForm["status"];
   editedLabel: string;
-  tab: BuilderTab;
-  setTab: (tab: BuilderTab) => void;
 };
 
 export type FieldPaletteProps = {

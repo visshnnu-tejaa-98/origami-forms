@@ -56,7 +56,7 @@ const Inspector = (props: InspectorProps) => {
 
         <div className="insp-row">
           <label htmlFor="insp-help">Helper text</label>
-          <input
+          <textarea
             id="insp-help"
             className="insp-input"
             value={field.help}
@@ -125,6 +125,7 @@ const Inspector = (props: InspectorProps) => {
       )}
 
       {/* ====== VALIDATION ====== */}
+      {/* TODO: Check validation for numbers, dates, strings and show it here */}
       <section className="insp-sec">
         <div className="sec-head">Validation</div>
 
@@ -169,7 +170,9 @@ const Inspector = (props: InspectorProps) => {
       </section>
 
       {/* ====== LOGIC ====== */}
-      <section className="insp-sec">
+      {/* TODO: will implement conditional logic in the next phase */}
+
+      {/* <section className="insp-sec">
         <div className="sec-head">Conditional logic</div>
         {field.logic ? (
           <div className="logic-chip">↳ {field.logic}</div>
@@ -179,7 +182,7 @@ const Inspector = (props: InspectorProps) => {
         <button type="button" className="add-opt">
           + add a rule
         </button>
-      </section>
+      </section> */}
 
       {/* ====== DANGER ====== */}
       <div className="insp-foot">
