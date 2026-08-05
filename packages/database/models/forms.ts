@@ -49,8 +49,11 @@ export const formFields = pgTable("form_fields", {
     order: doublePrecision("number").notNull(),
     labelKey: varchar("label_key", { length: 255 }).notNull(),
 
-    validation: jsonb("validation").notNull().default({}),
-    options: jsonb("options").notNull().default({}),
+    validation: jsonb("validation").$type<Record<string, unknown>>().notNull().default({}),
+    options: jsonb("options")
+        .$type<{ id: string; label: string; value: string }[] | Record<string, never>>()
+        .notNull()
+        .default({}),
     defaultValue: text("default_value"),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

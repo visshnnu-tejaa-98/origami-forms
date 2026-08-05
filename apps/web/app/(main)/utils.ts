@@ -32,14 +32,14 @@ export const toUiForm = (f: ApiForm) => ({
     // Progress toward the submission cap; 0 when the form is uncapped.
     // TODO: Change this max submission count based on subscription plan
     completion:
-        f.maxSubmissions > 0
-            ? Math.min(100, Math.round((f.submissionCount / f.maxSubmissions) * 100))
+        (f.maxSubmissions ?? 0) > 0
+            ? Math.min(100, Math.round((f.submissionCount / f.maxSubmissions!) * 100))
             : 0,
-    edited: relativeTime(f.updatedAt),
+    edited: f.updatedAt ? relativeTime(f.updatedAt) : "just now",
     // Lower rank = more recent; the API already sorts by updatedAt desc.
-    editedRank: -new Date(f.updatedAt).getTime(),
+    editedRank: f.updatedAt ? -new Date(f.updatedAt).getTime() : 0,
     pinned: false,
-    description: f.description,
+    description: f.description ?? "",
 });
 
 export const updatePageOptions = (props: PageOptions) => {

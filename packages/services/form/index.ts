@@ -81,7 +81,7 @@ export default class FormService {
                     formId: form.id,
                     type: field.type,
                     label: field.label,
-                    placeholder: field.placeholder,
+                    // placeholder: field.placeholder,
                     description: field.description,
                     helpText: field.helpText,
                     required: field.required,
@@ -96,6 +96,10 @@ export default class FormService {
                     row.options = field.options as {};
                 }
 
+                if ("placeholder" in field && field.placeholder !== undefined) {
+                    row.placeholder = field.placeholder;
+                }
+
                 if ("defaultValue" in field && field.defaultValue !== undefined) {
                     row.defaultValue = field.defaultValue as string;
                 }
@@ -103,9 +107,13 @@ export default class FormService {
                 return row;
             });
 
-            await tx.insert(formFields).values(fieldValues).returning();
+            const insertedFields = await tx.insert(formFields).values(fieldValues).returning();
 
-            return { id: form.id };
+            return {
+                ...form,
+                submissionCount: 0,
+                fields: insertedFields,
+            };
         });
     }
 
@@ -179,6 +187,7 @@ export default class FormService {
         ]);
 
         const totalPages = Math.ceil(totalItems / pageSize);
+        console.log({ rows })
 
         return {
             forms: rows,

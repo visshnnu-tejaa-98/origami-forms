@@ -1,32 +1,22 @@
 "use client";
 import { useCallback, useMemo, useState } from "react";
 import {
-  BLOCK_META,
-  DEFAULT_OPTIONS,
-  HEADING,
   LAYOUT_TYPES,
-  OPTION_TYPES,
   PAGE_BREAK,
-  isFieldBlock,
-  PREVIEW_PLACEHOLDER,
   SEED_FORM,
   hasOptions,
+  isFieldBlock,
 } from "~/app/(main)/builder/constants";
 import type {
   BlockType,
   BuilderField,
   BuilderForm,
-  FieldBlock,
   FieldPatch,
-  LayoutType,
 } from "~/app/(main)/builder/types";
+import type { CreateFormInputModel } from "@repo/services/form/model";
 import { blankField, uid } from "~/app/(main)/utils";
-
-
-let nextFieldOrder = 1
-const getOrder = () => {
-  return nextFieldOrder++
-}
+import { toast } from "~/components/origami/toast";
+import { useCreateForm } from "./use-form";
 
 
 /**
@@ -38,6 +28,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
   const [selectedId, setSelectedId] = useState<string | null>(
     seed.fields.find((f) => !LAYOUT_TYPES.includes(f.type))?.id ?? null
   );
+
+  const { createFormAsync } = useCreateForm()
 
   const setTitle = useCallback((title: string) => setForm((f) => ({ ...f, title })), []);
   const setDescription = useCallback(
@@ -111,13 +103,47 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
     };
   }, [form.fields]);
 
-  const saveAsDraft = () => {
-    console.log({ form })
-  };
+  /**
+   * The canvas payload the API accepts: page breaks and headings are studio-only,
+   * so they are dropped. The client-side `id` on each field is left for Zod to strip.
+   */
+  const toCreatePayload = useCallback(
+    (): CreateFormInputModel => ({ ...form, fields: form.fields.filter(isFieldBlock) }),
+    [form]
+  );
 
-  const saveAndPublish = () => {
-    console.log({ form })
-  };
+  const saveAsDraft = useCallback(async () => {
+    const payload = toCreatePayload();
+
+    // the schema demands a title and at least one field — say so before the round trip
+    if (payload.title.trim() === "") {
+      toast.error("Give the form a title before saving.");
+      return;
+    }
+    if (payload.fields.length === 0) {
+      toast.error("Add at least one question before saving.");
+      return;
+    }
+
+    try {
+      // forms are created as drafts — the database defaults `status` to draft
+      console.log(111, { payload })
+      const saved = await createFormAsync(payload);
+      console.log({ saved })
+      toast.success("Draft saved.");
+      return saved;
+    } catch (error) {
+      console.log({ error })
+
+      toast.error(error instanceof Error ? error.message : "Could not save the draft.");
+    }
+  }, [createFormAsync, toCreatePayload]);
+
+  // TODO: publishing needs an updateForm route — the create input carries no status,
+  // so this saves the draft and the status flip has to follow once that route exists.
+  const saveAndPublish = useCallback(async () => {
+    await saveAsDraft();
+  }, [saveAsDraft]);
 
   return {
     form,

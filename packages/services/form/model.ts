@@ -186,56 +186,54 @@ export const createFormInputModel = z.object({
 
 export type CreateFormInputModel = z.infer<typeof createFormInputModel>;
 
-// TODO: Need to change output schema according to our need in future
+export const isoDateSchema = z.date()
+    .transform((val) => val.toISOString())
+    .pipe(z.iso.datetime());
+
 export const formFieldOutputSchema = z.object({
-
     id: z.string().uuid(),
+    formId: z.string().uuid(),
+    type: z.enum(FIELD_TYPES),
+    label: z.string().describe("label of the field"),
+    // these columns are nullable in the database, so the contract mirrors them
+    description: z.string().nullish().describe("description of the field"),
 
-    // id: z.string().uuid(),
-    // formId: z.string().uuid(),
-    // type: z.enum(FIELD_TYPES),
-    // label: z.string().describe("label of the field"),
-    // description: z.string().optional().describe("description of the field"),
+    placeholder: z.string().nullish().describe("placeholder of the field"),
+    helpText: z.string().nullish().describe("help text of the field"),
+    required: z.boolean().nullish().describe("required of the field"),
+    order: z.number().describe("order of the field"),
+    labelKey: z.string().describe("label key of the field"),
+    validation: z.record(z.string(), z.unknown()).describe("validation of the field"),
+    options: z.union([z.array(optionsSchema), z.object({}).strict()]),
+    defaultValue: z.string().nullish().describe("default value of the field"), // can also have array of selected items in multi select
 
-    // placeholder: z.string().optional().describe("placeholder of the field"),
-    // helpText: z.string().optional().describe("help text of the field"),
-    // required: z.boolean().describe("required of the field"),
-    // order: z.number().describe("order of the field"),
-    // labelKey: z.string().describe("label key of the field"),
-    // validation: z.json().describe("validation of the field"),
-    // options: z.union([z.array(optionsSchema), z.object({}).strict()]),
-    // defaultValue: z.string().optional().describe("default value of the field"), // can also have array of selected items in multi select
-
-    // createdAt: z.coerce.date().transform(d => d.toISOString()).describe("created at"),
-    // updatedAt: z.coerce.date().transform(d => d.toISOString()).describe("updated at"),
+    createdAt: isoDateSchema.nullish(),
+    updatedAt: isoDateSchema.nullish(),
 });
 
 export type FormFieldOutputSchemaType = z.infer<typeof formFieldOutputSchema>;
 
-export const isoDateSchema = z.coerce
-    .date()
-    .transform((d) => d.toISOString())
-    .pipe(z.iso.datetime());
 
+// TODO: Need to change output schema according to our need in future
 export const createFormOutputSchema = z.object({
     id: z.string().uuid(),
     creatorId: z.string().uuid(),
     title: z.string().describe("title of the form"),
-    description: z.string().describe("description of the form"),
+    description: z.string().nullable().describe("description of the form"),
     logoUrl: z.string().nullable().describe("logo url of the form"),
     slug: z.string().describe("slug of the form"),
 
     status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
     visibility: z.enum(FORM_VISIBILITY_OPTIONS).describe("visibility of the form"),
 
-    maxSubmissions: z.number().describe("max submissions for the form"),
+    maxSubmissions: z.number().nullable().describe("max submissions for the form"),
     submissionCount: z.number().describe("submission count of the form"),
 
-    createdAt: isoDateSchema.describe("created at"),
+    createdAt: isoDateSchema.nullable().describe("created at"),
     expiresAt: isoDateSchema.nullable().describe("expires at"),
     publishedAt: isoDateSchema.nullable().describe("published at"),
     archivedAt: isoDateSchema.nullable().describe("archived at"),
-    updatedAt: isoDateSchema.describe("updated at"),
+    updatedAt: isoDateSchema.nullable().describe("updated at"),
     deletedAt: isoDateSchema.nullable().describe("deleted at"),
 
     fields: z.array(formFieldOutputSchema).describe("fields of the form"),
