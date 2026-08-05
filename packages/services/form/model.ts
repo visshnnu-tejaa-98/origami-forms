@@ -16,6 +16,8 @@ import {
 } from "@repo/database/constants";
 import { z } from "zod";
 
+// TODO: Replace all the output schemas with nullish / nullable instead of optional
+
 export const slugSchema = z
     .string()
     .min(3)

@@ -35,14 +35,6 @@ const FieldPalette = ({ addField }: FieldPaletteProps) => {
           <Chip key={block.key} block={block as FieldTypeMeta} onAdd={addField} />
         ))}
       </div>
-
-      {/* TODO: Implement this once all application features are completed. */}
-      {/* <div className="ai-card">
-        <div className="lbl">✶ ai sketch</div>
-        <h4>Describe &amp; fold.</h4>
-        <p>&ldquo;RSVP for a sakura picnic, 8 questions, friendly tone&rdquo;</p>
-        <button type="button">Try it ↗</button>
-      </div> */}
     </aside>
   );
 };
