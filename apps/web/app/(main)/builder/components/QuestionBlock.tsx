@@ -3,6 +3,7 @@ import { Icon } from "../../components/icons";
 import { BLOCK_META } from "../constants";
 import { QuestionBlockProps } from "../types";
 import FieldPreview from "./FieldPreview";
+import HelpTip from "./HelpTip";
 
 const QuestionBlock = (props: QuestionBlockProps) => {
   const { field, index, selected, onSelect, onDuplicate, onRemove } = props;
@@ -34,10 +35,11 @@ const QuestionBlock = (props: QuestionBlockProps) => {
             {meta?.label.toLowerCase() ?? field.type}
           </span>
           {field.required && <span className="req">required</span>}
+          <HelpTip text={field.helpText ?? ""} />
         </div>
 
         <div className="q-title">{field.label || "Untitled question"}</div>
-        {field.help !== "" && <div className="q-help">{field.help}</div>}
+        {field.description !== "" && <div className="q-desc">{field.description}</div>}
 
         <div className="field-preview">
           <FieldPreview field={field} />

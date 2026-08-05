@@ -1,5 +1,5 @@
 import React from "react";
-import { LAYOUT_TYPES } from "../constants";
+import { LAYOUT_TYPES, isFieldBlock } from "../constants";
 import { FormCanvasProps } from "../types";
 import QuestionBlock from "./QuestionBlock";
 
@@ -56,23 +56,23 @@ const FormCanvas = (props: FormCanvasProps) => {
           );
         }
 
+        if (!isFieldBlock(field)) return null;
+
         questionNumber += 1;
         return (
-          <React.Fragment key={field.id}>
-            <QuestionBlock
-              field={field}
-              index={questionNumber}
-              selected={selectedId === field.id}
-              onSelect={() => selectField(field.id)}
-              onDuplicate={() => duplicateField(field.id)}
-              onRemove={() => removeField(field.id)}
-            />
-            {field.logic && <div className="logic-line">↳ {field.logic}</div>}
-          </React.Fragment>
+          <QuestionBlock
+            key={field.id}
+            field={field}
+            index={questionNumber}
+            selected={selectedId === field.id}
+            onSelect={() => selectField(field.id)}
+            onDuplicate={() => duplicateField(field.id)}
+            onRemove={() => removeField(field.id)}
+          />
         );
       })}
 
-      <button type="button" className="add-q" onClick={() => addField("short-text")}>
+      <button type="button" className="add-q" onClick={() => addField("short_text")}>
         + add a question
       </button>
 

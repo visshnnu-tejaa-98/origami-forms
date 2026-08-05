@@ -23,16 +23,17 @@ const BuilderPage = () => {
     updateField,
     duplicateField,
     removeField,
+    saveAsDraft,
+    saveAndPublish
   } = useBuilder();
 
   return (
     <div className="builder-studio">
       <Topbar
-        title={form.title}
+        title={form?.title}
         setTitle={setTitle}
-        slug={form.slug}
-        status={form.status}
-        editedLabel={form.editedLabel}
+        saveAsDraft={saveAsDraft}
+        saveAndPublish={saveAndPublish}
       />
 
       <div className="b-main">

@@ -501,6 +501,86 @@
   color: var(--coral-deep);
 }
 
+/* ----- help tip · an info nib that unfolds a sticky note ----- */
+.db-shell .help-tip {
+  position: relative;
+  display: inline-flex;
+}
+
+.db-shell .tip-nib {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-4);
+  cursor: pointer;
+  transition: color var(--transition-snap), background var(--transition-snap);
+}
+
+.db-shell .tip-nib:hover,
+.db-shell .tip-nib:focus-visible {
+  color: var(--ink-2);
+  background: var(--bg-sunken);
+  outline: none;
+}
+
+.db-shell .tip-note {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  z-index: 5;
+  width: max-content;
+  max-width: 240px;
+  padding: 9px 12px;
+  background: var(--surface-sticky);
+  color: var(--ink-1);
+  border-radius: var(--r-sticky);
+  box-shadow: var(--shadow-sticky);
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: left;
+  white-space: normal;
+  /* folded shut until asked for */
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px) rotate(-1.5deg) scale(0.96);
+  transform-origin: bottom center;
+  transition: opacity var(--transition-snap), transform var(--transition-snap);
+}
+
+/* the dog-ear that points back down at the nib */
+.db-shell .tip-note .fold {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--surface-sticky);
+}
+
+.db-shell .help-tip:hover .tip-note,
+.db-shell .tip-nib:focus-visible + .tip-note {
+  opacity: 1;
+  transform: translate(-50%, 0) rotate(-1.5deg) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .tip-note {
+    transition: none;
+  }
+}
+
 .db-shell .q-block .meta .editing-note {
   margin-left: auto;
   font-family: var(--font-hand);
@@ -519,7 +599,7 @@
   color: var(--ink-1);
 }
 
-.db-shell .q-block .q-help {
+.db-shell .q-block .q-desc {
   margin-top: 2px;
   font-size: 0.82rem;
   font-style: italic;
@@ -590,7 +670,7 @@
   color: #fffdf7;
 }
 
-.db-shell .preview-pill .kbd-mini {
+/* .db-shell .preview-pill .kbd-mini {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   padding: 1px 4px;
@@ -600,7 +680,7 @@
 
 .db-shell .preview-pill.is-picked .kbd-mini {
   background: rgba(255, 255, 255, 0.25);
-}
+} */
 
 .db-shell .preview-input {
   width: 100%;
@@ -647,11 +727,71 @@
   color: var(--ink-3);
 }
 
-.db-shell .preview-checks {
+/* stacked choices — radio stamps and checkbox boxes share the column */
+.db-shell .preview-choices {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   font-size: 0.86rem;
+}
+
+.db-shell .preview-choice {
+  /* a sketch of the respondent's control, not something the builder clicks */
+  cursor: inherit;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  align-items: center;
+}
+
+/* the stamps and boxes are drawn a touch smaller than the live form's */
+.db-shell .preview-choice.o-radio .stamp {
+  flex-basis: 18px;
+  width: 18px;
+  height: 18px;
+  /* an inked circle is never quite round — same hand as the checkbox's cut corners */
+  border-radius: 53% 47% 49% 51% / 48% 52% 47% 53%;
+  transform: rotate(-6deg);
+}
+
+.db-shell .preview-choice.o-radio input:checked + .stamp::after {
+  inset: 4px;
+  /* the fill is a second, looser pass of the pen — tilted against the ring */
+  border-radius: 48% 52% 53% 47% / 52% 47% 51% 49%;
+  transform: rotate(9deg);
+}
+
+.db-shell .preview-choice.o-check .box {
+  flex-basis: 18px;
+  width: 18px;
+  height: 18px;
+  /* the label is centred, so the live form's optical nudge isn't needed here */
+  margin-top: 0;
+}
+
+/* checked box wears the accent, matching the radio stamp beside it */
+.db-shell .preview-choice.o-check input:checked + .box {
+  background: var(--accent);
+  border-color: var(--accent-deep);
+}
+
+/* the stock tick is cut for a 22px box and spills out of this one */
+.db-shell .preview-choice.o-check input:checked + .box::after {
+  left: 5.5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border-width: 0 2px 2px 0;
+  border-color: #fffdf7;
+}
+
+[data-theme="dark"] .db-shell .preview-choice.o-check input:checked + .box::after {
+  border-color: var(--paper-0);
+}
+
+/* an unpicked control should read as waiting, not as disabled chrome */
+.db-shell .preview-choice input:not(:checked) + .stamp,
+.db-shell .preview-choice input:not(:checked) + .box {
+  border-color: var(--ink-4);
 }
 
 .db-shell .preview-stars {
@@ -840,6 +980,62 @@
   letter-spacing: 0;
 }
 
+/* paired rule inputs — min/max side by side, min/max/step in threes */
+.db-shell .insp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.db-shell .insp-grid--three {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* date pickers need room for dd/mm/yyyy plus the native button — one per row */
+.db-shell .insp-grid--stack {
+  grid-template-columns: 1fr;
+}
+
+.db-shell .insp-input[type="date"] {
+  /* the picker button supplies its own gutter; extra padding clips the year */
+  padding-right: 4px;
+}
+
+.db-shell .insp-input[type="date"]::-webkit-calendar-picker-indicator {
+  margin-left: 0;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.db-shell .insp-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* a unit or format note trailing the field label */
+.db-shell .insp-row .row-hint {
+  margin-left: 5px;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--ink-4);
+}
+
+/* the rules editor sits tighter than the content rows above it */
+.db-shell .insp-grid .insp-row {
+  margin-bottom: 8px;
+  /* grid items default to min-width:auto, which lets the input push the track wide */
+  min-width: 0;
+}
+
+.db-shell .insp-grid .insp-row label {
+  /* long labels wrap rather than stretching their column */
+  overflow-wrap: anywhere;
+}
+
+.db-shell .insp-input[type="number"] {
+  /* the spinners eat width in a 3-up row, so trim the padding they sit in */
+  padding-right: 4px;
+}
+
 .db-shell .insp-sec .sec-empty {
   font-size: 0.84rem;
   font-style: italic;
@@ -865,6 +1061,10 @@
 
 .db-shell .insp-input,
 .db-shell .insp-textarea {
+  /* inputs carry an intrinsic size; without these they refuse to shrink to their column */
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 7px 9px;
   font-family: var(--font-body);
   font-size: 0.86rem;
@@ -909,6 +1109,9 @@
 }
 
 .db-shell .opt-row input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 5px 8px;
   font-family: var(--font-body);
   font-size: 0.84rem;

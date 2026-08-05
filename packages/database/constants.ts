@@ -28,6 +28,8 @@ export const CHECK_BOX = "check_box";
 export const RADIO = "radio";
 export const RATING = "rating";
 export const FILE_UPLOAD = "file_upload";
+export const HEADING = "heading"
+export const PAGE_BREAK = "page_break"
 
 export const FIELD_TYPES = [
     SHORT_TEXT,
@@ -47,6 +49,9 @@ export const FIELD_TYPES = [
 
 export const TEXT_LIKE_FIELDS = [SHORT_TEXT, LONG_TEXT, EMAIL, PHONE, URL] as const
 export const NUMBER_LIKE_FIELDS = [NUMBER, RATING] as const
+
+
+export const LAYOUT_FIELD_TYPES = [PAGE_BREAK, HEADING] as const
 
 export const PARTIAL = "partial";
 export const COMPLETED = "completed";

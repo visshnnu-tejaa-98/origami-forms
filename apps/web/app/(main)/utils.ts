@@ -2,6 +2,8 @@ import { RouterOutputs } from "@repo/trpc/client";
 import { ICONS, TINTS } from "./constants";
 import { PageOptions, Status } from "./types";
 import { relativeTime } from "../utils";
+import { BlockType, BuilderField, LayoutType } from "./builder/types";
+import { BLOCK_META, HEADING, LAYOUT_TYPES, PREVIEW_PLACEHOLDER } from "./builder/constants";
 
 export const TAPE = ["tape-pink", "tape-matcha", "tape-yellow", "tape-lav"];
 
@@ -56,3 +58,91 @@ export const updatePageOptions = (props: PageOptions) => {
         rangeEnd,
     };
 };
+
+
+export const uid = (prefix: string) => `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+
+let nextFieldOrder = 1
+
+const blankOptions = () => [
+    { id: uid("o"), label: "Option 1", value: "option-1" },
+    { id: uid("o"), label: "Option 2", value: "option-2" },
+];
+
+export const blankField = (type: BlockType): BuilderField => {
+    const meta = BLOCK_META[type];
+    const placeholder = PREVIEW_PLACEHOLDER[type]
+    const getOrder = () => {
+        return nextFieldOrder++
+    }
+
+    if (LAYOUT_TYPES.includes(type)) {
+        return {
+            id: uid("q"),
+            type: type as LayoutType,
+            label: type === HEADING ? "A new section" : "page break",
+            order: getOrder(),
+        };
+    }
+
+    const base = {
+        id: uid("q"),
+        label: `Untitled ${meta?.label.toLowerCase() ?? "question"}`,
+        description: "",
+        helpText: "",
+        required: false,
+        order: getOrder(),
+    };
+
+    switch (type) {
+        case "short_text":
+        case "long_text":
+        case "email":
+        case "phone":
+        case "url":
+            return {
+                ...base,
+                type,
+                placeholder,
+                defaultValue: "",
+                validation: { minLength: 2, maxLength: 255 },
+            };
+
+        case "number":
+            return {
+                ...base,
+                type,
+                placeholder,
+                defaultValue: "",
+                validation: { min: 0, max: 5, step: 1 },
+            };
+
+        case "rating":
+            return {
+                ...base,
+                type,
+                validation: { min: 0, max: 5, step: 1 },
+            };
+
+        case "single_select":
+        case "radio":
+            return { ...base, type, validation: {}, options: blankOptions() };
+
+        case "multi_select":
+        case "check_box":
+            return { ...base, type, validation: {}, options: blankOptions() };
+
+        case "date":
+            return { ...base, type, defaultValue: "", validation: {} };
+
+        case "file_upload":
+            return {
+                ...base,
+                type,
+                validation: { maxSizeMb: 10, maxFiles: 1, allowedFileTypes: [] },
+            };
+
+        default:
+            throw new Error(`Unknown block type: ${type}`);
+    }
+}

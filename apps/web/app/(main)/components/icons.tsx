@@ -51,6 +51,9 @@ export type IconName =
     | 'link'
     | 'upload'
     | 'toggle'
+    | 'save'
+    | 'publish'
+    | 'info'
 
 const paths: Record<IconName, React.ReactNode> = {
     plus: <path d="M12 5v14M5 12h14" />,
@@ -232,6 +235,28 @@ const paths: Record<IconName, React.ReactNode> = {
         <>
             <rect x="2.5" y="7" width="19" height="10" rx="5" />
             <circle cx="16.5" cy="12" r="2.6" fill="currentColor" stroke="none" />
+        </>
+    ),
+    /* a floppy — the shutter up top, the label below; no arrow, so it can't read as download */
+    save: (
+        <>
+            <path d="M6 4.5h8.5L19.5 9.5V18a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 18V6A1.5 1.5 0 0 1 6 4.5z" />
+            <path d="M8.5 4.5v4.5h5.5V4.5" />
+            <path d="M7.5 19.5V14h9v5.5" />
+        </>
+    ),
+    info: (
+        <>
+            <circle cx="12" cy="12" r="8.5" />
+            <path d="M12 11v5.5" />
+            <path d="M12 7.75h.01" />
+        </>
+    ),
+    /* the paper plane, launched — folded and sent on its way */
+    publish: (
+        <>
+            <path d="M20.5 3.5 11 13M20.5 3.5 14.5 20.5l-3.5-7.5-7.5-3.5z" />
+            <path d="M3 17.5 5 19M6.5 20.5 7.5 21.5" />
         </>
     ),
 }

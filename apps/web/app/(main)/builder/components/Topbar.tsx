@@ -4,7 +4,7 @@ import { Icon } from "../../components/icons";
 import { TopbarProps } from "../types";
 
 const Topbar = (props: TopbarProps) => {
-  const { title, setTitle, slug, status, editedLabel } = props;
+  const { title, setTitle, saveAsDraft, saveAndPublish } = props;
 
   return (
     <header className="b-top">
@@ -20,25 +20,29 @@ const Topbar = (props: TopbarProps) => {
           aria-label="Form title"
           placeholder="Untitled form"
         />
-        <div className="sub">
+        {/* TODO: Add this only for edit form */}
+        {/* <div className="sub">
           <span className="o-dot o-dot--success" /> {status}
           <span>· {slug}</span>
           <span>· {editedLabel}</span>
-        </div>
+        </div> */}
       </div>
 
       <div className="right">
         <div className="save-state">
           <span className="dot" /> auto-saved
         </div>
-        <button className="o-btn o-btn--sm">
+        {/* <button className="o-btn o-btn--sm">
           <Icon name="eye" size={14} /> Preview
         </button>
         <button className="o-btn o-btn--sm">
           <Icon name="share" size={14} /> Share
+        </button> */}
+        <button className="o-btn o-btn--sm" onClick={saveAsDraft}>
+          <Icon name="save" size={14} /> Save as draft
         </button>
-        <button className="o-btn o-btn--accent o-btn--sm">
-          <Icon name="sparkles" size={14} /> Publish changes
+        <button className="o-btn o-btn--accent o-btn--sm" onClick={saveAndPublish}>
+          <Icon name="publish" size={14} /> Save and publish
         </button>
       </div>
     </header>

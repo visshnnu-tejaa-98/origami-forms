@@ -5,9 +5,11 @@ import {
     FILE_UPLOAD,
     FORM_STATUS_OPTIONS,
     FORM_VISIBILITY_OPTIONS,
+    LAYOUT_FIELD_TYPES,
     MULTI_SELECT,
-    NUMBER_LIKE_FIELDS,
+    NUMBER,
     RADIO,
+    RATING,
     SINGLE_SELECT,
     TEXT_LIKE_FIELDS,
     UNLISTED,
@@ -26,18 +28,22 @@ export const optionsSchema = z.object({
     value: z.string().min(1).max(255).describe("value for the option"),
 });
 
+export const layoutField = z.object({
+    type: z.enum(LAYOUT_FIELD_TYPES),
+    label: z
+        .string()
+        .min(1, "Label must be atleast 1 character long")
+        .max(255, "Label cannot be longer than 255 characters")
+        .describe("label for the field"),
+    order: z.number().describe("order of the field"),
+})
+
 export const baseField = z.object({
     label: z
         .string()
         .min(1, "Label must be atleast 1 character long")
         .max(255, "Label cannot be longer than 255 characters")
         .describe("label for the field"),
-    placeholder: z
-        .string()
-        .min(1, "Placeholder must be atleast 1 character long")
-        .max(255, "Placeholder cannot be longer than 255 characters")
-        .optional()
-        .describe("placeholder for the field"),
     description: z.string().optional().describe("description for the field"),
     helpText: z
         .string()
@@ -51,7 +57,12 @@ export const baseField = z.object({
 export const textLikeField = {
     ...baseField.shape,
     type: z.enum(TEXT_LIKE_FIELDS),
-
+    placeholder: z
+        .string()
+        .min(1, "Placeholder must be atleast 1 character long")
+        .max(255, "Placeholder cannot be longer than 255 characters")
+        .optional()
+        .describe("placeholder for the field"),
     defaultValue: z.string().optional(),
     validation: z
         .object({
@@ -62,10 +73,34 @@ export const textLikeField = {
         .optional(),
 };
 
-export const numberLikeFields = {
+export const numberField = {
     ...baseField.shape,
-    type: z.enum(NUMBER_LIKE_FIELDS),
+    type: z.literal(NUMBER),
+    placeholder: z
+        .string()
+        .min(1, "Placeholder must be atleast 1 character long")
+        .max(255, "Placeholder cannot be longer than 255 characters")
+        .optional()
+        .describe("placeholder for the field"),
     defaultValue: z.coerce.string().optional(),
+    validation: z
+        .object({
+            min: z.number().optional(),
+            max: z.number().optional(),
+            step: z.number().positive().optional().default(1),
+        })
+        .optional(),
+};
+
+export const ratingField = {
+    ...baseField.shape,
+    type: z.literal(RATING),
+    placeholder: z
+        .string()
+        .min(1, "Placeholder must be atleast 1 character long")
+        .max(255, "Placeholder cannot be longer than 255 characters")
+        .optional()
+        .describe("placeholder for the field"),
     validation: z
         .object({
             min: z.number().optional(),
@@ -79,7 +114,7 @@ export const singleSelectFields = {
     ...baseField.shape,
     type: z.enum([SINGLE_SELECT, RADIO]),
     options: z.array(optionsSchema).min(1, "Atleast 1 option is required"),
-    defaultValue: z.string().optional().describe("default value for the field"),
+    // defaultValue: z.string().optional().describe("default value for the field"),
     validation: z.object({}).optional(),
 };
 
@@ -87,7 +122,7 @@ export const multiSelectFields = {
     ...baseField.shape,
     type: z.enum([MULTI_SELECT, CHECK_BOX]),
     options: z.array(optionsSchema).min(1, "Atleast 1 option is required"),
-    defaultValue: z.array(z.string()).optional().describe("default value for the field"),
+    // defaultValue: z.array(z.string()).optional().describe("default value for the field"),
     validation: z
         .object({
             minSelections: z.number().int().min(0).optional(),
@@ -122,7 +157,8 @@ export const fileUploadField = {
 
 export const createFieldSchema = z.discriminatedUnion("type", [
     z.object(textLikeField),
-    z.object(numberLikeFields),
+    z.object(numberField),
+    z.object(ratingField),
     z.object(singleSelectFields),
     z.object(multiSelectFields),
     z.object(dateField),

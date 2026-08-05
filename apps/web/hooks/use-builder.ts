@@ -3,33 +3,31 @@ import { useCallback, useMemo, useState } from "react";
 import {
   BLOCK_META,
   DEFAULT_OPTIONS,
+  HEADING,
   LAYOUT_TYPES,
   OPTION_TYPES,
+  PAGE_BREAK,
+  isFieldBlock,
   PREVIEW_PLACEHOLDER,
   SEED_FORM,
+  hasOptions,
 } from "~/app/(main)/builder/constants";
-import type { BlockType, BuilderField, BuilderForm } from "~/app/(main)/builder/types";
+import type {
+  BlockType,
+  BuilderField,
+  BuilderForm,
+  FieldBlock,
+  FieldPatch,
+  LayoutType,
+} from "~/app/(main)/builder/types";
+import { blankField, uid } from "~/app/(main)/utils";
 
-const uid = (prefix: string) => `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
 
-/** a fresh block, pre-filled with sensible copy for its type */
-function blankField(type: BlockType): BuilderField {
-  const meta = BLOCK_META[type];
-  const isLayout = LAYOUT_TYPES.includes(type);
-
-  return {
-    id: uid("q"),
-    type,
-    label: isLayout ? (type === "heading" ? "A new section" : "page break") : `Untitled ${meta?.label.toLowerCase() ?? "question"}`,
-    help: "",
-    placeholder: PREVIEW_PLACEHOLDER[type] ?? "",
-    required: false,
-    options: OPTION_TYPES.includes(type)
-      ? DEFAULT_OPTIONS.map((label) => ({ id: uid("o"), label }))
-      : [],
-    rating: 4,
-  };
+let nextFieldOrder = 1
+const getOrder = () => {
+  return nextFieldOrder++
 }
+
 
 /**
  * Studio state for the form builder — the sheet, the selection and every
@@ -53,10 +51,12 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
     setSelectedId(field.id);
   }, []);
 
-  const updateField = useCallback((id: string, patch: Partial<BuilderField>) => {
+  const updateField = useCallback((id: string, patch: FieldPatch) => {
     setForm((f) => ({
       ...f,
-      fields: f.fields.map((field) => (field.id === id ? { ...field, ...patch } : field)),
+      fields: f.fields.map((field) =>
+        field.id === id ? ({ ...field, ...patch } as BuilderField) : field
+      ),
     }));
   }, []);
 
@@ -65,11 +65,15 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
       const at = f.fields.findIndex((field) => field.id === id);
       if (at === -1) return f;
 
-      const copy: BuilderField = {
-        ...f.fields[at]!,
-        id: uid("q"),
-        options: f.fields[at]!.options.map((o) => ({ ...o, id: uid("o") })),
-      };
+      const source = f.fields[at]!;
+      const copy: BuilderField = hasOptions(source)
+        ? {
+          ...source,
+          id: uid("q"),
+          options: source.options.map((o) => ({ ...o, id: uid("o") })),
+        }
+        : { ...source, id: uid("q") };
+
       const fields = [...f.fields];
       fields.splice(at + 1, 0, copy);
       setSelectedId(copy.id);
@@ -87,10 +91,10 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
     });
   }, []);
 
-  const selectedField = useMemo(
-    () => form.fields.find((f) => f.id === selectedId) ?? null,
-    [form.fields, selectedId]
-  );
+  const selectedField = useMemo(() => {
+    const found = form.fields.find((f) => f.id === selectedId);
+    return found
+  }, [form.fields, selectedId]);
 
   /** questions are numbered ignoring layout blocks — page breaks aren't Q4 */
   const selectedIndex = useMemo(() => {
@@ -102,10 +106,18 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
     const questions = form.fields.filter((f) => !LAYOUT_TYPES.includes(f.type));
     return {
       questions: questions.length,
-      pages: form.fields.filter((f) => f.type === "page-break").length + 1,
-      validations: questions.filter((f) => f.required).length,
+      pages: form.fields.filter((f) => f.type === PAGE_BREAK).length + 1,
+      validations: questions.filter((f) => isFieldBlock(f) && f.required).length,
     };
   }, [form.fields]);
+
+  const saveAsDraft = () => {
+    console.log({ form })
+  };
+
+  const saveAndPublish = () => {
+    console.log({ form })
+  };
 
   return {
     form,
@@ -120,5 +132,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
     updateField,
     duplicateField,
     removeField,
+    saveAsDraft,
+    saveAndPublish,
   };
 }
