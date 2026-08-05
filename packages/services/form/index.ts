@@ -81,13 +81,12 @@ export default class FormService {
                     formId: form.id,
                     type: field.type,
                     label: field.label,
-                    // placeholder: field.placeholder,
                     description: field.description,
-                    helpText: field.helpText,
-                    required: field.required,
                     order: field.order,
                     labelKey: uniqueLabelKey,
-                    validation: field.validation ?? {},
+                    helpText: "helpText" in field ? field.helpText : undefined,
+                    required: "required" in field ? field.required : false,
+                    validation: ("validation" in field ? field.validation : undefined) ?? {},
                 };
 
                 const selectTypeFields = [SINGLE_SELECT, MULTI_SELECT, RADIO, CHECK_BOX];

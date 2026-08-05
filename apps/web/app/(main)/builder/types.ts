@@ -1,11 +1,13 @@
-import { CreateFormInputModel } from "@repo/services/form/model";
+import { CreateFormInputModel, LayoutFieldType } from "@repo/services/form/model";
 import { IconName } from "../components/icons";
 
-export type FieldType = CreateFormInputModel["fields"][number]["type"];
+type CreateFormInputType = CreateFormInputModel["fields"][number];
 
-export type LayoutType = "page-break" | "heading";
+export type FieldType = Exclude<CreateFormInputType, { type: LayoutType }>["type"];
 
-export type BlockType = FieldType | LayoutType;
+export type LayoutType = LayoutFieldType;
+
+export type BlockType = CreateFormInputType["type"];
 
 export type Tint = "accent" | "pink" | "matcha" | "peach" | "lavender" | "indigo" | "highlighter";
 
@@ -16,14 +18,9 @@ export type FieldTypeMeta = {
   tint: Tint;
 };
 
-export type FieldBlock = CreateFormInputModel["fields"][number] & { id: string };
+export type FieldBlock = Exclude<CreateFormInputType, { type: LayoutType }> & { id: string };
 
-export type LayoutBlock = {
-  id: string;
-  type: LayoutType;
-  label: string;
-  order: number;
-};
+export type LayoutBlock = Extract<CreateFormInputType, { type: LayoutType }> & { id: string };
 
 export type OptionFieldBlock = Extract<FieldBlock, { options: unknown }>;
 
@@ -31,7 +28,7 @@ export type FieldOption = OptionFieldBlock["options"][number];
 
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
-export type FieldPatch = Partial<DistributiveOmit<FieldBlock, "id" | "type">>;
+export type FieldPatch = Partial<DistributiveOmit<CreateFormInputType, "type">>;
 
 export type TextLikeFieldsValidation = {
   minLength?: number;

@@ -18,11 +18,6 @@ import { blankField, uid } from "~/app/(main)/utils";
 import { toast } from "~/components/origami/toast";
 import { useCreateForm } from "./use-form";
 
-
-/**
- * Studio state for the form builder — the sheet, the selection and every
- * edit made to it. Local for now; wiring to the forms API comes later.
- */
 export function useBuilder(seed: BuilderForm = SEED_FORM) {
   const [form, setForm] = useState<BuilderForm>(seed);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -32,6 +27,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
   const { createFormAsync } = useCreateForm()
 
   const setTitle = useCallback((title: string) => setForm((f) => ({ ...f, title })), []);
+
   const setDescription = useCallback(
     (description: string) => setForm((f) => ({ ...f, description })),
     []
@@ -103,12 +99,11 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
     };
   }, [form.fields]);
 
-  /**
-   * The canvas payload the API accepts: page breaks and headings are studio-only,
-   * so they are dropped. The client-side `id` on each field is left for Zod to strip.
-   */
   const toCreatePayload = useCallback(
-    (): CreateFormInputModel => ({ ...form, fields: form.fields.filter(isFieldBlock) }),
+    (): CreateFormInputModel => ({
+      ...form,
+      fields: form.fields.map(({ id: _id, ...field }) => field),
+    }),
     [form]
   );
 

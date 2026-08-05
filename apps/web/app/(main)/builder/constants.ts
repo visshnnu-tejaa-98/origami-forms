@@ -22,7 +22,7 @@ export const FIELD_TYPES = [
   { key: "file_upload", label: "File upload", icon: "upload", tint: "accent" },
 ];
 
-export const PAGE_BREAK = "page-break";
+export const PAGE_BREAK = "page_break";
 export const HEADING = "heading";
 
 export const LAYOUT_BLOCKS = [
@@ -41,7 +41,6 @@ export const OPTION_TYPES: readonly string[] = ["single_select", "multi_select",
 /** field types that render no question chrome on the canvas */
 export const LAYOUT_TYPES: readonly string[] = [PAGE_BREAK, HEADING];
 
-/** narrows a canvas block to a persistable field — layout blocks never reach the API */
 export const isFieldBlock = (block: BuilderField): block is FieldBlock =>
   !LAYOUT_TYPES.includes(block.type);
 

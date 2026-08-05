@@ -3,7 +3,7 @@ import {
     FORM_STATUS_OPTIONS,
     FORM_VISIBILITY_OPTIONS,
     USER_ROLES,
-    FIELD_TYPES,
+    FORM_FIELD_TYPES,
     RESPONSE_STATUS,
     ANALYTICS_EVENT_TYPES,
 } from "../constants";
@@ -14,7 +14,7 @@ export const formStatusEnum = pgEnum("form_status", FORM_STATUS_OPTIONS);
 
 export const formVisibilityEnum = pgEnum("form_visibility", FORM_VISIBILITY_OPTIONS);
 
-export const formFieldTypeEnum = pgEnum("field_type", FIELD_TYPES);
+export const formFieldTypeEnum = pgEnum("field_type", FORM_FIELD_TYPES);
 
 export const responseStatusEnum = pgEnum("response_status", RESPONSE_STATUS);
 

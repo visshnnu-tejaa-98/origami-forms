@@ -53,6 +53,8 @@ export const NUMBER_LIKE_FIELDS = [NUMBER, RATING] as const
 
 export const LAYOUT_FIELD_TYPES = [PAGE_BREAK, HEADING] as const
 
+export const FORM_FIELD_TYPES = [...FIELD_TYPES, ...LAYOUT_FIELD_TYPES] as const
+
 export const PARTIAL = "partial";
 export const COMPLETED = "completed";
 

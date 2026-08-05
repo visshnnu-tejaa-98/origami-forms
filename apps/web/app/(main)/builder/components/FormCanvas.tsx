@@ -1,5 +1,5 @@
 import React from "react";
-import { LAYOUT_TYPES, isFieldBlock } from "../constants";
+import { LAYOUT_TYPES, PAGE_BREAK, isFieldBlock } from "../constants";
 import { FormCanvasProps } from "../types";
 import QuestionBlock from "./QuestionBlock";
 
@@ -40,7 +40,7 @@ const FormCanvas = (props: FormCanvasProps) => {
       </div>
 
       {form.fields.map((field) => {
-        if (field.type === "page-break") {
+        if (field.type === PAGE_BREAK) {
           return (
             <div className="page-break cursor-pointer" key={field.id} onClick={() => selectField(field.id)}>
               <span>↓ page break · &ldquo;{field.label}&rdquo;</span>
@@ -86,7 +86,7 @@ const FormCanvas = (props: FormCanvasProps) => {
         </div>
         <span>
           {form.fields.filter((f) => !LAYOUT_TYPES.includes(f.type)).length} questions ·{" "}
-          {form.fields.filter((f) => f.type === "page-break").length + 1} pages
+          {form.fields.filter((f) => f.type === PAGE_BREAK).length + 1} pages
         </span>
       </div>
     </div>

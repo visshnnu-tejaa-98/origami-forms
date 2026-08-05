@@ -1,7 +1,7 @@
 import {
     CHECK_BOX,
     DATE,
-    FIELD_TYPES,
+    FORM_FIELD_TYPES,
     FILE_UPLOAD,
     FORM_STATUS_OPTIONS,
     FORM_VISIBILITY_OPTIONS,
@@ -30,15 +30,19 @@ export const optionsSchema = z.object({
     value: z.string().min(1).max(255).describe("value for the option"),
 });
 
-export const layoutField = z.object({
+export const layoutField = {
     type: z.enum(LAYOUT_FIELD_TYPES),
     label: z
         .string()
         .min(1, "Label must be atleast 1 character long")
         .max(255, "Label cannot be longer than 255 characters")
         .describe("label for the field"),
+    description: z.string().optional().describe("supporting copy shown under a heading"),
     order: z.number().describe("order of the field"),
-})
+}
+
+export const LAYOUT_TYPES = LAYOUT_FIELD_TYPES;
+export type LayoutFieldType = (typeof LAYOUT_FIELD_TYPES)[number];
 
 export const baseField = z.object({
     label: z
@@ -158,6 +162,7 @@ export const fileUploadField = {
 };
 
 export const createFieldSchema = z.discriminatedUnion("type", [
+    z.object(layoutField),
     z.object(textLikeField),
     z.object(numberField),
     z.object(ratingField),
@@ -195,7 +200,7 @@ export const isoDateSchema = z.date()
 export const formFieldOutputSchema = z.object({
     id: z.string().uuid(),
     formId: z.string().uuid(),
-    type: z.enum(FIELD_TYPES),
+    type: z.enum(FORM_FIELD_TYPES),
     label: z.string().describe("label of the field"),
     // these columns are nullable in the database, so the contract mirrors them
     description: z.string().nullish().describe("description of the field"),
@@ -364,7 +369,7 @@ export const upSertFormFieldsInputSchema = z.object({
     requesterId: z.string().uuid().describe("id of the requesting user"),
     id: z.string().uuid().optional().nullable().describe("id of the field"),
     formId: z.string().uuid().describe("formId of the form"),
-    type: z.enum(FIELD_TYPES).optional().describe("type of the field"),
+    type: z.enum(FORM_FIELD_TYPES).optional().describe("type of the field"),
     label: z.string().optional().describe("label of the field"),
     description: z.string().nullable().optional().describe("description of the field"),
     placeholder: z.string().nullable().optional().describe("placeholder of the field"),
@@ -384,7 +389,7 @@ export const upSertFormFieldsOutputSchema = z.object({
     formFields: z.object({
         id: z.string().uuid().optional().nullable().describe("id of the field"),
         formId: z.string().uuid().describe("formId of the form"),
-        type: z.enum(FIELD_TYPES).optional().describe("type of the field"),
+        type: z.enum(FORM_FIELD_TYPES).optional().describe("type of the field"),
         description: z.string().nullable().optional().describe("description of the field"),
         label: z.string().optional().describe("label of the field"),
         labelKey: z.string().optional().describe("label key of the field"),
