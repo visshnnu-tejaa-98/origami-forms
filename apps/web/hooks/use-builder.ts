@@ -17,6 +17,7 @@ import type { CreateFormInputModel } from "@repo/services/form/model";
 import { blankField, uid } from "~/app/(main)/utils";
 import { toast } from "~/components/origami/toast";
 import { useCreateForm } from "./use-form";
+import { useRouter } from "next/navigation";
 
 export function useBuilder(seed: BuilderForm = SEED_FORM) {
   const [form, setForm] = useState<BuilderForm>(seed);
@@ -25,6 +26,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
   );
 
   const { createFormAsync } = useCreateForm()
+  const router = useRouter()
 
   const setTitle = useCallback((title: string) => setForm((f) => ({ ...f, title })), []);
 
@@ -126,6 +128,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
       const saved = await createFormAsync(payload);
       console.log({ saved })
       toast.success("Draft saved.");
+      router.replace("/forms")
       return saved;
     } catch (error) {
       console.log({ error })
