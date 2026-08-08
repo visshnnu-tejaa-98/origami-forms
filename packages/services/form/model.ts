@@ -172,6 +172,22 @@ export const createFieldSchema = z.discriminatedUnion("type", [
     z.object(fileUploadField),
 ]);
 
+const withFieldId = <T extends z.ZodRawShape>(shape: T) =>
+    z.object({ ...shape, id: z.string().uuid().optional().describe("id of the field being edited") });
+
+export const updateFieldSchema = z.discriminatedUnion("type", [
+    withFieldId(layoutField),
+    withFieldId(textLikeField),
+    withFieldId(numberField),
+    withFieldId(ratingField),
+    withFieldId(singleSelectFields),
+    withFieldId(multiSelectFields),
+    withFieldId(dateField),
+    withFieldId(fileUploadField),
+]);
+
+export type UpdateFieldModel = z.infer<typeof updateFieldSchema>;
+
 export const createFormInputModel = z.object({
     title: z
         .string()
@@ -311,6 +327,11 @@ export const updateFormInputSchema = z.object({
     visibility: z.enum(FORM_VISIBILITY_OPTIONS).optional().describe("visibility of the form"),
     maxSubmissions: z.number().int().nonnegative().nullable().optional().describe("max submissions for the form (null to clear)"),
     expiresAt: z.coerce.date().nullable().optional().describe("expiry date of the form (null to clear)"),
+    fields: z
+        .array(updateFieldSchema)
+        .min(1)
+        .optional()
+        .describe("the full field list; omit to leave the form's fields untouched"),
 });
 
 export type UpdateFormProps = z.infer<typeof updateFormInputSchema>;
@@ -318,19 +339,7 @@ export type UpdateFormProps = z.infer<typeof updateFormInputSchema>;
 export const updateFormOutputSchema = z.object({
     success: z.boolean().describe("true or false based on if update was successfull"),
     message: z.string().describe("Success or error message"),
-    formData: z
-        .object({
-            formId: z.string().uuid().describe("formId of the form"),
-            creatorId: z.string().uuid().describe("creator id of the form"),
-            title: z.string().describe("title of the form"),
-            description: z.string().nullable().describe("description of the form"),
-            logoUrl: z.string().nullable().describe("logo url of the form"),
-            slug: z.string().describe("slug of the form"),
-            status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
-            visibility: z.enum(FORM_VISIBILITY_OPTIONS).describe("visibility of the form"),
-            maxSubmissions: z.number().int().nullable().describe("max submissions for the form"),
-            expiresAt: isoDateSchema.nullable().describe("expiry date of the form"),
-        })
+    formData: createFormOutputSchema
         .nullable()
         .describe("updated form data, or null when no update was performed"),
 });

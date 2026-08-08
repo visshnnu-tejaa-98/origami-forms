@@ -1,5 +1,14 @@
-import { createFormInputModel, createFormOutputSchema, listFormsInputSchema, listFormsOutputSchema } from "@repo/services/form/model";
-import { createFormMeta, listFormsMeta } from "@repo/services/form/meta";
+import {
+    createFormInputModel,
+    createFormOutputSchema,
+    getFormByIdInputSchema,
+    getFormByIdOutputSchema,
+    listFormsInputSchema,
+    listFormsOutputSchema,
+    updateFormInputSchema,
+    updateFormOutputSchema,
+} from "@repo/services/form/model";
+import { createFormMeta, getFormByIdMeta, listFormsMeta, updateFormMeta } from "@repo/services/form/meta";
 import { protectedProcedure, router } from "../../trpc";
 import { formService } from "../../services";
 
@@ -34,5 +43,33 @@ export const formsRouter = router({
 
             return result;
         }
-    )
+    ),
+    getFormById: protectedProcedure
+        // the placeholder has to match the input key exactly for trpc-to-openapi to
+        // bind it, so it is `{formId}` rather than `{id}`
+        .meta(getFormByIdMeta({ getPathFn: () => "/form/{formId}", tags: TAGS }))
+        .input(getFormByIdInputSchema.omit({ requesterId: true }))
+        .output(getFormByIdOutputSchema)
+        .query(async ({ input, ctx }) => {
+            const result = await formService.getFormById({ ...input, requesterId: ctx.userId });
+
+            if (!result) {
+                throw new Error("Form not found");
+            }
+
+            return result;
+        }),
+    updateForm: protectedProcedure
+        .meta(updateFormMeta({ getPathFn: () => "/form/update/{formId}", tags: TAGS }))
+        .input(updateFormInputSchema.omit({ requesterId: true }))
+        .output(updateFormOutputSchema)
+        .mutation(async ({ input, ctx }) => {
+            const result = await formService.updateForm({ ...input, requesterId: ctx.userId });
+
+            if (!result) {
+                throw new Error("Something went wrong while updating form");
+            }
+
+            return result;
+        }),
 });

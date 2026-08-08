@@ -6,6 +6,7 @@ import db, {
     formFields,
     forms,
     ilike,
+    inArray,
     InsertFormField,
     isNull,
     lte,
@@ -55,6 +56,33 @@ export default class FormService {
 
     private readonly userService = new UserService();
 
+    private buildFieldRow(field: CreateFormInputModel["fields"][number], formId: string, order: number): Omit<InsertFormField, "labelKey"> {
+        const row: Omit<InsertFormField, "labelKey"> = {
+            formId: formId,
+            type: field.type,
+            label: field.label,
+            description: field.description,
+            order: order,
+            helpText: "helpText" in field ? field.helpText : undefined,
+            required: "required" in field ? field.required : false,
+            validation: ("validation" in field ? field.validation : undefined) ?? {},
+        };
+        const selectTypeFields = [SINGLE_SELECT, MULTI_SELECT, RADIO, CHECK_BOX];
+
+        if (selectTypeFields.includes(field.type) && "options" in field) {
+            row.options = field.options as {};
+        }
+
+        if ("placeholder" in field && field.placeholder !== undefined) {
+            row.placeholder = field.placeholder;
+        }
+
+        if ("defaultValue" in field && field.defaultValue !== undefined) {
+            row.defaultValue = field.defaultValue as string;
+        }
+        return row
+    }
+
     public async createForm(creatorId: string, formData: CreateFormInputModel) {
         return db.transaction(async (tx) => {
             const [form] = await tx
@@ -74,37 +102,12 @@ export default class FormService {
                 return tx.rollback();
             }
 
-            const fieldValues = formData.fields.map((field) => {
-                const uniqueLabelKey = generateLabelKey();
-
-                const row: typeof formFields.$inferInsert = {
-                    formId: form.id,
-                    type: field.type,
-                    label: field.label,
-                    description: field.description,
-                    order: field.order,
-                    labelKey: uniqueLabelKey,
-                    helpText: "helpText" in field ? field.helpText : undefined,
-                    required: "required" in field ? field.required : false,
-                    validation: ("validation" in field ? field.validation : undefined) ?? {},
-                };
-
-                const selectTypeFields = [SINGLE_SELECT, MULTI_SELECT, RADIO, CHECK_BOX];
-
-                if (selectTypeFields.includes(field.type) && "options" in field) {
-                    row.options = field.options as {};
-                }
-
-                if ("placeholder" in field && field.placeholder !== undefined) {
-                    row.placeholder = field.placeholder;
-                }
-
-                if ("defaultValue" in field && field.defaultValue !== undefined) {
-                    row.defaultValue = field.defaultValue as string;
-                }
-
-                return row;
-            });
+            // the array's position is the ordering — the client's `order` is a second
+            // copy of that fact and can disagree with it
+            const fieldValues = formData.fields.map((field, index) => ({
+                ...this.buildFieldRow(field, form.id, index),
+                labelKey: generateLabelKey(),
+            }));
 
             const insertedFields = await tx.insert(formFields).values(fieldValues).returning();
 
@@ -210,6 +213,7 @@ export default class FormService {
             visibility,
             maxSubmissions,
             expiresAt,
+            fields,
         } = payload;
 
         const form = await this.getFormById({ formId, requesterId });
@@ -243,7 +247,7 @@ export default class FormService {
             if (status === ARCHIVED) updatedValues.archivedAt = now;
         }
 
-        if (Object.keys(updatedValues).length === 0) {
+        if (Object.keys(updatedValues).length === 0 && fields === undefined) {
             return {
                 success: false,
                 message: "No changes to update",
@@ -251,30 +255,74 @@ export default class FormService {
             };
         }
 
-        const isAdmin = await this.userService.isAdmin(requesterId);
-        const condition = !isAdmin
-            ? and(eq(forms.id, formId), eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
-            : and(eq(forms.id, formId), isNull(forms.deletedAt));
+        const hasResponses = form.submissionCount > 0;
 
-        const [updatedForm] = await db.update(forms).set(updatedValues).where(condition).returning();
+        await db.transaction(async (tx) => {
+            if (Object.keys(updatedValues).length > 0) {
+                await tx.update(forms).set(updatedValues).where(eq(forms.id, formId));
+            }
+
+            if (fields === undefined) return;
+
+            const existing = new Map(form.fields.map((field) => [field.id, field]));
+            const keptIds = new Set<string>();
+
+            const toInsert: InsertFormField[] = [];
+            const toUpdate: { id: string; values: Omit<InsertFormField, "labelKey"> }[] = [];
+
+            fields.forEach((field, index) => {
+                const row = this.buildFieldRow(field, formId, index);
+
+                const current = field.id ? existing.get(field.id) : undefined;
+
+                if (!current) {
+                    toInsert.push({ ...row, labelKey: generateLabelKey() });
+                    return;
+                }
+
+                if (hasResponses && field.type !== current.type) {
+                    throw new Error(
+                        `Cannot change the type of "${current.label}" — it already has answers`,
+                    );
+                }
+
+                keptIds.add(current.id);
+                toUpdate.push({ id: current.id, values: row });
+            });
+
+            const removedIds = [...existing.keys()].filter((id) => !keptIds.has(id));
+
+            if (removedIds.length > 0 && hasResponses) {
+                throw new Error("Cannot remove fields from a form that already has responses");
+            }
+
+            if (toInsert.length > 0) {
+                await tx.insert(formFields).values(toInsert);
+            }
+
+            for (const { id, values } of toUpdate) {
+                await tx
+                    .update(formFields)
+                    .set(values)
+                    .where(and(eq(formFields.id, id), eq(formFields.formId, formId)));
+            }
+
+            if (removedIds.length > 0) {
+                await tx
+                    .update(formFields)
+                    .set({ deletedAt: new Date() })
+                    .where(and(eq(formFields.formId, formId), inArray(formFields.id, removedIds)));
+            }
+        });
+
+        const updatedForm = await this.getFormById({ formId, requesterId });
 
         if (!updatedForm) throw new Error("Failed to update form");
 
         return {
             success: true,
             message: "Form updated successfully",
-            formData: {
-                formId: updatedForm.id,
-                creatorId: updatedForm.creatorId,
-                title: updatedForm.title,
-                description: updatedForm.description,
-                logoUrl: updatedForm.logoUrl,
-                slug: updatedForm.slug,
-                status: updatedForm.status,
-                visibility: updatedForm.visibility,
-                maxSubmissions: updatedForm.maxSubmissions,
-                expiresAt: updatedForm.expiresAt,
-            },
+            formData: updatedForm,
         };
     }
 
