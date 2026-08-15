@@ -16,16 +16,23 @@ import type {
 import type { CreateFormInputModel } from "@repo/services/form/model";
 import { blankField, uid } from "~/app/(main)/utils";
 import { toast } from "~/components/origami/toast";
-import { useCreateForm } from "./use-form";
+import { useCreateForm, useUpdateForm } from "./use-form";
 import { useRouter } from "next/navigation";
 
-export function useBuilder(seed: BuilderForm = SEED_FORM) {
+/** a saved field carries its database id; a block added in this session carries a local
+ *  `q-xxxx` one. only the former identifies a row the server should update */
+const SAVED_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const PUBLISHED = "published" as const;
+
+export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   const [form, setForm] = useState<BuilderForm>(seed);
   const [selectedId, setSelectedId] = useState<string | null>(
     seed.fields.find((f) => !LAYOUT_TYPES.includes(f.type))?.id ?? null
   );
 
   const { createFormAsync } = useCreateForm()
+  const { updateFormAsync } = useUpdateForm()
   const router = useRouter()
 
   const setTitle = useCallback((title: string) => setForm((f) => ({ ...f, title })), []);
@@ -109,39 +116,62 @@ export function useBuilder(seed: BuilderForm = SEED_FORM) {
     [form]
   );
 
-  const saveAsDraft = useCallback(async () => {
-    const payload = toCreatePayload();
+  /** an editing save sends the whole field list — anything missing from it is removed —
+   *  keeping database ids so the server updates those rows instead of inserting copies */
+  const toUpdatePayload = useCallback(
+    () => ({
+      title: form.title,
+      description: form.description,
+      visibility: form.visibility,
+      fields: form.fields.map(({ id, ...field }) =>
+        SAVED_ID.test(id) ? { ...field, id } : field
+      ),
+    }),
+    [form]
+  );
 
-    // the schema demands a title and at least one field — say so before the round trip
-    if (payload.title.trim() === "") {
-      toast.error("Give the form a title before saving.");
-      return;
-    }
-    if (payload.fields.length === 0) {
-      toast.error("Add at least one question before saving.");
-      return;
-    }
+  const save = useCallback(
+    async (status?: typeof PUBLISHED) => {
+      // the schema demands a title and at least one field — say so before the round trip
+      if (form.title.trim() === "") {
+        toast.error("Give the form a title before saving.");
+        return;
+      }
+      if (form.fields.length === 0) {
+        toast.error("Add at least one question before saving.");
+        return;
+      }
 
-    try {
-      // forms are created as drafts — the database defaults `status` to draft
-      console.log(111, { payload })
-      const saved = await createFormAsync(payload);
-      console.log({ saved })
-      toast.success("Draft saved.");
-      router.replace("/forms")
-      return saved;
-    } catch (error) {
-      console.log({ error })
+      try {
+        if (formId) {
+          const result = await updateFormAsync({ formId, ...toUpdatePayload(), status });
+          if (!result.success) {
+            toast.error(result.message);
+            return;
+          }
+          toast.success(status === PUBLISHED ? "Form published." : "Changes saved.");
+          return result.formData;
+        }
 
-      toast.error(error instanceof Error ? error.message : "Could not save the draft.");
-    }
-  }, [createFormAsync, toCreatePayload]);
+        // forms are created as drafts — the database defaults `status` to draft
+        const saved = await createFormAsync(toCreatePayload());
 
-  // TODO: publishing needs an updateForm route — the create input carries no status,
-  // so this saves the draft and the status flip has to follow once that route exists.
-  const saveAndPublish = useCallback(async () => {
-    await saveAsDraft();
-  }, [saveAsDraft]);
+        // create carries no status, so publishing is a second call against the new form
+        if (status === PUBLISHED) await updateFormAsync({ formId: saved.id, status });
+
+        toast.success(status === PUBLISHED ? "Form published." : "Draft saved.");
+        router.replace("/forms");
+        return saved;
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Could not save the form.");
+      }
+    },
+    [createFormAsync, form, formId, router, toCreatePayload, toUpdatePayload, updateFormAsync]
+  );
+
+  const saveAsDraft = useCallback(() => save(), [save]);
+
+  const saveAndPublish = useCallback(() => save(PUBLISHED), [save]);
 
   return {
     form,

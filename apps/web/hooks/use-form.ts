@@ -35,6 +35,50 @@ export function useCreateForm() {
     };
 }
 
+/** the form the builder edits — fields included, ordered by `order` */
+export function useFormById(formId: string) {
+    const {
+        data: formData,
+        error: getFormError,
+        isError: getFormIsError,
+        isSuccess: getFormIsSuccess,
+        isPending: getFormIsPending,
+        refetch: refetchForm,
+    } = trpc.forms.getFormById.useQuery({ formId }, { enabled: Boolean(formId) });
+
+    return { formData, getFormError, getFormIsError, getFormIsSuccess, getFormIsPending, refetchForm };
+}
+
+/** the payload is passed to `updateForm(...)` at call time, not to the hook */
+export function useUpdateForm() {
+    const utils = trpc.useUtils();
+
+    const {
+        mutateAsync: updateFormAsync,
+        mutate: updateForm,
+        data: updatedForm,
+        error: updateFormError,
+        isError: updateFormIsError,
+        isSuccess: updateFormIsSuccess,
+        isPending: updateFormIsPending,
+    } = trpc.forms.updateForm.useMutation({
+        onSuccess: (_result, variables) => {
+            utils.forms.getAllForms.invalidate();
+            utils.forms.getFormById.invalidate({ formId: variables.formId });
+        },
+    });
+
+    return {
+        updateFormAsync,
+        updateForm,
+        updatedForm,
+        updateFormError,
+        updateFormIsError,
+        updateFormIsSuccess,
+        updateFormIsPending,
+    };
+}
+
 export function useListForms(props: Omit<ListFormsInput, 'requesterId'>) {
     const queryProps = {} as Omit<ListFormsInput, 'requesterId'>
 

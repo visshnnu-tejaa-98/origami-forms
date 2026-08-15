@@ -2,8 +2,8 @@ import { RouterOutputs } from "@repo/trpc/client";
 import { ICONS, TINTS } from "./constants";
 import { PageOptions, Status } from "./types";
 import { relativeTime } from "../utils";
-import { BlockType, BuilderField, LayoutType } from "./builder/types";
-import { BLOCK_META, HEADING, LAYOUT_TYPES, PREVIEW_PLACEHOLDER } from "./builder/constants";
+import { BlockType, BuilderField, BuilderForm, LayoutType } from "./builder/types";
+import { BLOCK_META, HEADING, LAYOUT_TYPES, OPTION_TYPES, PREVIEW_PLACEHOLDER } from "./builder/constants";
 
 export const TAPE = ["tape-pink", "tape-matcha", "tape-yellow", "tape-lav"];
 
@@ -146,3 +146,50 @@ export const blankField = (type: BlockType): BuilderField => {
             throw new Error(`Unknown block type: ${type}`);
     }
 }
+
+type SavedForm = RouterOutputs["forms"]["getFormById"];
+type ApiField = SavedForm["fields"][number];
+
+/** a saved field becomes a canvas block: the database id *is* the block id, so a field
+ *  keeps its identity across an edit and the server can tell an update from an insert */
+const toBuilderField = (field: ApiField): BuilderField => {
+    const block = {
+        id: field.id,
+        type: field.type,
+        label: field.label,
+        description: field.description ?? "",
+        order: field.order,
+    };
+
+    if (LAYOUT_TYPES.includes(field.type)) return block as BuilderField;
+
+    const question = {
+        ...block,
+        helpText: field.helpText ?? "",
+        required: field.required ?? false,
+        // the column is loose jsonb; each field type narrows it back to its own shape
+        validation: field.validation ?? {},
+    };
+
+    if (OPTION_TYPES.includes(field.type)) {
+        return {
+            ...question,
+            options: Array.isArray(field.options) ? field.options : [],
+        } as BuilderField;
+    }
+
+    return {
+        ...question,
+        placeholder: field.placeholder ?? undefined,
+        defaultValue: field.defaultValue ?? "",
+    } as BuilderField;
+};
+
+/** seeds the studio from a saved form */
+export const toBuilderForm = (form: SavedForm): BuilderForm => ({
+    title: form.title,
+    description: form.description ?? "",
+    visibility: form.visibility,
+    maxSubmissions: form.maxSubmissions ?? undefined,
+    fields: form.fields.map(toBuilderField),
+});
