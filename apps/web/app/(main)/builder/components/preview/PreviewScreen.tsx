@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Icon } from "../../../components/icons";
 import { BLOCK_META, HEADING, PAGE_BREAK, isFieldBlock } from "../../constants";
 import { BuilderForm, FieldBlock } from "../../types";
@@ -26,9 +26,10 @@ type Step =
 const TAPE_TONES = ["sakura", "matcha", "peach", "lavender", "indigo", "highlighter"];
 
 const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
-  const cardRef = useRef<HTMLDivElement>(null);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [at, setAt] = useState(0);
+  // which way the last move went, so the sheet animates with the travel
+  const [back, setBack] = useState(false);
 
   // layout blocks get their own screens: a heading is a statement, a page break
   // is the turn of the page — one question per screen otherwise
@@ -51,7 +52,12 @@ const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
   const step = steps[Math.min(at, total)]!;
 
   const go = useCallback(
-    (to: number) => setAt(Math.max(0, Math.min(total, to))),
+    (to: number) =>
+      setAt((current) => {
+        const next = Math.max(0, Math.min(total, to));
+        setBack(next < current);
+        return next;
+      }),
     [total]
   );
 
@@ -75,12 +81,6 @@ const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
     return () => window.removeEventListener("keydown", onKey);
   }, [at, go, onClose]);
 
-  // each new sheet hands the pen straight to the respondent
-  useEffect(() => {
-    const control = cardRef.current?.querySelector<HTMLElement>("input, textarea");
-    control?.focus({ preventScroll: true });
-  }, [at]);
-
   const isAnswered = useCallback(
     (id: string) => {
       const value = answers[id];
@@ -88,6 +88,26 @@ const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
     },
     [answers]
   );
+
+  /**
+   * The pile thins as the form runs out: two sheets waiting behind the third-from-last
+   * card, one behind the second-from-last, none behind the final one. Each step shifts
+   * the remaining sheets a little, so the top card reads as having just been peeled off.
+   */
+  const stack = useMemo(() => {
+    const under = Math.max(0, Math.min(2, total - at));
+    return Array.from({ length: under }, (_, k) => {
+      const depth = k + 1;
+      // deterministic wobble — the pile is never squared up, but it is never random either
+      const wobble = ((at * 13 + depth * 29) % 9) - 4;
+      return {
+        depth,
+        rot: (depth % 2 === 0 ? 1.7 : -1.5) * depth + wobble * 0.2,
+        x: wobble * 1.8 + depth * 2,
+        y: depth * 7 + Math.abs(wobble) * 0.7,
+      };
+    });
+  }, [at, total]);
 
   const questions = steps.filter((s) => s.kind === "field");
   const answered = questions.filter((s) => s.kind === "field" && isAnswered(s.id)).length;
@@ -177,10 +197,23 @@ const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
         </header>
 
         <div className="pv-pages">
-          <span className="pv-stack pv-stack--b" aria-hidden />
-          <span className="pv-stack pv-stack--a" aria-hidden />
+          {/* deepest sheet first, so the nearest one paints on top */}
+          {[...stack].reverse().map((sheet) => (
+            <span
+              key={sheet.depth}
+              className={`pv-stack pv-stack--${sheet.depth}`}
+              aria-hidden
+              style={
+                {
+                  "--sheet-r": `${sheet.rot}deg`,
+                  "--sheet-x": `${sheet.x}px`,
+                  "--sheet-y": `${sheet.y}px`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
 
-          <div className="pv-card" key={at} ref={cardRef}>
+          <div className={`pv-card${back ? " is-back" : ""}`} key={at}>
             <span className="pv-grain-card" aria-hidden />
             <span className="pv-margin-rule" aria-hidden />
             <span className="pv-watermark" aria-hidden>
