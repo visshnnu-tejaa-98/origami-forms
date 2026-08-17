@@ -21,6 +21,17 @@
   padding: 28px 36px 80px;
 }
 
+/* full-bleed routes (the respondent preview) drop the sidebar and the padding.
+   doubled selector so the responsive rules further down cannot narrow it back */
+.db-shell.db-shell--bare {
+  grid-template-columns: 1fr;
+}
+
+.db-shell.db-shell--bare > main {
+  padding: 0;
+  overflow: hidden;
+}
+
 /* ====== SIDEBAR ====== */
 .db-shell .sidebar {
   background: var(--bg-elevated);

@@ -1,7 +1,7 @@
 import React from "react";
-import { Icon } from "../../../components/icons";
-import { hasOptions } from "../../constants";
-import { FieldBlock } from "../../types";
+import { Icon } from "../../../../components/icons";
+import { hasOptions } from "../../../constants";
+import { FieldBlock } from "../../../types";
 
 /** the answer a respondent has given — shape depends on the field type */
 export type AnswerValue = string | string[];

@@ -14,6 +14,21 @@
   animation: pvFade 240ms ease;
 }
 
+/* on its own route the preview is the page, so it sits in the shell's pane
+   instead of covering it — the sidebar stays reachable */
+.db-shell .pv-screen--page {
+  position: relative;
+  inset: auto;
+  z-index: 0;
+  height: 100vh;
+}
+
+/* loading and not-found share the stage, centred */
+.db-shell .pv-screen--state {
+  grid-template-columns: 1fr;
+  place-items: center;
+}
+
 @keyframes pvFade {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -329,6 +344,20 @@
 
 .db-shell .pv-item.active .num {
   color: var(--accent-deep);
+}
+
+.db-shell .pv-rail-title--spaced {
+  margin-top: 16px;
+}
+
+/* the last sheet in the run — dashed, because nothing is answered on it */
+.db-shell .pv-item--review {
+  border: 1px dashed var(--rule-line);
+}
+
+.db-shell .pv-item--review.active {
+  border-style: solid;
+  border-color: transparent;
 }
 
 .db-shell .pv-rail-empty {

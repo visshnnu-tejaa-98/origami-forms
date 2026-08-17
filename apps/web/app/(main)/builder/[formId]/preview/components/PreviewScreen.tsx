@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Icon } from "../../../components/icons";
-import { BLOCK_META, HEADING, PAGE_BREAK, isFieldBlock } from "../../constants";
-import { BuilderForm, FieldBlock } from "../../types";
+import { Icon } from "../../../../components/icons";
+import { BLOCK_META, HEADING, PAGE_BREAK, isFieldBlock } from "../../../constants";
+import { BuilderForm, FieldBlock } from "../../../types";
 import { Clip, Crane, ScribbleArrow } from "~/components/origami/deco";
-import HelpTip from "../HelpTip";
+import HelpTip from "../../../components/HelpTip";
 import PreviewCanvas from "./PreviewCanvas";
 import PreviewInput, { AnswerValue } from "./PreviewInput";
 
 type PreviewScreenProps = {
   form: BuilderForm;
   onClose: () => void;
+  /** true when the preview owns the route rather than floating over the studio */
+  asPage?: boolean;
 };
 
 /** a welcome cover, one step per question or heading, then the review */
@@ -25,7 +27,7 @@ type Step =
 /** every sheet is taped down with a different colour from the washi drawer */
 const TAPE_TONES = ["sakura", "matcha", "peach", "lavender", "indigo", "highlighter"];
 
-const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
+const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) => {
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [at, setAt] = useState(0);
   // which way the last move went, so the sheet animates with the travel
@@ -124,7 +126,12 @@ const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
             : "Review";
 
   return (
-    <div className="pv-screen" role="dialog" aria-modal="true" aria-label="Form preview">
+    <div
+      className={`pv-screen${asPage ? " pv-screen--page" : ""}`}
+      {...(asPage
+        ? { "aria-label": "Form preview" }
+        : { role: "dialog", "aria-modal": true, "aria-label": "Form preview" })}
+    >
       <PreviewCanvas />
 
       {/* ===== RAIL ===== */}
@@ -170,6 +177,19 @@ const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
           <p className="pv-rail-empty">No folds yet — add a field and it appears here.</p>
         )}
 
+        <div className="pv-rail-title pv-rail-title--spaced">The finish</div>
+        <button
+          type="button"
+          className={`pv-item t-matcha pv-item--review${at === total ? " active" : ""}`}
+          onClick={() => go(total)}
+        >
+          <span className="ic">
+            <Icon name="check" size={14} />
+          </span>
+          <span className="nm">Review &amp; send</span>
+          <span className="num">{String(total).padStart(2, "0")}</span>
+        </button>
+
         <div className="pv-rail-foot">
           <div className="row">
             <span className="o-kbd">←</span>
@@ -179,7 +199,7 @@ const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
             <span className="o-kbd">↵</span> next
           </div>
           <div className="row">
-            <span className="o-kbd">esc</span> close
+            <span className="o-kbd">esc</span> back to builder
           </div>
         </div>
       </aside>

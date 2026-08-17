@@ -9,7 +9,7 @@ import FieldPalette from "./components/FieldPalette";
 import FormCanvas from "./components/FormCanvas";
 import Inspector from "./components/Inspector";
 import Topbar from "./components/Topbar";
-import PreviewScreen from "./components/preview/PreviewScreen";
+import PreviewScreen from "./[formId]/preview/components/PreviewScreen";
 
 const BuilderPage = () => {
   const [previewing, setPreviewing] = useState(false);

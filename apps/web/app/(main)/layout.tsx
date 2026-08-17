@@ -1,6 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 import React, { useEffect } from "react";
 import { useUserStore } from "~/app/store/user-store";
 import { useGetUser } from "~/hooks/use-user";
@@ -8,6 +9,10 @@ import Sidebar from "./components/Sidebar";
 import "./shell.css";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+  // the respondent preview is the whole window — no app chrome around it
+  const bare = pathname?.endsWith("/preview") ?? false;
+
   const { isLoaded, isSignedIn, user } = useUser();
   const { createUserAsync } = useGetUser();
   const setUserToRedux = useUserStore((state) => state.setUser);
@@ -36,8 +41,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   }, [isLoaded, isSignedIn, user?.id]);
 
   return (
-    <div className="db-shell o-scope">
-      <Sidebar />
+    <div className={`db-shell o-scope${bare ? " db-shell--bare" : ""}`}>
+      {!bare && <Sidebar />}
       <main>{children}</main>
     </div>
   );
