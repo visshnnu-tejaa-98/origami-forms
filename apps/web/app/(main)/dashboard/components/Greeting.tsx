@@ -20,7 +20,7 @@ const Greeting = () => {
                     completion rate jumped 4 points. Worth a sticker.
                 </p>
                 <div className="actions">
-                    <Link className="o-btn o-btn--accent" href="#">
+                    <Link className="o-btn o-btn--accent" href="/builder">
                         New form
                     </Link>
                     <Link className="o-btn" href="#">

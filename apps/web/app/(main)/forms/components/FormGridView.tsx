@@ -56,7 +56,7 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
 
                         {/* actions */}
                         <div className="card-foot">
-                            <Link className="o-btn o-btn--sm" href="#">
+                            <Link className="o-btn o-btn--sm" href={`/builder/${f.id}`}>
                                 <Icon name="edit" size={13} /> {isDraft ? "Continue folding" : "Edit"}
                             </Link>
                             <span className="foot-spacer" />

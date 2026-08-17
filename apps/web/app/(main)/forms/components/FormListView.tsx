@@ -1,4 +1,5 @@
 import React from "react";
+import Link from 'next/link'
 import { Icon } from "../../components/icons";
 import { STATUS_BADGE } from "../../utils";
 import { Form } from "../../types";
@@ -59,13 +60,13 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
 
                         <div className="c-actions">
                             <span className="row-tools">
-                                <button
+                                <Link
                                     className="tool"
                                     title={isDraft ? "Continue editing" : "Edit"}
                                     aria-label="Edit"
-                                >
+                                    href={`/builder/${f.id}`}>
                                     <Icon name="edit" size={15} />
-                                </button>
+                                </Link>
                                 <button className="tool" title="Preview" aria-label="Preview">
                                     <Icon name="eye" size={15} />
                                 </button>

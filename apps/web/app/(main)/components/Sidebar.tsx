@@ -7,6 +7,7 @@ import React from "react";
 import { Icon, type IconName } from "./icons";
 import { useSignInOrUp } from "~/hooks/use-signin";
 import { useUserStore } from "~/app/store/user-store";
+import { getNameFromEmail } from "~/app/utils";
 
 type NavItem = {
   href: string;
@@ -34,9 +35,9 @@ const Sidebar = () => {
   const { signOutUser } = useSignInOrUp()
   const clearUserFromRedux = useUserStore((state) => state.clearUser);
 
-  const firstName = user?.firstName ?? "there";
-  const email = user?.emailAddresses?.[0]?.emailAddress ?? "you@origamiforms.com";
-  const initial = (user?.firstName ?? "D").charAt(0).toUpperCase();
+  const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
+  const firstName = user?.firstName ?? getNameFromEmail(email);
+  const initial = (user?.firstName ?? getNameFromEmail(email)!).charAt(0).toUpperCase();
 
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);

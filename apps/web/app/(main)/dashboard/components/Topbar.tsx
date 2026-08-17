@@ -2,11 +2,13 @@
 
 import { useUser } from '@clerk/nextjs';
 import React from 'react'
+import { getNameFromEmail } from '~/app/utils';
 import { Icon } from '~/components/origami/icon';
 
 const Topbar = () => {
     const { user } = useUser();
-    const firstName = user?.firstName ?? "there";
+    const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
+    const firstName = user?.firstName ?? getNameFromEmail(email);
     return (
         <header className="topbar">
             <h1>

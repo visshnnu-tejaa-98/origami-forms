@@ -49,7 +49,7 @@ const FormFieldConfiguration = (props: FormFieldConfigurationProps) => {
                     <input
                         id="insp-placeholder"
                         className="insp-input"
-                        value={field.placeholder}
+                        value={field.placeholder ?? ""}
                         onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
                     />
                 </div>

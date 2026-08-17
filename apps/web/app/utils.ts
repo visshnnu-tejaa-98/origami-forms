@@ -18,3 +18,7 @@ export const relativeTime = (iso: string) => {
     const months = Math.round(days / 30);
     return `${months} month${months === 1 ? "" : "s"} ago`;
 };
+
+export const getNameFromEmail = (email: string) => {
+    return email.split("@")[0]
+}
