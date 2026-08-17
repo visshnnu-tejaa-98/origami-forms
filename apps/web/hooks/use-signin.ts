@@ -8,6 +8,7 @@ import { signInFlow, signupFlow } from "~/app/(auth)/constants";
 import { LoginFlow } from "~/app/(auth)/types";
 import { validateForm } from "~/app/(auth)/utils";
 import { signInFormInput, SignInFormInputType } from "~/app/(auth)/validators"
+import { useLocalStorage } from "./use-localstorage";
 
 export function useSignInOrUp() {
     const [formError, setFormError] = useState("")
@@ -15,11 +16,13 @@ export function useSignInOrUp() {
     const [isSigningInLoading, setisSigningInLoading] = useState(false)
     const [isSignUpLoading, setisSignUpLoading] = useState(false)
     const [missingRequirements, setMissingRequirements] = useState(false)
+    const [_, __, removeAuthDataFromLocalStorage] = useLocalStorage("user")
     // Which resource the shared OTP screen is driving.
     const [loginFlow, setLoginFlow] = useState<LoginFlow>('sign-in')
 
     const { signIn } = useSignIn()
     const { signUp } = useSignUp()
+    const { signOut } = useClerk()
     const clerk = useClerk()
     const router = useRouter()
     const searchParams = useSearchParams();
@@ -299,6 +302,12 @@ export function useSignInOrUp() {
         })
     }
 
+    const signOutUser = async () => {
+        await signOut()
+        removeAuthDataFromLocalStorage("user")
+        router.push('/')
+    }
+
 
     return {
         otpVerifying,
@@ -312,6 +321,7 @@ export function useSignInOrUp() {
         verifyOtp,
         resendOtp,
         signInWithGoogle,
-        clearFormError
+        clearFormError,
+        signOutUser
     }
 }

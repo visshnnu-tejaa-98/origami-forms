@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { Icon, type IconName } from "./icons";
+import { useSignInOrUp } from "~/hooks/use-signin";
+import { useUserStore } from "~/app/store/user-store";
 
 type NavItem = {
   href: string;
@@ -29,6 +31,8 @@ const library: NavItem[] = [
 const Sidebar = () => {
   const pathname = usePathname();
   const { user } = useUser();
+  const { signOutUser } = useSignInOrUp()
+  const clearUserFromRedux = useUserStore((state) => state.clearUser);
 
   const firstName = user?.firstName ?? "there";
   const email = user?.emailAddresses?.[0]?.emailAddress ?? "you@origamiforms.com";
@@ -36,6 +40,11 @@ const Sidebar = () => {
 
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
+
+  const handleSignOutUser = async () => {
+    await signOutUser();
+    clearUserFromRedux();
+  }
 
   const renderItem = (item: NavItem) => (
     <Link
@@ -74,6 +83,9 @@ const Sidebar = () => {
       </Link>
       <Link className={`sb-item${isActive("/settings") ? " active" : ""}`} href="/settings">
         <Icon name="settings" size={17} /><span>Settings</span>
+      </Link>
+      <Link className={`sb-item${isActive("/auth/signout") ? " active" : ""}`} href="" onClick={handleSignOutUser}>
+        <Icon name="users" size={17} /><span>Signout →</span>
       </Link>
 
       <div className="sb-user">
