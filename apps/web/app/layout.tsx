@@ -32,7 +32,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="o-scope">
+      <body className="o-scope" suppressHydrationWarning>
         <GlobalProviders>{children}</GlobalProviders>
       </body>
     </html>

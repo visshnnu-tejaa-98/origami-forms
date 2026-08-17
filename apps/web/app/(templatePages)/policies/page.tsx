@@ -310,9 +310,9 @@ const Page = () => {
                         <Link href="/" className="o-btn o-btn--outline">
                             Back home
                         </Link>
-                        <a href="mailto:privacy@origamiforms.com" className="o-btn o-btn--accent">
+                        <Link href="/contact" className="o-btn o-btn--accent">
                             Contact us
-                        </a>
+                        </Link>
                     </div>
                     <p className="o-soft o-policy-copyright">
                         © {new Date().getFullYear()} Origami Forms · All rights reserved.

@@ -101,8 +101,8 @@ export function SignUpFlow() {
       </form>
 
       <div className="auth-foot">
-        By signing up you agree to our <Link href="/terms">terms</Link> &amp;{" "}
-        <Link href="/privacy">privacy</Link>.
+        By signing up you agree to our <Link href="/policies">terms</Link> &amp;{" "}
+        <Link href="/policies">privacy</Link>.
       </div>
       <div id="clerk-captcha" className="my-2" />
     </div>
