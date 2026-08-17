@@ -22,3 +22,10 @@ export const relativeTime = (iso: string) => {
 export const getNameFromEmail = (email: string) => {
     return email.split("@")[0]
 }
+
+export const addElipsis = (start: number, end: number, text: string) => {
+    if (text.length > end) {
+        return text.slice(start, end) + "..."
+    }
+    return text
+}
