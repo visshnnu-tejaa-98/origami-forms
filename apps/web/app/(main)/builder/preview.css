@@ -277,6 +277,7 @@
 
 .db-shell .pv-item .ic {
   flex: 0 0 28px;
+  flex-shrink: 0;
   width: 28px;
   height: 28px;
   display: grid;
@@ -297,6 +298,10 @@
 .db-shell .pv-item.t-highlighter .ic { background: var(--highlighter-soft); color: var(--highlighter-deep); }
 
 .db-shell .pv-item .nm {
+  /* the label is the only part allowed to shrink — min-width:0 lets it go
+     below its content width so the ellipsis kicks in instead of the tick */
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -304,6 +309,7 @@
 
 .db-shell .pv-item .tick {
   margin-left: auto;
+  flex: 0 0 17px;
   display: grid;
   place-items: center;
   width: 17px;
@@ -315,6 +321,7 @@
 
 .db-shell .pv-item .num {
   margin-left: auto;
+  flex: 0 0 auto;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--ink-4);

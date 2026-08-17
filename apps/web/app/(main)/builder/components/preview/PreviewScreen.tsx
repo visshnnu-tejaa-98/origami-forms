@@ -366,7 +366,7 @@ const PreviewScreen = ({ form, onClose }: PreviewScreenProps) => {
             <span className="o-kbd">←</span>
             <span className="o-kbd">→</span> nav
             <span className="sep">·</span>
-fold {at} of {total}
+            fold {at} of {total}
           </div>
           <div className="pv-arrows">
             <button type="button" onClick={() => go(at - 1)} disabled={at === 0} aria-label="Previous">
