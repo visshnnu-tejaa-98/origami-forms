@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import "../builder.css";
+import "../preview.css";
 import { useBuilder } from "~/hooks/use-builder";
 import { useFormById } from "~/hooks/use-form";
 import { toBuilderForm } from "../../utils";
@@ -11,6 +12,7 @@ import FieldPalette from "../components/FieldPalette";
 import FormCanvas from "../components/FormCanvas";
 import Inspector from "../components/Inspector";
 import Topbar from "../components/Topbar";
+import PreviewScreen from "../components/preview/PreviewScreen";
 import { Icon } from "../../components/icons";
 import type { BuilderForm } from "../types";
 
@@ -18,6 +20,8 @@ import type { BuilderForm } from "../types";
  *  seed is only ever handed to `useBuilder` once the form has actually loaded — the hook
  *  copies the seed into state on mount and never looks at it again */
 const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) => {
+  const [previewing, setPreviewing] = useState(false);
+
   const {
     form,
     stats,
@@ -48,7 +52,7 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
         <FieldPalette addField={addField} />
 
         <main className="b-center">
-          <CanvasHead questions={stats.questions} />
+          <CanvasHead questions={stats.questions} onPreview={() => setPreviewing(true)} />
           <FormCanvas
             form={form}
             setTitle={setTitle}
@@ -69,6 +73,8 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
           duplicateField={duplicateField}
         />
       </div>
+
+      {previewing && <PreviewScreen form={form} onClose={() => setPreviewing(false)} />}
     </div>
   );
 };

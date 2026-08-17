@@ -1,15 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import "./builder.css";
+import "./preview.css";
 import { useBuilder } from "~/hooks/use-builder";
 import CanvasHead from "./components/CanvasHead";
 import FieldPalette from "./components/FieldPalette";
 import FormCanvas from "./components/FormCanvas";
 import Inspector from "./components/Inspector";
 import Topbar from "./components/Topbar";
+import PreviewScreen from "./components/preview/PreviewScreen";
 
 const BuilderPage = () => {
+  const [previewing, setPreviewing] = useState(false);
+
   const {
     form,
     stats,
@@ -40,7 +44,7 @@ const BuilderPage = () => {
         <FieldPalette addField={addField} />
 
         <main className="b-center">
-          <CanvasHead questions={stats.questions} />
+          <CanvasHead questions={stats.questions} onPreview={() => setPreviewing(true)} />
           <FormCanvas
             form={form}
             setTitle={setTitle}
@@ -61,6 +65,8 @@ const BuilderPage = () => {
           duplicateField={duplicateField}
         />
       </div>
+
+      {previewing && <PreviewScreen form={form} onClose={() => setPreviewing(false)} />}
     </div>
   );
 };
