@@ -58,7 +58,6 @@ export type ToolbarProps = {
 export type FormHeaderProps = {
     query: string
     setQuery: (query: string) => void
-    totalForms: number
     totalResponses: number
 }
 

@@ -2,16 +2,20 @@ import React from 'react'
 import { Icon } from '~/components/origami/icon'
 import { FormHeaderProps } from '../../types'
 import Link from 'next/link'
+import { useFormStore } from '~/app/store/form-store'
 
 const FormsHeader = (props: FormHeaderProps) => {
-    const { query, setQuery, totalForms, totalResponses } = props
+    const { query, setQuery, totalResponses } = props
+    const formsStats = useFormStore((state) => state.formsStats)
+    const { total } = formsStats
+
     return (
         <header className="forms-head">
             <div>
                 <h1>Your paper drawer</h1>
                 <div className="sub">
                     {/* TODO: This length comes ander analytics, need to work on this, this data changes wrt to teh filter based on status */}
-                    {totalForms.toLocaleString()} forms folded · {totalResponses.toLocaleString()} responses
+                    {total.toLocaleString()} forms folded · {totalResponses.toLocaleString()} responses
                     gathered so far
                 </div>
             </div>

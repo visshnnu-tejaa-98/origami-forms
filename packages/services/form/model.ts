@@ -427,3 +427,26 @@ export const deleteFormFieldOutputSchema = z.object({
 })
 
 export type DeleteFormFieldOutputSchemaType = z.infer<typeof deleteFormFieldOutputSchema>
+
+
+export const formStatusListInputSchema = z.object({
+    requesterId: z.string().uuid().describe("id of the requesting user")
+})
+
+export type FormStatusListInputProps = z.infer<typeof formStatusListInputSchema>
+
+export const formStatusListOutputSchema = z.object({
+    published: z.number().int().nonnegative().describe("number of published forms"),
+    draft: z.number().int().nonnegative().describe("number of draft forms"),
+    archived: z.number().int().nonnegative().describe("number of archived forms"),
+    total: z.number().int().nonnegative().describe("total number of forms"),
+    // TODO: Add the below stats after the responses api is ready
+    // totalResponses: z.number().int().nonnegative().describe("total number of responses"),
+    // completedResponses: z.number().int().nonnegative().describe("total number of responses which hit the max submissions limit"),
+    // completionRate: z.number().int().nonnegative().describe("percentage of forms that are completed"),
+    // averageCompletionRate: z.number().int().nonnegative().describe("average completion rate of all forms"),
+    // totalViews: z.number().int().nonnegative().describe("total number of views"),
+    // totalShares: z.number().int().nonnegative().describe("total number of shares"),
+})
+
+export type FormStatusListOutputSchemaType = z.infer<typeof formStatusListOutputSchema>

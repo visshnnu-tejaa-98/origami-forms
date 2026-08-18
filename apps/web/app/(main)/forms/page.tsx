@@ -15,6 +15,7 @@ import Toolbar from "./components/Toolbar";
 import FormsHeader from "./components/FormsHeader";
 import FormsContent from "./components/FormsContent";
 import FloatingOrigamiDecorations from "../components/FloatingOrigamiDecorations";
+import { useFormStore } from "~/app/store/form-store";
 
 const Forms = () => {
   const { searchParams, setParams } = useQueryParams();
@@ -42,6 +43,12 @@ const Forms = () => {
     sortOrder,
   });
 
+  const setFormsToRedux = useFormStore(state => state.setForms)
+  useEffect(() => {
+    if (!formsData) return;
+    setFormsToRedux(formsData);
+  }, [formsData, setFormsToRedux]);
+
   const forms = useMemo<Form[]>(() => formsData?.forms.map(toUiForm) ?? [], [formsData]);
 
   const loading = !isUserLoaded || listFormsIsPending;
@@ -54,7 +61,6 @@ const Forms = () => {
       <FormsHeader
         query={query}
         setQuery={setQuery}
-        totalForms={formsData?.totalItems ?? 0}
         totalResponses={totalResponses}
       />
       <Toolbar {...toolbarProps} />

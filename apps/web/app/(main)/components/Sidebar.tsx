@@ -3,11 +3,13 @@
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Icon, type IconName } from "./icons";
 import { useSignInOrUp } from "~/hooks/use-signin";
 import { useUserStore } from "~/app/store/user-store";
 import { getNameFromEmail } from "~/app/utils";
+import { useFormStore } from "~/app/store/form-store";
+import { useFormsStats } from "~/hooks/use-form";
 
 type NavItem = {
   href: string;
@@ -18,7 +20,7 @@ type NavItem = {
 
 const workspace: NavItem[] = [
   { href: "/dashboard", icon: "home", label: "Overview" },
-  { href: "/forms", icon: "forms", label: "My forms", count: "7" },
+  { href: "/forms", icon: "forms", label: "My forms", },
   { href: "/responses", icon: "mail", label: "Responses", count: "218" },
   { href: "/analytics", icon: "analytics", label: "Analytics" },
 ];
@@ -30,10 +32,13 @@ const library: NavItem[] = [
 ];
 
 const Sidebar = () => {
+  const [workspaceLinks, setWorkSpaceLinks] = useState(workspace)
   const pathname = usePathname();
   const { user } = useUser();
   const { signOutUser } = useSignInOrUp()
   const clearUserFromRedux = useUserStore((state) => state.clearUser);
+  const { formsStatsData } = useFormsStats({})
+  const setFormStatsDataToRedux = useFormStore((state) => state.setFormsStats);
 
   const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
   const firstName = user?.firstName ?? getNameFromEmail(email);
@@ -46,6 +51,19 @@ const Sidebar = () => {
     await signOutUser();
     clearUserFromRedux();
   }
+
+  useEffect(() => {
+    if (formsStatsData) {
+      setWorkSpaceLinks((prevLinks) =>
+        prevLinks.map((link) =>
+          link.href === "/forms"
+            ? { ...link, count: formsStatsData.draft.toString() }
+            : link
+        )
+      );
+      setFormStatsDataToRedux(formsStatsData)
+    }
+  }, [formsStatsData]);
 
   const renderItem = (item: NavItem) => (
     <Link
@@ -73,7 +91,7 @@ const Sidebar = () => {
       </Link>
 
       <div className="sb-section">Workspace</div>
-      {workspace.map(renderItem)}
+      {workspaceLinks.map(renderItem)}
 
       <div className="sb-section">Library</div>
       {library.map(renderItem)}

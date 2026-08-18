@@ -1,6 +1,8 @@
 import {
     createFormInputModel,
     createFormOutputSchema,
+    formStatusListInputSchema,
+    formStatusListOutputSchema,
     getFormByIdInputSchema,
     getFormByIdOutputSchema,
     listFormsInputSchema,
@@ -8,7 +10,7 @@ import {
     updateFormInputSchema,
     updateFormOutputSchema,
 } from "@repo/services/form/model";
-import { createFormMeta, getFormByIdMeta, listFormsMeta, updateFormMeta } from "@repo/services/form/meta";
+import { createFormMeta, formStatsMeta, getFormByIdMeta, listFormsMeta, updateFormMeta } from "@repo/services/form/meta";
 import { protectedProcedure, router } from "../../trpc";
 import { formService } from "../../services";
 
@@ -72,4 +74,20 @@ export const formsRouter = router({
 
             return result;
         }),
+    formsStats: protectedProcedure
+        .meta(formStatsMeta({ getPathFn: () => "/forms/stats", tags: TAGS }))
+        .input(formStatusListInputSchema.omit({ requesterId: true }))
+        .output(formStatusListOutputSchema)
+        .query(async ({ input, ctx }) => {
+            console.log({ input })
+            const result = await formService.formStats({ ...input, requesterId: ctx.userId });
+            console.log({ result });
+
+            if (!result) {
+                throw new Error("Something went wrong while fetching form stats");
+            }
+
+            return result;
+        }),
+
 });

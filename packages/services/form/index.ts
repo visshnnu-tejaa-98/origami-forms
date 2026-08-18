@@ -16,6 +16,7 @@ import {
     CreateFormInputModel,
     DeleteFormFieldInputProps,
     DeleteFormProps,
+    FormStatusListInputProps,
     GetFormByIdProps,
     ListFormsProps,
     UpdateFormProps,
@@ -189,8 +190,6 @@ export default class FormService {
         ]);
 
         const totalPages = Math.ceil(totalItems / pageSize);
-        console.log({ rows })
-
         return {
             forms: rows,
             page,
@@ -499,6 +498,35 @@ export default class FormService {
         if (!deleted) throw new Error("Failed to delete form field");
 
         return { success: true, message: "Form field deleted successfully" };
+    }
+
+    public async formStats(payload: FormStatusListInputProps) {
+        const { requesterId } = payload;
+
+        const isAdmin = await this.userService.isAdmin(requesterId);
+
+        const condition = !isAdmin
+            ? and(eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
+            : isNull(forms.deletedAt);
+
+        const [rows, totalItems] = await Promise.all([
+            db.query.forms.findMany({
+                where: condition,
+                columns: { status: true },
+            }),
+            db.$count(forms, condition),
+        ]);
+
+        const published = rows.filter((form) => form.status === PUBLISHED).length;
+        const draft = rows.filter((form) => form.status === DRAFT).length;
+        const archived = rows.filter((form) => form.status === ARCHIVED).length;
+
+        return {
+            published,
+            draft,
+            archived,
+            total: totalItems,
+        };
     }
 }
 

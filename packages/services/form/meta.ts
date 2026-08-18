@@ -275,6 +275,49 @@ Returns the new form's id: \`{ id }\`.
     };
 };
 
+const formStatsMeta = ({ getPathFn, tags }: FormMetaInputProps): OpenApiMetaConfig => {
+    const pathType = getPathFn() as `/${string}`;
+    return {
+        openapi: {
+            method: GET,
+            path: pathType,
+            tags: tags ?? ["Form"],
+            summary: "Get form statistics",
+            description: `
+### Overview
+
+Fetches statistics for non-deleted forms, with optional filtering. Admins see all forms; regular users see only the forms they created.
+
+### Query Parameters
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`requesterId\` | string (uuid) | Yes | Id of the requesting user (admins see all forms). |
+| \`status\` | enum | No | Filter by \`draft\`, \`published\`, or \`archived\`. |
+| \`visibility\` | enum | No | Filter by \`public\` or \`unlisted\`. |
+| \`maxSubmissions\` | number | No | Only forms whose current submission count is at most this value. |
+
+### Response
+
+Returns \`{
+  published: number,
+  draft: number,
+  archived: number,
+  total: number
+}\`, where:\n
+- \`published\` — number of published forms;\n
+- \`draft\` — number of draft forms;\n
+- \`archived\` — number of archived forms;\n
+- \`total\` — total number of forms matching the filters.\n
+
+### Errors
+
+- **Validation** — a query parameter fails its schema constraint (e.g. \`maxSubmissions\` is not positive).\n
+`,
+        },
+    };
+}
+
 export {
     createFormMeta,
     getFormByIdMeta,
@@ -282,4 +325,5 @@ export {
     updateFormMeta,
     deleteFormMeta,
     cloneFormMeta,
+    formStatsMeta
 };
