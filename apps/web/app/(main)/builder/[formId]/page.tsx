@@ -35,6 +35,7 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
     removeField,
     saveAsDraft,
     saveAndPublish,
+    preview,
   } = useBuilder(seed, formId);
 
   return (
@@ -44,6 +45,7 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
         setTitle={setTitle}
         saveAsDraft={saveAsDraft}
         saveAndPublish={saveAndPublish}
+        preview={preview}
       />
 
       <div className="b-main">

@@ -57,6 +57,7 @@ export type TopbarProps = {
   setTitle: (title: string) => void;
   saveAsDraft: () => void;
   saveAndPublish: () => void;
+  preview: () => void;
 };
 
 export type FieldPaletteProps = {

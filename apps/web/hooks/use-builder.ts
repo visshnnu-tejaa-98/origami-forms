@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   LAYOUT_TYPES,
   PAGE_BREAK,
@@ -25,11 +25,17 @@ const SAVED_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
 
 const PUBLISHED = "published" as const;
 
+/** a cheap structural fingerprint — enough to tell "nothing changed since the last save" */
+const fingerprint = (form: BuilderForm) => JSON.stringify(form);
+
 export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   const [form, setForm] = useState<BuilderForm>(seed);
   const [selectedId, setSelectedId] = useState<string | null>(
     seed.fields.find((f) => !LAYOUT_TYPES.includes(f.type))?.id ?? null
   );
+
+  /** what the server last saw. the preview only needs a save when the form drifts from it */
+  const savedPrint = useRef(fingerprint(seed));
 
   const { createFormAsync } = useCreateForm()
   const { updateFormAsync } = useUpdateForm()
@@ -131,7 +137,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   );
 
   const save = useCallback(
-    async (status?: typeof PUBLISHED) => {
+    async (status?: typeof PUBLISHED, options?: { redirect?: boolean; silent?: boolean }) => {
+      const { redirect = true, silent = false } = options ?? {};
       // the schema demands a title and at least one field — say so before the round trip
       if (form.title.trim() === "") {
         toast.error("Give the form a title before saving.");
@@ -149,7 +156,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
             toast.error(result.message);
             return;
           }
-          toast.success(status === PUBLISHED ? "Form published." : "Changes saved.");
+          savedPrint.current = fingerprint(form);
+          if (!silent) toast.success(status === PUBLISHED ? "Form published." : "Changes saved.");
           return result.formData;
         }
 
@@ -159,8 +167,9 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
         // create carries no status, so publishing is a second call against the new form
         if (status === PUBLISHED) await updateFormAsync({ formId: saved.id, status });
 
-        toast.success(status === PUBLISHED ? "Form published." : "Draft saved.");
-        router.replace("/forms");
+        savedPrint.current = fingerprint(form);
+        if (!silent) toast.success(status === PUBLISHED ? "Form published." : "Draft saved.");
+        if (redirect) router.replace("/forms");
         return saved;
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Could not save the form.");
@@ -172,6 +181,19 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   const saveAsDraft = useCallback(() => save(), [save]);
 
   const saveAndPublish = useCallback(() => save(PUBLISHED), [save]);
+
+  const preview = useCallback(async () => {
+    if (formId && fingerprint(form) === savedPrint.current) {
+      router.push(`/builder/${formId}/preview`);
+      return;
+    }
+
+    const saved = await save(undefined, { redirect: false, silent: true });
+    if (!saved) return;
+
+    toast.success("Draft saved.");
+    router.push(`/builder/${formId ?? saved.id}/preview`);
+  }, [form, formId, router, save]);
 
   return {
     form,
@@ -188,5 +210,6 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     removeField,
     saveAsDraft,
     saveAndPublish,
+    preview,
   };
 }

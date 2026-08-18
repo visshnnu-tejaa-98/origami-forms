@@ -27,7 +27,8 @@ const BuilderPage = () => {
     duplicateField,
     removeField,
     saveAsDraft,
-    saveAndPublish
+    saveAndPublish,
+    preview
   } = useBuilder();
 
   return (
@@ -37,6 +38,7 @@ const BuilderPage = () => {
         setTitle={setTitle}
         saveAsDraft={saveAsDraft}
         saveAndPublish={saveAndPublish}
+        preview={preview}
       />
 
       <div className="b-main">
