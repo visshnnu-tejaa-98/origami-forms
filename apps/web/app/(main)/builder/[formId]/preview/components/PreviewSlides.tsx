@@ -49,7 +49,6 @@ const PreviewSlides = ({
     const isAnswered = useCallback(
         (id: string) => {
             const value = answers[id];
-            console.log({ value })
             return Array.isArray(value) ? value.length > 0 : (value ?? "") !== "";
         },
         [answers],

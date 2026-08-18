@@ -191,7 +191,6 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     const saved = await save(undefined, { redirect: false, silent: true });
     if (!saved) return;
 
-    toast.success("Draft saved.");
     router.push(`/builder/${formId ?? saved.id}/preview`);
   }, [form, formId, router, save]);
 
