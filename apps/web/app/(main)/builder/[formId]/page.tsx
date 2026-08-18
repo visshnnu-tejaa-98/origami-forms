@@ -52,8 +52,6 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
         <main className="b-center">
           <CanvasHead
             questions={stats.questions}
-            saveAsDraft={saveAsDraft}
-            onPreview={() => router.push(`/builder/${formId}/preview`)}
           />
           <FormCanvas
             form={form}

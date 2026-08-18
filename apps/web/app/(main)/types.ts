@@ -97,21 +97,3 @@ export type EmptyScreenProps = {
     onClick: () => void
 }
 
-export type PreviewScreenProps = {
-    form: BuilderForm;
-    status: Status | "pending",
-    onClose: () => void;
-};
-
-export type NumberFieldValidation = {
-    step: number;
-    min?: number;
-    max?: number;
-}
-
-export type Step =
-    | { kind: "cover" }
-    | { kind: "heading"; id: string; label: string }
-    | { kind: "page-break"; id: string; label: string; page: number }
-    | { kind: "field"; id: string; field: FieldBlock }
-    | { kind: "review" };

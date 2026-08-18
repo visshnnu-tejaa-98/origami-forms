@@ -1,5 +1,6 @@
 import { CreateFormInputModel, LayoutFieldType } from "@repo/services/form/model";
 import { IconName } from "../components/icons";
+import { Status } from "../types";
 
 type CreateFormInputType = CreateFormInputModel["fields"][number];
 
@@ -126,3 +127,48 @@ export type PreviewInputProps = {
   value: AnswerValue | undefined;
   onChange: (value: AnswerValue) => void;
 };
+
+export type PreviewScreenProps = {
+  form: BuilderForm;
+  status: Status | "pending",
+  onClose: () => void;
+};
+
+export type NumberFieldValidation = {
+  step: number;
+  min?: number;
+  max?: number;
+}
+
+export type Step =
+  | { kind: "cover" }
+  | { kind: "heading"; id: string; label: string }
+  | { kind: "page-break"; id: string; label: string; page: number }
+  | { kind: "field"; id: string; field: FieldBlock }
+  | { kind: "review" };
+
+export type Question = {
+  kind: "field";
+  id: string;
+  field: FieldBlock;
+}
+
+export type PreviewSideRailProps = {
+  form: BuilderForm
+  at: number,
+  steps: Step[],
+  questions: Question[]
+  onClose: () => void,
+  go: (i: number) => void,
+}
+
+export type PreviewStateProps = {
+  at: number
+  total: number
+  back: boolean
+  step: any
+  form: any
+  questions: any[]
+  go: any
+  status: string
+}

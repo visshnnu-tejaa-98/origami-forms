@@ -9,7 +9,6 @@ import FieldPalette from "./components/FieldPalette";
 import FormCanvas from "./components/FormCanvas";
 import Inspector from "./components/Inspector";
 import Topbar from "./components/Topbar";
-import PreviewScreen from "./[formId]/preview/components/PreviewScreen";
 
 const BuilderPage = () => {
   const [previewing, setPreviewing] = useState(false);
@@ -44,7 +43,7 @@ const BuilderPage = () => {
         <FieldPalette addField={addField} />
 
         <main className="b-center">
-          <CanvasHead questions={stats.questions} saveAsDraft={saveAsDraft} onPreview={() => { setPreviewing(true) }} />
+          <CanvasHead questions={stats.questions} />
           <FormCanvas
             form={form}
             setTitle={setTitle}
@@ -66,7 +65,6 @@ const BuilderPage = () => {
         />
       </div>
 
-      {previewing && <PreviewScreen form={form} status={"pending"} onClose={() => setPreviewing(false)} />}
     </div>
   );
 };

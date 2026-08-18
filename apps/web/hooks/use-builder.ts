@@ -166,7 +166,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
         toast.error(error instanceof Error ? error.message : "Could not save the form.");
       }
     },
-    [createFormAsync, form, formId, router, toCreatePayload, toUpdatePayload, updateFormAsync]
+    [form, formId, router, createFormAsync, toCreatePayload, toUpdatePayload, updateFormAsync]
   );
 
   const saveAsDraft = useCallback(() => save(), [save]);

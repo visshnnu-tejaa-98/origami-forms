@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Icon } from "../../components/icons";
 import { TopbarProps } from "../types";
+import { useParams, useRouter } from "next/navigation";
 
 const Topbar = (props: TopbarProps) => {
   const { title, setTitle, saveAsDraft, saveAndPublish } = props;
+  const params = useParams();
+  const router = useRouter();
+  const { formId } = params;
 
   return (
     <header className="b-top">
@@ -30,12 +34,12 @@ const Topbar = (props: TopbarProps) => {
 
       <div className="right">
         <div className="save-state">
-          <span className="dot" /> auto-saved
+          <span className="dot"></span> auto-saved
         </div>
-        {/* <button className="o-btn o-btn--sm">
+        <button className="o-btn o-btn--sm" onClick={() => router.push(`/builder/${formId}/preview`)}>
           <Icon name="eye" size={14} /> Preview
         </button>
-        <button className="o-btn o-btn--sm">
+        {/* <button className="o-btn o-btn--sm">
           <Icon name="share" size={14} /> Share
         </button> */}
         <button className="o-btn o-btn--sm" onClick={saveAsDraft}>
