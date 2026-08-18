@@ -52,6 +52,7 @@ const Sidebar = () => {
       key={item.href}
       className={`sb-item${isActive(item.href) ? " active" : ""}`}
       href={item.href}
+      title={item.label}
     >
       <Icon name={item.icon} size={17} />
       <span>{item.label}</span>
@@ -66,7 +67,7 @@ const Sidebar = () => {
         <span>origami</span>
       </Link>
 
-      <Link className="sb-new" href="/builder">
+      <Link className="sb-new" href="/builder" title="New form">
         <Icon name="plus" size={16} />
         <span>New form</span>
       </Link>
@@ -78,14 +79,14 @@ const Sidebar = () => {
       {library.map(renderItem)}
 
       <div className="sb-section">Account</div>
-      <Link className={`sb-item${isActive("/pricing") ? " active" : ""}`} href="/pricing">
+      <Link className={`sb-item${isActive("/pricing") ? " active" : ""}`} href="/pricing" title="Billing">
         <Icon name="zap" size={17} /><span>Billing</span>
         <span className="o-badge o-badge--matcha" style={{ marginLeft: "auto", fontSize: "0.62rem", padding: "1px 6px" }}>free</span>
       </Link>
-      <Link className={`sb-item${isActive("/settings") ? " active" : ""}`} href="/settings">
+      <Link className={`sb-item${isActive("/settings") ? " active" : ""}`} href="/settings" title="Settings">
         <Icon name="settings" size={17} /><span>Settings</span>
       </Link>
-      <Link className={`sb-item${isActive("/auth/signout") ? " active" : ""}`} href="" onClick={handleSignOutUser}>
+      <Link className={`sb-item${isActive("/auth/signout") ? " active" : ""}`} href="" onClick={handleSignOutUser} title="Sign out">
         <Icon name="users" size={17} /><span>Signout →</span>
       </Link>
 

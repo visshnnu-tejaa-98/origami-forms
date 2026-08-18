@@ -6,12 +6,15 @@ import React, { useEffect } from "react";
 import { useUserStore } from "~/app/store/user-store";
 import { useGetUser } from "~/hooks/use-user";
 import Sidebar from "./components/Sidebar";
+import { Icon } from "./components/icons";
+import { useSidebarRail } from "~/hooks/use-sidebar-rail";
 import "./shell.css";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  // the respondent preview is the whole window — no app chrome around it
-  const bare = pathname?.endsWith("/preview") ?? false;
+  const flush = pathname?.endsWith("/preview") ?? false;
+
+  const { railed, closing, collapsed, toggleable, toggle } = useSidebarRail();
 
   const { isLoaded, isSignedIn, user } = useUser();
   const { createUserAsync } = useGetUser();
@@ -41,8 +44,22 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   }, [isLoaded, isSignedIn, user?.id]);
 
   return (
-    <div className={`db-shell o-scope${bare ? " db-shell--bare" : ""}`}>
-      {!bare && <Sidebar />}
+    <div
+      className={`db-shell o-scope${flush ? " db-shell--flush" : ""}${railed ? " db-shell--rail" : ""}${closing ? " db-shell--closing" : ""}`}
+    >
+      <Sidebar />
+      {toggleable && (
+        <button
+          type="button"
+          className="sb-collapse"
+          onClick={toggle}
+          aria-pressed={collapsed}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <Icon name="chevron" size={14} />
+        </button>
+      )}
       <main>{children}</main>
     </div>
   );

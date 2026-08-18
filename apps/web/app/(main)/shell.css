@@ -5,10 +5,23 @@
    ============================================================ */
 
 .db-shell {
+  --sidebar-w: 240px;
+  --sidebar-rail-w: 64px;
+  /* one timing for the column and the handle, so the handle stays welded to the edge */
+  --rail-ease: 110ms cubic-bezier(0.4, 0, 0.2, 1);
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: var(--sidebar-w) 1fr;
   height: 100vh;
   overflow: hidden;
+  /* the collapse handle is positioned against the shell */
+  position: relative;
+  /* both column widths are fixed lengths, so the column itself can animate */
+  transition: grid-template-columns var(--rail-ease);
+}
+
+/* rail mode: the column shrinks to icons and stays there until the handle is clicked */
+.db-shell.db-shell--rail {
+  grid-template-columns: var(--sidebar-rail-w) 1fr;
 }
 .db-shell > aside {
   height: 100vh;
@@ -21,13 +34,8 @@
   padding: 28px 36px 80px;
 }
 
-/* full-bleed routes (the respondent preview) drop the sidebar and the padding.
-   doubled selector so the responsive rules further down cannot narrow it back */
-.db-shell.db-shell--bare {
-  grid-template-columns: 1fr;
-}
-
-.db-shell.db-shell--bare > main {
+/* full-bleed routes (the preview stage) keep the sidebar but drop the shell padding */
+.db-shell.db-shell--flush > main {
   padding: 0;
   overflow: hidden;
 }
@@ -55,6 +63,44 @@
   background-repeat: repeat-y;
   opacity: 0.45;
 }
+/* the collapse handle rides the seam between the sidebar and the page */
+.db-shell .sb-collapse {
+  position: absolute;
+  top: 30px;
+  left: calc(var(--sidebar-w) - 13px);
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--rule-line);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--ink-3);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(31, 27, 23, 0.1);
+  transition:
+    left var(--rail-ease),
+    background 180ms,
+    color 180ms;
+}
+.db-shell--rail .sb-collapse {
+  left: calc(var(--sidebar-rail-w) - 13px);
+}
+.db-shell .sb-collapse:hover {
+  background: var(--bg-sunken);
+  color: var(--ink-1);
+}
+/* the chevron points the way the sidebar will move */
+.db-shell .sb-collapse svg {
+  transform: rotate(180deg);
+  transition: transform var(--rail-ease);
+}
+.db-shell--rail .sb-collapse svg {
+  transform: none;
+}
+
 .db-shell .sb-brand {
   display: inline-flex;
   align-items: center;
@@ -77,12 +123,17 @@
   text-transform: uppercase;
   color: var(--ink-4);
   padding: 12px 12px 6px;
+  flex: 0 0 auto;
 }
 .db-shell .sb-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 11px;
+  /* fixed so a row is the same height collapsed or not, and never squeezed by a
+     scrolling column */
+  height: 38px;
+  flex: 0 0 auto;
+  padding: 0 11px;
   margin: 0 0 2px;
   border-radius: 9px;
   font-size: 0.92rem;
@@ -94,6 +145,15 @@
     background 200ms,
     color 200ms;
   position: relative;
+}
+.db-shell .sb-item span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.db-shell .sb-item svg,
+.db-shell .sb-new svg {
+  flex: 0 0 auto;
 }
 .db-shell .sb-item:hover {
   background: var(--bg-sunken);
@@ -122,7 +182,24 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 62px;
   border-top: 1px dashed var(--rule-line);
+}
+/* the avatar is a circle, so it must never be squeezed by a long name beside it */
+.db-shell .sb-user .o-avatar {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+.db-shell .sb-user > div {
+  min-width: 0;
+}
+.db-shell .sb-user .name,
+.db-shell .sb-user .plan {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .db-shell .sb-user .name {
   font-weight: 600;
@@ -137,10 +214,13 @@
   margin: 14px 10px 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  height: 40px;
+  flex: 0 0 auto;
   background: var(--ink-1);
   color: var(--paper-0);
-  padding: 10px 12px;
+  padding: 0 12px;
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.86rem;
@@ -151,6 +231,102 @@
 }
 .db-shell .sb-new:hover {
   transform: translateY(-1px);
+}
+
+/* ---- labels coming and going ----
+   opening: labels can't transition out of display:none, so they fade in on a delay and
+   arrive as the column finishes widening rather than snapping into a 64px rail.
+   closing: the shell wears --closing for one beat before --rail lands, which is the window
+   the labels fade out in, while the column is still wide enough to hold them. */
+@keyframes sbLabelIn {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.db-shell:not(.db-shell--rail) .sb-brand span:last-child,
+.db-shell:not(.db-shell--rail) .sb-section,
+.db-shell:not(.db-shell--rail) .sb-item span:nth-child(2),
+.db-shell:not(.db-shell--rail) .sb-item .count,
+.db-shell:not(.db-shell--rail) .sb-item .o-badge,
+.db-shell:not(.db-shell--rail) .sb-user div,
+.db-shell:not(.db-shell--rail) .sb-new span:nth-child(2) {
+  animation: sbLabelIn 110ms ease-out backwards;
+  animation-delay: 50ms;
+}
+.db-shell--closing:not(.db-shell--rail) .sb-brand span:last-child,
+.db-shell--closing:not(.db-shell--rail) .sb-section,
+.db-shell--closing:not(.db-shell--rail) .sb-item span:nth-child(2),
+.db-shell--closing:not(.db-shell--rail) .sb-item .count,
+.db-shell--closing:not(.db-shell--rail) .sb-item .o-badge,
+.db-shell--closing:not(.db-shell--rail) .sb-user div,
+.db-shell--closing:not(.db-shell--rail) .sb-new span:nth-child(2) {
+  animation: none;
+  opacity: 0;
+  transform: translateX(-6px);
+  /* ease-in, so the labels drain away gradually instead of blinking out */
+  transition:
+    opacity 90ms cubic-bezier(0.4, 0, 1, 1),
+    transform 90ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ---- rail (icons-only) mode ---- */
+.db-shell--rail .sidebar {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.db-shell--rail .sb-brand span:last-child,
+.db-shell--rail .sb-item span:nth-child(2),
+.db-shell--rail .sb-item .count,
+.db-shell--rail .sb-item .o-badge,
+.db-shell--rail .sb-user div,
+.db-shell--rail .sb-new span:nth-child(2) {
+  display: none;
+}
+/* collapsed, a heading becomes a rule: the text goes transparent so the box (and with it
+   the rail's row-for-row alignment with the wide sidebar) survives, and a dash is drawn
+   through the middle of it */
+.db-shell--rail .sb-section {
+  position: relative;
+  color: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.db-shell--rail .sb-section::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: calc(50% + 3px);
+  border-top: 1px dashed var(--rule-line);
+}
+.db-shell--rail .sb-item,
+.db-shell--rail .sb-user {
+  justify-content: center;
+}
+.db-shell--rail .sb-brand {
+  display: flex;
+  justify-content: center;
+}
+/* rows keep their fixed height; only the label goes, and the icon grows into its place */
+.db-shell--rail .sb-item,
+.db-shell--rail .sb-new {
+  padding-left: 0;
+  padding-right: 0;
+  gap: 0;
+}
+.db-shell--rail .sb-new {
+  margin-left: 0;
+  margin-right: 0;
+}
+.db-shell--rail .sb-item svg,
+.db-shell--rail .sb-new svg {
+  width: 21px;
+  height: 21px;
 }
 
 /* ============================================================
@@ -184,34 +360,32 @@
 @keyframes skShimmer { 100% { transform: translateX(100%); } }
 
 @media (prefers-reduced-motion: reduce) {
+  .db-shell,
+  .db-shell .sb-collapse,
+  .db-shell .sb-collapse svg {
+    transition: none;
+  }
+  .db-shell :is(.sb-brand, .sb-section, .sb-item, .sb-user, .sb-new),
+  .db-shell :is(.sb-brand, .sb-section, .sb-item, .sb-user, .sb-new) * {
+    animation: none;
+    transition: none;
+  }
   .db-shell .ori-loader .ori-piece,
   .db-shell .sk-shimmer::after { animation: none; }
 }
 
 /* ====== RESPONSIVE ====== */
+/* narrow viewports get the rail whatever the stored preference says — hover still expands it,
+   so these mirror the .db-shell--rail rules above */
 @media (max-width: 1080px) {
-  .db-shell {
-    grid-template-columns: 64px 1fr;
-  }
-  .db-shell .sb-brand span:last-child,
-  .db-shell .sb-section,
-  .db-shell .sb-item span:nth-child(2),
-  .db-shell .sb-item .count,
-  .db-shell .sb-user .name,
-  .db-shell .sb-user .plan,
-  .db-shell .sb-new span:nth-child(2) {
+  /* the rail is forced at this width (see the shell layout), so there is nothing to toggle */
+  .db-shell .sb-collapse {
     display: none;
-  }
-  .db-shell .sb-item {
-    justify-content: center;
-    padding: 10px;
-  }
-  .db-shell .sb-new {
-    justify-content: center;
   }
 }
 @media (max-width: 720px) {
-  .db-shell {
+  .db-shell,
+  .db-shell.db-shell--rail {
     grid-template-columns: 1fr;
   }
   .db-shell > aside {
