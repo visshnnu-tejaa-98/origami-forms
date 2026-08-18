@@ -245,6 +245,12 @@
 }
 
 .db-shell .pv-rail-head {
+  position: sticky;
+  top: -20px;
+  z-index: 2;
+  padding: 20px 0 8px;
+  margin-top: -20px;
+  background: var(--bg-elevated);
   display: flex;
   align-items: center;
   justify-content: space-between;

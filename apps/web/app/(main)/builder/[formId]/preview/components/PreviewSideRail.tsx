@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Icon } from '~/app/(main)/components/icons';
 import { PreviewSideRailProps, } from '../../../types';
 import { BLOCK_META, HEADING, PAGE_BREAK } from '../../../constants';
@@ -7,6 +7,11 @@ import { BLOCK_META, HEADING, PAGE_BREAK } from '../../../constants';
 
 const PreviewSideRail = ({ form, at, steps, questions, onClose, go }: PreviewSideRailProps) => {
     const total = steps.length - 1;
+    const activeItem = useRef<HTMLButtonElement | null>(null);
+
+    useEffect(() => {
+        activeItem.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, [at]);
 
     return (
         <aside className="pv-rail">
@@ -20,6 +25,7 @@ const PreviewSideRail = ({ form, at, steps, questions, onClose, go }: PreviewSid
             <div className="pv-rail-title pv-rail-title--spaced">First Fold</div>
             <button
                 type="button"
+                ref={at === 0 ? activeItem : undefined}
                 className={`pv-item t-matcha pv-item ${at === 0 ? " active" : ""}`}
                 onClick={() => go(0)}
             >
@@ -42,6 +48,7 @@ const PreviewSideRail = ({ form, at, steps, questions, onClose, go }: PreviewSid
                     <button
                         key={s.id}
                         type="button"
+                        ref={i === at ? activeItem : undefined}
                         className={`pv-item t-${meta?.tint ?? "accent"}${i === at ? " active" : ""}`}
                         onClick={() => go(i)}
                     >
@@ -61,7 +68,8 @@ const PreviewSideRail = ({ form, at, steps, questions, onClose, go }: PreviewSid
             <div className="pv-rail-title pv-rail-title--spaced">The finish</div>
             <button
                 type="button"
-                className={`pv-item t-matcha pv-item--review${at === total ? " active" : ""}`}
+                ref={at === total ? activeItem : undefined}
+                className={`pv-item t-matcha pv-item ${at === total ? " active" : ""}`}
                 onClick={() => go(total)}
             >
                 <span className="ic">
