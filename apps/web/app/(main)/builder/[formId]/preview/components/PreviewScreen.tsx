@@ -3,38 +3,20 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Icon } from "../../../../components/icons";
 import { BLOCK_META, HEADING, PAGE_BREAK, isFieldBlock } from "../../../constants";
-import { BuilderForm, FieldBlock } from "../../../types";
+import { AnswerValue } from "../../../types";
 import { Clip, Crane, ScribbleArrow } from "~/components/origami/deco";
 import HelpTip from "../../../components/HelpTip";
 import PreviewCanvas from "./PreviewCanvas";
-import PreviewInput, { AnswerValue } from "./PreviewInput";
+import PreviewInput from "./PreviewInput";
+import { PreviewScreenProps, Step } from "~/app/(main)/types";
+import { estimatedTimeToCompleteForm } from "~/app/(main)/utils";
 
-type PreviewScreenProps = {
-  form: BuilderForm;
-  onClose: () => void;
-  /** true when the preview owns the route rather than floating over the studio */
-  asPage?: boolean;
-};
-
-/** a welcome cover, one step per question or heading, then the review */
-type Step =
-  | { kind: "cover" }
-  | { kind: "heading"; id: string; label: string }
-  | { kind: "page-break"; id: string; label: string; page: number }
-  | { kind: "field"; id: string; field: FieldBlock }
-  | { kind: "review" };
-
-/** every sheet is taped down with a different colour from the washi drawer */
-const TAPE_TONES = ["sakura", "matcha", "peach", "lavender", "indigo", "highlighter"];
-
-const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) => {
+const PreviewScreen = ({ form, status, onClose }: PreviewScreenProps) => {
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [at, setAt] = useState(0);
   // which way the last move went, so the sheet animates with the travel
   const [back, setBack] = useState(false);
 
-  // layout blocks get their own screens: a heading is a statement, a page break
-  // is the turn of the page — one question per screen otherwise
   const steps = useMemo<Step[]>(() => {
     let page = 1;
     const middle: Step[] = form.fields.flatMap((block): Step[] => {
@@ -60,7 +42,7 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
         setBack(next < current);
         return next;
       }),
-    [total]
+    [total],
   );
 
   // enter and the arrow keys walk the flow, exactly as the published form does
@@ -76,7 +58,7 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
         go(at + 1);
       }
       if (!typing && e.key === "ArrowRight") go(at + 1);
-      if (!typing && e.key === "ArrowLeft") go(at - 1);
+      if (!typing && e.key === "ArrowLeft" && at > 0) go(at - 1);
     };
 
     window.addEventListener("keydown", onKey);
@@ -88,14 +70,8 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
       const value = answers[id];
       return Array.isArray(value) ? value.length > 0 : (value ?? "") !== "";
     },
-    [answers]
+    [answers],
   );
-
-  /**
-   * The pile thins as the form runs out: two sheets waiting behind the third-from-last
-   * card, one behind the second-from-last, none behind the final one. Each step shifts
-   * the remaining sheets a little, so the top card reads as having just been peeled off.
-   */
   const stack = useMemo(() => {
     const under = Math.max(0, Math.min(2, total - at));
     return Array.from({ length: under }, (_, k) => {
@@ -114,34 +90,51 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
   const questions = steps.filter((s) => s.kind === "field");
   const answered = questions.filter((s) => s.kind === "field" && isAnswered(s.id)).length;
 
-  const stepLabel =
-    step.kind === "field"
-      ? (BLOCK_META[step.field.type]?.label ?? "Question")
-      : step.kind === "cover"
-        ? "Welcome"
-        : step.kind === "heading"
-          ? "Section"
-          : step.kind === "page-break"
-            ? `Page ${step.page}`
-            : "Review";
+  const getStepLabel = () => {
+    if (step.kind === "cover") return "Welcome";
+    if (step.kind === "page-break") return `Page ${step.page}`;
+    if (step.kind === "heading") return "Section";
+    if (step.kind === "field") {
+      const meta = BLOCK_META[step.field.type];
+      return meta?.label ?? step.field.type;
+    }
+    return "Review";
+  };
+
+  const stepLabel = getStepLabel();
+  const estimatedTime = estimatedTimeToCompleteForm(form.fields.length);
+
+  const isField = step && step.kind === "field";
+  const field = isField ? step.field : null;
+
+  const fieldType = field ? BLOCK_META[field.type]?.label.toLowerCase() : "";
+  const isRequired = field ? field.required : undefined;
+  const fieldLabel = field ? field?.label : "Untitled question";
 
   return (
-    <div
-      className={`pv-screen${asPage ? " pv-screen--page" : ""}`}
-      {...(asPage
-        ? { "aria-label": "Form preview" }
-        : { role: "dialog", "aria-modal": true, "aria-label": "Form preview" })}
-    >
+    <div className={`pv-screen pv-screen--page`} {...{ "aria-label": "Form preview" }}>
       <PreviewCanvas />
 
-      {/* ===== RAIL ===== */}
+      {/* ===== SIDE RAIL ===== */}
       <aside className="pv-rail">
         <div className="pv-rail-head">
-          <span className="o-badge o-badge--matcha">▶ live preview</span>
           <button type="button" className="o-btn o-btn--sm o-btn--ghost" onClick={onClose}>
             <Icon name="arrow-left" size={13} /> builder
           </button>
+          <span className="o-badge o-badge--matcha">▶ live preview</span>
         </div>
+
+        <div className="pv-rail-title pv-rail-title--spaced">First Fold</div>
+        <button
+          type="button"
+          className={`pv-item t-matcha pv-item ${at === 0 ? " active" : ""}`}
+          onClick={() => go(0)}
+        >
+          <span className="ic">
+            <Icon name="check" size={14} />
+          </span>
+          <span className="nm">{form.title}</span>
+        </button>
 
         <div className="pv-rail-title">The folds</div>
         {steps.map((s, i) => {
@@ -151,6 +144,7 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
               ? BLOCK_META[s.field.type]
               : BLOCK_META[s.kind === "page-break" ? PAGE_BREAK : HEADING];
           const label = s.kind === "field" ? s.field.label : s.label;
+
           return (
             <button
               key={s.id}
@@ -189,25 +183,14 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
           <span className="nm">Review &amp; send</span>
           <span className="num">{String(total).padStart(2, "0")}</span>
         </button>
-
-        <div className="pv-rail-foot">
-          <div className="row">
-            <span className="o-kbd">←</span>
-            <span className="o-kbd">→</span> navigate
-          </div>
-          <div className="row">
-            <span className="o-kbd">↵</span> next
-          </div>
-          <div className="row">
-            <span className="o-kbd">esc</span> back to builder
-          </div>
-        </div>
       </aside>
 
       {/* ===== STAGE ===== */}
       <section className="pv-stage">
         <header className="pv-top">
-          <span className="pv-eyebrow">wet-fold preview · unpublished</span>
+          <span className="pv-eyebrow">
+            wet-fold preview · <span>{status === "published" ? "published" : "unpublished"}</span>
+          </span>
           <div className="pv-meta">
             <span className="pv-step-label">{stepLabel}</span>
             <div className="pv-progress">
@@ -239,7 +222,6 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
             <span className="pv-watermark" aria-hidden>
               <Crane size={190} />
             </span>
-            <span className={`pv-tape pv-tape--${TAPE_TONES[at % TAPE_TONES.length]}`} aria-hidden />
             <span className="pv-clip" aria-hidden>
               <Clip size={34} />
             </span>
@@ -250,17 +232,14 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
                 <span className="pv-mascot">
                   <Icon name="crane" size={72} />
                 </span>
-                <h1 className="pv-title">{form.title || "Untitled form"}</h1>
+                <h1 className="pv-title">{form.title}</h1>
                 {form.description && <p className="pv-help">{form.description}</p>}
                 <div className="pv-actions pv-actions--center">
                   <button className="o-btn o-btn--accent o-btn--lg" onClick={() => go(at + 1)}>
                     Make the first fold <Icon name="arrow" size={16} />
                   </button>
-                  <span className="ok-hint">
-                    press <span className="o-kbd">↵</span>
-                  </span>
                 </div>
-                <p className="pv-margin-note">↓ a few folds, about a minute</p>
+                <p className="pv-margin-note">↓ a few folds, {estimatedTime}</p>
                 <div className="pv-facts">
                   <span>
                     <Icon name="layers" size={14} /> {questions.length} folds
@@ -275,11 +254,11 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
             {step.kind === "heading" && (
               <div className="pv-centered">
                 <p className="pv-quote">{step.label}</p>
+                <span className="ok-hint">nothing to fold here — read and carry on</span>
                 <div className="pv-actions pv-actions--center">
                   <button className="o-btn o-btn--accent o-btn--lg" onClick={() => go(at + 1)}>
                     Continue <Icon name="arrow" size={16} />
                   </button>
-                  <span className="ok-hint">nothing to fold here — read and carry on</span>
                 </div>
               </div>
             )}
@@ -292,6 +271,7 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
                   <span className="rule" />
                 </div>
                 <p className="pv-quote">{step.label || "halfway there"}</p>
+                <span className="ok-hint">nothing to fold here — read and carry on</span>
                 <div className="pv-actions pv-actions--center">
                   <button className="o-btn o-btn--accent o-btn--lg" onClick={() => go(at + 1)}>
                     Turn the leaf <Icon name="arrow" size={16} />
@@ -305,14 +285,16 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
                 <div className="pv-num-row">
                   {String(at).padStart(2, "0")}
                   <span className="arrow">→</span>
-                  <span className={`pv-type-pill t-${BLOCK_META[step.field.type]?.tint ?? "accent"}`}>
-                    {BLOCK_META[step.field.type]?.label.toLowerCase() ?? step.field.type}
+                  <span
+                    className={`pv-type-pill t-${BLOCK_META[step.field.type]?.tint ?? "accent"}`}
+                  >
+                    {fieldType}
                   </span>
-                  {step.field.required && <span className="pv-req">required</span>}
+                  {isRequired && <span className="pv-req">required</span>}
                 </div>
 
                 <h2 className="pv-title">
-                  {step.field.label || "Untitled question"}
+                  {fieldLabel}
                   {step.field.helpText && (
                     <span className="pv-title-tip">
                       <HelpTip text={step.field.helpText} />
@@ -336,9 +318,6 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
                   <button className="o-btn o-btn--accent o-btn--lg" onClick={() => go(at + 1)}>
                     Crease it <Icon name="check" size={16} />
                   </button>
-                  <span className="ok-hint">
-                    press <span className="o-kbd">↵</span>
-                  </span>
                 </div>
               </>
             )}
@@ -386,13 +365,25 @@ const PreviewScreen = ({ form, onClose, asPage = false }: PreviewScreenProps) =>
             <span className="o-kbd">←</span>
             <span className="o-kbd">→</span> nav
             <span className="sep">·</span>
+            <span className="o-kbd">esc</span> back to builder
+            <span className="sep">·</span>
             fold {at} of {total}
           </div>
           <div className="pv-arrows">
-            <button type="button" onClick={() => go(at - 1)} disabled={at === 0} aria-label="Previous">
+            <button
+              type="button"
+              onClick={() => go(at - 1)}
+              disabled={at === 0}
+              aria-label="Previous"
+            >
               <Icon name="arrow-left" size={16} />
             </button>
-            <button type="button" onClick={() => go(at + 1)} disabled={at === total} aria-label="Next">
+            <button
+              type="button"
+              onClick={() => go(at + 1)}
+              disabled={at === total}
+              aria-label="Next"
+            >
               <Icon name="arrow" size={16} />
             </button>
           </div>

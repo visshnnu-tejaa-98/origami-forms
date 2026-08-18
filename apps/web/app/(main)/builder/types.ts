@@ -118,3 +118,11 @@ export type InspectorActionsProps = {
   removeField: (id: string) => void;
   duplicateField: (id: string) => void;
 };
+
+export type AnswerValue = string | string[];
+
+export type PreviewInputProps = {
+  field: FieldBlock;
+  value: AnswerValue | undefined;
+  onChange: (value: AnswerValue) => void;
+};

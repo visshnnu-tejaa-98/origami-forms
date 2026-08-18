@@ -9,10 +9,6 @@ import { toBuilderForm } from "../../../utils";
 import { Icon } from "../../../components/icons";
 import PreviewScreen from "./components/PreviewScreen";
 
-/**
- * The saved form, as a respondent meets it. Loads the sheet by id rather than
- * reading studio state, so the preview survives a refresh and can be linked to.
- */
 const FormPreviewPage = () => {
   const { formId } = useParams<{ formId: string }>();
   const router = useRouter();
@@ -45,7 +41,7 @@ const FormPreviewPage = () => {
     );
   }
 
-  return <PreviewScreen asPage form={toBuilderForm(formData)} onClose={backToBuilder} />;
+  return <PreviewScreen form={toBuilderForm(formData)} status={formData.status} onClose={backToBuilder} />;
 };
 
 export default FormPreviewPage;

@@ -2,6 +2,7 @@ import React from "react";
 import { Icon } from "../../components/icons";
 import { PREVIEW_PLACEHOLDER, hasOptions } from "../constants";
 import { FieldBlock } from "../types";
+import { previewNumberNote } from "../../utils";
 
 /**
  * A non-interactive sketch of how the field will look to a respondent.
@@ -100,13 +101,7 @@ const FieldPreview = ({ field }: { field: FieldBlock }) => {
             disabled
           />
           <span className="preview-note">
-            {field.validation?.min != null && field.validation?.min != 0 && (
-              <span>min {field.validation.min}</span>
-            )}{" "}
-            . {field.validation?.max != null && <span>max {field.validation.max}</span>} {" "}
-            {field.validation?.step != null && field.validation?.step != 1 && (
-              <span>. step {field.validation.step}</span>
-            )}
+            {field?.validation && previewNumberNote(field.validation)}
           </span>
         </div>
       );

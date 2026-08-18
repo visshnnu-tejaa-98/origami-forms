@@ -1,11 +1,6 @@
 import React from "react";
 import { Crane, Leaf, Pencil, Plane, Sakura } from "~/components/origami/deco";
 
-/**
- * The desk the preview sits on: washi colour washes, paper grain and fibre,
- * a faint fold crease, and folded-paper shapes drifting behind the sheet.
- * Purely decorative — nothing here is reachable or announced.
- */
 const PreviewCanvas = () => (
   <div className="pv-canvas" aria-hidden>
     <span className="pv-wash pv-wash--accent" />

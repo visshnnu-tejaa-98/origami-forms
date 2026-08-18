@@ -42,7 +42,11 @@ const FormCanvas = (props: FormCanvasProps) => {
       {form.fields.map((field) => {
         if (field.type === PAGE_BREAK) {
           return (
-            <div className="page-break cursor-pointer" key={field.id} onClick={() => selectField(field.id)}>
+            <div
+              className="page-break cursor-pointer"
+              key={field.id}
+              onClick={() => selectField(field.id)}
+            >
               <span>↓ page break · &ldquo;{field.label}&rdquo;</span>
             </div>
           );
@@ -50,7 +54,11 @@ const FormCanvas = (props: FormCanvasProps) => {
 
         if (field.type === "heading") {
           return (
-            <h3 className="canvas-heading" key={field.id}>
+            <h3
+              className="canvas-heading cursor-pointer"
+              key={field.id}
+              onClick={() => selectField(field.id)}
+            >
               {field.label}
             </h3>
           );

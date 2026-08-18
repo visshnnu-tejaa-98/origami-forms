@@ -1,9 +1,15 @@
 import { RouterOutputs } from "@repo/trpc/client";
 import { ICONS, TINTS } from "./constants";
-import { PageOptions, Status } from "./types";
+import { NumberFieldValidation, PageOptions, Status } from "./types";
 import { relativeTime } from "../utils";
 import { BlockType, BuilderField, BuilderForm, LayoutType } from "./builder/types";
-import { BLOCK_META, HEADING, LAYOUT_TYPES, OPTION_TYPES, PREVIEW_PLACEHOLDER } from "./builder/constants";
+import {
+    BLOCK_META,
+    HEADING,
+    LAYOUT_TYPES,
+    OPTION_TYPES,
+    PREVIEW_PLACEHOLDER,
+} from "./builder/constants";
 
 export const TAPE = ["tape-pink", "tape-matcha", "tape-yellow", "tape-lav"];
 
@@ -59,10 +65,9 @@ export const updatePageOptions = (props: PageOptions) => {
     };
 };
 
-
 export const uid = (prefix: string) => `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
 
-let nextFieldOrder = 1
+let nextFieldOrder = 1;
 
 const blankOptions = () => [
     { id: uid("o"), label: "Option 1", value: "option-1" },
@@ -71,10 +76,10 @@ const blankOptions = () => [
 
 export const blankField = (type: BlockType): BuilderField => {
     const meta = BLOCK_META[type];
-    const placeholder = PREVIEW_PLACEHOLDER[type]
+    const placeholder = PREVIEW_PLACEHOLDER[type];
     const getOrder = () => {
-        return nextFieldOrder++
-    }
+        return nextFieldOrder++;
+    };
 
     if (LAYOUT_TYPES.includes(type)) {
         return {
@@ -145,7 +150,7 @@ export const blankField = (type: BlockType): BuilderField => {
         default:
             throw new Error(`Unknown block type: ${type}`);
     }
-}
+};
 
 type SavedForm = RouterOutputs["forms"]["getFormById"];
 type ApiField = SavedForm["fields"][number];
@@ -193,3 +198,25 @@ export const toBuilderForm = (form: SavedForm): BuilderForm => ({
     maxSubmissions: form.maxSubmissions ?? undefined,
     fields: form.fields.map(toBuilderField),
 });
+
+export const estimatedTimeToCompleteForm = (fields: number) => {
+    if (fields <= 5) return "less than a minute";
+    if (fields <= 10) return `about a minute`;
+    if (fields <= 20) return `about 2 min`;
+    if (fields <= 30) return `about 3 min`;
+    return `couple of minutes`;
+};
+
+export const previewNumberNote = (fieldValidations: NumberFieldValidation) => {
+    let parts: string[] = [];
+    if (fieldValidations.min !== undefined && fieldValidations.min !== 0) {
+        parts.push(`min ${fieldValidations.min}`);
+    }
+    if (fieldValidations.max !== undefined) {
+        parts.push(`max ${fieldValidations.max}`);
+    }
+    if (fieldValidations.step !== undefined && fieldValidations.step !== 1) {
+        parts.push(`step ${fieldValidations.step}`);
+    }
+    return parts.join(" • ");
+};

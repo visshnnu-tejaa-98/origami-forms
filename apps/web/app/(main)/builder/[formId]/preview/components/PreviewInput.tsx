@@ -1,23 +1,11 @@
 import React from "react";
 import { Icon } from "../../../../components/icons";
 import { hasOptions } from "../../../constants";
-import { FieldBlock } from "../../../types";
-
-/** the answer a respondent has given — shape depends on the field type */
-export type AnswerValue = string | string[];
-
-type PreviewInputProps = {
-  field: FieldBlock;
-  value: AnswerValue | undefined;
-  onChange: (value: AnswerValue) => void;
-};
+import { PreviewInputProps } from "../../../types";
+import { previewNumberNote } from "~/app/(main)/utils";
 
 const OPTION_KEYS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
-/**
- * The real, working control a respondent would fill in. Everything here is
- * live — the preview is the published form, rendered from builder state.
- */
 const PreviewInput = ({ field, value, onChange }: PreviewInputProps) => {
   const text = typeof value === "string" ? value : "";
   const picked = Array.isArray(value) ? value : [];
@@ -30,9 +18,7 @@ const PreviewInput = ({ field, value, onChange }: PreviewInputProps) => {
     const toggle = (optValue: string) => {
       if (!multiple) return onChange(optValue);
       return onChange(
-        picked.includes(optValue)
-          ? picked.filter((v) => v !== optValue)
-          : [...picked, optValue]
+        picked.includes(optValue) ? picked.filter((v) => v !== optValue) : [...picked, optValue],
       );
     };
 
@@ -48,7 +34,7 @@ const PreviewInput = ({ field, value, onChange }: PreviewInputProps) => {
               onClick={() => toggle(opt.value)}
               aria-pressed={selected}
             >
-              <span className="key">{multiple ? i + 1 : OPTION_KEYS[i] ?? i + 1}</span>
+              <span className="key">{multiple ? i + 1 : (OPTION_KEYS[i] ?? i + 1)}</span>
               <span className="txt">{opt.label}</span>
               <span className="mark">{selected && <Icon name="check" size={13} />}</span>
             </button>
@@ -94,7 +80,9 @@ const PreviewInput = ({ field, value, onChange }: PreviewInputProps) => {
             </button>
           </div>
           <span className="unit">
-            min {min} · max {max}
+            <span className="preview-note">
+              {field?.validation && previewNumberNote(field.validation)}
+            </span>
           </span>
         </div>
       );
@@ -135,18 +123,10 @@ const PreviewInput = ({ field, value, onChange }: PreviewInputProps) => {
     case "file_upload":
       return (
         <label className="pv-drop">
-          <input
-            type="file"
-            hidden
-            onChange={(e) => onChange(e.target.files?.[0]?.name ?? "")}
-          />
+          <input type="file" hidden onChange={(e) => onChange(e.target.files?.[0]?.name ?? "")} />
           <Icon name="upload" size={30} />
           <h4>Drop a paper here</h4>
-          <p>
-            {text !== ""
-              ? text
-              : `or browse — max ${field.validation?.maxSizeMb ?? 10}MB`}
-          </p>
+          <p>{text !== "" ? text : `or browse — max ${field.validation?.maxSizeMb ?? 10}MB`}</p>
         </label>
       );
 

@@ -13,6 +13,7 @@ import {
     TITLE_SORT,
     UPDATED_AT,
 } from "./constants";
+import { BuilderForm, FieldBlock } from "./builder/types";
 
 export type Status = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED;
 
@@ -95,3 +96,22 @@ export type EmptyScreenProps = {
     cta: string,
     onClick: () => void
 }
+
+export type PreviewScreenProps = {
+    form: BuilderForm;
+    status: Status | "pending",
+    onClose: () => void;
+};
+
+export type NumberFieldValidation = {
+    step: number;
+    min?: number;
+    max?: number;
+}
+
+export type Step =
+    | { kind: "cover" }
+    | { kind: "heading"; id: string; label: string }
+    | { kind: "page-break"; id: string; label: string; page: number }
+    | { kind: "field"; id: string; field: FieldBlock }
+    | { kind: "review" };

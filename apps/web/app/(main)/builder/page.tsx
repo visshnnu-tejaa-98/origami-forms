@@ -44,7 +44,7 @@ const BuilderPage = () => {
         <FieldPalette addField={addField} />
 
         <main className="b-center">
-          <CanvasHead questions={stats.questions} onPreview={() => setPreviewing(true)} />
+          <CanvasHead questions={stats.questions} saveAsDraft={saveAsDraft} onPreview={() => { setPreviewing(true) }} />
           <FormCanvas
             form={form}
             setTitle={setTitle}
@@ -66,7 +66,7 @@ const BuilderPage = () => {
         />
       </div>
 
-      {previewing && <PreviewScreen form={form} onClose={() => setPreviewing(false)} />}
+      {previewing && <PreviewScreen form={form} status={"pending"} onClose={() => setPreviewing(false)} />}
     </div>
   );
 };
