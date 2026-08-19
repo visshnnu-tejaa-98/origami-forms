@@ -1,15 +1,40 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { SORTS, STATUS_TABS } from '../../constants';
 import { Icon, IconName } from '../../components/icons';
 import { SortField, Status, ToolbarProps } from '../../types';
+import { useFormStore } from '~/app/store/form-store';
+import { ToolbarSkeleton } from '../skeletons';
 
 
 const Toolbar = (props: ToolbarProps) => {
     const { tab, setTab, handleSort, sortOrder, setView, view, sort } = props
+    const formStats = useFormStore((state) => state.formsStats)
+    const { published, draft, archived, total } = formStats
+
+    const [tabs, setTabs] = useState(STATUS_TABS)
+
+    useEffect(() => {
+        setTabs(prev => prev.map((t) => {
+            if (t.key === "published") {
+                return { ...t, count: published }
+            }
+            if (t.key === "draft") {
+                return { ...t, count: draft }
+            }
+            if (t.key === "archived") {
+                return { ...t, count: archived }
+            }
+            if (t.key === "all") {
+                return { ...t, count: total }
+            }
+            return t
+        }))
+    }, [published, draft, archived])
+
     return (
         <div className="forms-toolbar">
             <div className="forms-tabs">
-                {STATUS_TABS.map((t) => (
+                {tabs.map((t) => (
                     <button
                         key={t.key}
                         className={`forms-tab${tab === t.key ? " active" : ""}`}
@@ -17,7 +42,7 @@ const Toolbar = (props: ToolbarProps) => {
                     >
                         <Icon name={t.icon as IconName} size={14} />
                         {t.label}
-                        {/* <span className="tab-count">{counts[t.key] ?? 0}</span> */}
+                        <span className="tab-count">{t.count}</span>
                     </button>
                 ))}
             </div>

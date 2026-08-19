@@ -89,3 +89,45 @@ export const FormsTableSkeleton = ({ count = 8 }: { count?: number }) => (
     </div>
   </>
 );
+
+const Ink = ({ w, h = "0.8em" }: { w: number | string; h?: string }) => (
+  <span
+    className="sk sk-shimmer"
+    style={{ width: w, height: h, display: "inline-block", verticalAlign: "middle" }}
+  />
+);
+
+const Slab = ({ w, h = 32, r = 10 }: { w: number | string; h?: number; r?: number }) => (
+  <span
+    className="sk sk-shimmer"
+    style={{ width: w, height: h, borderRadius: r, flex: "none", display: "inline-block" }}
+  />
+);
+
+export const FormsHeaderSkeleton = () => (
+  <header className="forms-head" aria-hidden>
+    <div>
+      <h1><Ink w={220} h="0.66em" /></h1>
+      <div className="sub"><Ink w={300} /></div>
+    </div>
+    <div className="head-actions">
+      <Slab w={260} h={38} r={12} />
+      <Slab w={132} h={38} r={12} />
+    </div>
+  </header>
+);
+
+export const ToolbarSkeleton = () => (
+  <div className="forms-toolbar" aria-hidden>
+    <div className="forms-tabs">
+      {[78, 86, 98, 116].map((w) => (
+        <Slab key={w} w={w} />
+      ))}
+    </div>
+
+    <span className="spacer" />
+
+    <Slab w={"250px"} h={34} />
+    <Slab w={78} h={34} r={8} />
+  </div>
+);

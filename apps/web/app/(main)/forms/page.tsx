@@ -2,7 +2,7 @@
 
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import "./forms.css";
-import { FormsGridSkeleton } from "./skeletons";
+import { FormsGridSkeleton, FormsHeaderSkeleton, ToolbarSkeleton } from "./skeletons";
 import { useUser } from "@clerk/nextjs";
 import { useListForms } from "~/hooks/use-form";
 import { useDebounce } from "~/hooks/use-debounce";
@@ -53,17 +53,26 @@ const Forms = () => {
 
   const loading = !isUserLoaded || listFormsIsPending;
 
+  /* only the very first load gets skeleton chrome — on later fetches (a tab, a sort, a search)
+     the real header and toolbar stay put, since they are what triggered the fetch */
+  const firstLoad = loading && !formsData;
+
   const totalResponses = forms.reduce((s, f) => s + f.responses, 0);
 
   return (
     <div className="forms-page">
       <FloatingOrigamiDecorations />
-      <FormsHeader
-        query={query}
-        setQuery={setQuery}
-        totalResponses={totalResponses}
-      />
-      <Toolbar {...toolbarProps} />
+      {firstLoad ? (
+        <>
+          <FormsHeaderSkeleton />
+          <ToolbarSkeleton />
+        </>
+      ) : (
+        <>
+          <FormsHeader query={query} setQuery={setQuery} totalResponses={totalResponses} />
+          <Toolbar {...toolbarProps} />
+        </>
+      )}
       <FormsContent
         loading={loading}
         selectedTab={tab}
@@ -78,7 +87,15 @@ const Forms = () => {
 };
 
 const FormsPage = () => (
-  <Suspense fallback={<FormsGridSkeleton />}>
+  <Suspense
+    fallback={
+      <div className="forms-page">
+        <FormsHeaderSkeleton />
+        <ToolbarSkeleton />
+        <FormsGridSkeleton />
+      </div>
+    }
+  >
     <Forms />
   </Suspense>
 );

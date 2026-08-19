@@ -12,10 +12,10 @@ export const ARCHIVED = "archived";
 export const FORM_STATUS_OPTIONS = [DRAFT, PUBLISHED, ARCHIVED]
 
 export const STATUS_TABS = [
-    { key: "all", label: "All", icon: "forms" },
-    { key: PUBLISHED, label: "Live", icon: "eye" },
-    { key: DRAFT, label: "Drafts", icon: "edit" },
-    { key: ARCHIVED, label: "Archived", icon: "archive" },
+    { key: "all", label: "All", icon: "forms", count: 0 },
+    { key: PUBLISHED, label: "Live", icon: "eye", count: 0 },
+    { key: DRAFT, label: "Drafts", icon: "edit", count: 0 },
+    { key: ARCHIVED, label: "Archived", icon: "archive", count: 0 },
 ];
 
 // Sorting
