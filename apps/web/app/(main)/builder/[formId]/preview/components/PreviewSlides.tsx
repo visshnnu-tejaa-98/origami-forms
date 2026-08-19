@@ -3,7 +3,7 @@ import { BLOCK_META } from "../../../constants";
 import { Icon } from "~/app/(main)/components/icons";
 import HelpTip from "../../../components/HelpTip";
 import { ScribbleArrow } from "~/components/origami/deco";
-import PaperSheet from "~/components/origami/paper-sheet";
+import FieldCard from "~/app/(public)/form/components/FieldCard";
 import PreviewInput from "./PreviewInput";
 import { AnswerValue, PreviewStateProps } from "../../../types";
 import { estimatedTimeToCompleteForm } from "~/app/(main)/utils";
@@ -68,7 +68,7 @@ const PreviewSlides = ({
             </header>
 
             <div className="pv-pages">
-                <PaperSheet at={at} total={total} back={back}>
+                <FieldCard at={at} total={total} back={back}>
                     {step.kind === "cover" && (
                         <div className="pv-centered">
                             <span className="pv-mascot">
@@ -195,7 +195,7 @@ const PreviewSlides = ({
                             </div>
                         </div>
                     )}
-                </PaperSheet>
+                </FieldCard>
             </div>
 
             <footer className="pv-bot">

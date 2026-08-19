@@ -6,7 +6,7 @@ import { estimatedTimeToCompleteForm } from "../../../(main)/utils";
 import HelpTip from "../../../(main)/builder/components/HelpTip";
 import PreviewInput from "../../../(main)/builder/[formId]/preview/components/PreviewInput";
 import { Crane, ScribbleArrow } from "~/components/origami/deco";
-import PaperSheet from "~/components/origami/paper-sheet";
+import FieldCard from "~/app/(public)/form/components/FieldCard";
 import type { PublicFormStageProps } from "../types";
 import { isAnswered } from "../utils";
 
@@ -54,7 +54,7 @@ const PublicFormStage = ({
             </header>
 
             <div className="pv-pages">
-                <PaperSheet at={at} total={total} back={back}>
+                <FieldCard at={at} total={total} back={back}>
                     {step.kind === "cover" && (
                         <div className="pv-centered">
                             <span className="pv-mascot">
@@ -170,7 +170,7 @@ const PublicFormStage = ({
                             </p>
 
                             <div className="pv-review">
-                                {questions.map((question) => {
+                                {questions.filter(q => q.field.type !== "long_text" && q.field.type !== "file_upload").map((question) => {
                                     const value = answers[question.id];
                                     const shown = Array.isArray(value) ? value.join(", ") : value;
                                     return (
@@ -207,7 +207,7 @@ const PublicFormStage = ({
                             </div>
                         </div>
                     )}
-                </PaperSheet>
+                </FieldCard>
             </div>
 
             <footer className="pv-bot">

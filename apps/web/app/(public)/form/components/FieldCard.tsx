@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
-import { Clip, Crane } from "./deco";
+import { Clip, Crane } from "../../../../components/origami/deco";
 
-type PaperSheetProps = {
+type FieldCardProps = {
     /** which sheet in the run is on top — drives the pile's fan and the card's re-entry */
     at: number;
     /** the last sheet's index, so the pile knows how many are still underneath */
@@ -18,7 +18,7 @@ type PaperSheetProps = {
  * to its author as it does to the stranger answering it — there is one card here, not two
  * that happen to share class names. Styling lives in `preview.css` (`.pv-card`, `.pv-stack`).
  */
-const PaperSheet = ({ at, total, back = false, children }: PaperSheetProps) => {
+const FieldCard = ({ at, total, back = false, children }: FieldCardProps) => {
     const stack = useMemo(() => {
         const under = Math.max(0, Math.min(2, total - at));
         return Array.from({ length: under }, (_, k) => {
@@ -70,4 +70,4 @@ const PaperSheet = ({ at, total, back = false, children }: PaperSheetProps) => {
     );
 };
 
-export default PaperSheet;
+export default FieldCard;
