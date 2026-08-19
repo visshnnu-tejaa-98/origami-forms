@@ -4,12 +4,15 @@ import db, {
     desc,
     eq,
     formFields,
+    formResponses,
     forms,
     ilike,
     inArray,
     InsertFormField,
     isNull,
     lte,
+    responseAnswers,
+    sql,
 } from "@repo/database";
 import {
     CloneFormInputProps,
@@ -18,7 +21,9 @@ import {
     DeleteFormProps,
     FormStatusListInputProps,
     GetFormByIdProps,
+    GetPublicFormProps,
     ListFormsProps,
+    SubmitPublicResponseProps,
     UpdateFormProps,
     UpSertFormFieldsInputProps,
 } from "./model";
@@ -26,7 +31,9 @@ import {
     ADMIN,
     ARCHIVED,
     CHECK_BOX,
+    COMPLETED,
     DRAFT,
+    LAYOUT_FIELD_TYPES,
     MULTI_SELECT,
     PUBLISHED,
     RADIO,
@@ -527,6 +534,156 @@ export default class FormService {
             archived,
             total: totalItems,
         };
+    }
+
+    /* ========================================================
+       PUBLIC · the form as an anonymous respondent meets it
+       ======================================================== */
+
+    /** the link carries both the slug and the id, so both have to agree before anything is
+     *  handed back — an id on its own is never enough to open somebody's form */
+    private publicFormCondition(formId: string, slug: string) {
+        return and(
+            eq(forms.id, formId),
+            eq(forms.slug, slug),
+            eq(forms.status, PUBLISHED),
+            isNull(forms.deletedAt),
+        );
+    }
+
+    /** why a live form is no longer taking answers — null while it still is */
+    private closedReason(form: { expiresAt: Date | null; maxSubmissions: number | null; submissionCount: number }) {
+        if (form.expiresAt && form.expiresAt.getTime() <= Date.now()) return "expired" as const;
+        if (form.maxSubmissions !== null && form.submissionCount >= form.maxSubmissions) {
+            return "limit_reached" as const;
+        }
+        return null;
+    }
+
+    public async getPublicForm(payload: GetPublicFormProps) {
+        const { formId, slug } = payload;
+
+        const form = await db.query.forms.findFirst({
+            where: this.publicFormCondition(formId, slug),
+            with: {
+                fields: {
+                    where: isNull(formFields.deletedAt),
+                    orderBy: asc(formFields.order),
+                },
+            },
+        });
+
+        if (!form) return null;
+
+        const closedReason = this.closedReason(form);
+
+        return {
+            id: form.id,
+            title: form.title,
+            description: form.description,
+            logoUrl: form.logoUrl,
+            slug: form.slug,
+            accepting: closedReason === null,
+            closedReason,
+            // the respondent never receives the creator, the counts or the timestamps
+            fields: form.fields.map((field) => ({
+                id: field.id,
+                formId: field.formId,
+                type: field.type,
+                label: field.label,
+                description: field.description,
+                placeholder: field.placeholder,
+                helpText: field.helpText,
+                required: field.required,
+                order: field.order,
+                validation: field.validation,
+                options: field.options,
+                defaultValue: field.defaultValue,
+            })),
+        };
+    }
+
+    public async submitPublicResponse(payload: SubmitPublicResponseProps) {
+        const { formId, slug, answers, completionTimeInSec } = payload;
+
+        const form = await db.query.forms.findFirst({
+            where: this.publicFormCondition(formId, slug),
+            with: {
+                fields: {
+                    where: isNull(formFields.deletedAt),
+                },
+            },
+        });
+
+        if (!form) throw new Error("Form not found");
+
+        const closedReason = this.closedReason(form);
+
+        if (closedReason === "expired") throw new Error("This form has closed");
+        if (closedReason === "limit_reached") throw new Error("This form is no longer taking responses");
+
+        // answers are keyed by field id, so anything the form does not own is dropped rather
+        // than trusted — a respondent cannot write a row against somebody else's field
+        const answerable = new Map(
+            form.fields
+                .filter((field) => !LAYOUT_FIELD_TYPES.includes(field.type as (typeof LAYOUT_FIELD_TYPES)[number]))
+                .map((field) => [field.id, field]),
+        );
+
+        const toStore = answers
+            .filter((answer) => answerable.has(answer.fieldId))
+            .map((answer) => ({
+                fieldId: answer.fieldId,
+                // multi-select arrives as a list; the column holds one joined value
+                value: Array.isArray(answer.value) ? answer.value.join(", ") : answer.value,
+            }))
+            .filter((answer) => answer.value.trim() !== "");
+
+        const answered = new Set(toStore.map((answer) => answer.fieldId));
+        const missing = [...answerable.values()].filter((field) => field.required && !answered.has(field.id));
+
+        if (missing.length > 0) {
+            throw new Error(`Please answer: ${missing.map((field) => field.label).join(", ")}`);
+        }
+
+        const now = new Date();
+
+        return db.transaction(async (tx) => {
+            const [response] = await tx
+                .insert(formResponses)
+                .values({
+                    formId: form.id,
+                    status: COMPLETED,
+                    startedAt: completionTimeInSec ? new Date(now.getTime() - completionTimeInSec * 1000) : now,
+                    submittedAt: now,
+                    CompletionTimeInSec: completionTimeInSec,
+                })
+                .returning();
+
+            if (!response) return tx.rollback();
+
+            if (toStore.length > 0) {
+                await tx.insert(responseAnswers).values(
+                    toStore.map((answer) => ({
+                        responseId: response.id,
+                        formFieldId: answer.fieldId,
+                        value: answer.value,
+                    })),
+                );
+            }
+
+            // counted in the same transaction, so the submission cap cannot be walked past
+            await tx
+                .update(forms)
+                .set({ submissionCount: sql`${forms.submissionCount} + 1` })
+                .where(eq(forms.id, form.id));
+
+            return {
+                success: true,
+                responseId: response.id,
+                message: "Response recorded",
+            };
+        });
     }
 }
 

@@ -1,0 +1,131 @@
+/* ============================================================
+   PUBLIC FORM · the published sheet as a stranger meets it
+
+   Everything structural is borrowed from preview.css — the card, the
+   inputs, the pills, the stars, the footer — so a form looks the same
+   published as it did in the studio. This file only does the three
+   things the public page needs and the preview doesn't: drop the
+   dashboard chrome, put a brand mark where the eyebrow was, and give
+   validation somewhere to speak.
+   ============================================================ */
+
+/* no sidebar out here — the form is the whole page */
+.db-shell.db-shell--public {
+  grid-template-columns: 1fr;
+  background:
+    radial-gradient(circle at 12% 8%, var(--accent-soft), transparent 45%),
+    radial-gradient(circle at 88% 92%, var(--matcha-soft), transparent 50%),
+    var(--bg);
+}
+
+.db-shell.db-shell--public > main {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* the stage is the only column, so the rail's 280px is dropped */
+.db-shell .pf-screen {
+  grid-template-columns: 1fr;
+  background: transparent;
+}
+
+/* ====== TOP BAR ====== */
+.db-shell .pf-top {
+  padding: 18px 32px 14px;
+}
+
+.db-shell .pf-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--ink-1);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 200ms;
+}
+
+.db-shell .pf-brand:hover {
+  opacity: 1;
+}
+
+.db-shell .pf-brand svg {
+  color: var(--accent);
+}
+
+/* ====== VALIDATION ====== */
+/* a note in the margin rather than a red slab — it belongs to the sheet */
+.db-shell .pf-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 14px 0 0;
+  padding: 7px 12px;
+  border-radius: var(--r-pill);
+  background: var(--sakura-soft);
+  color: var(--sakura-deep);
+  font-size: 0.86rem;
+  animation: pfNudge 320ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.db-shell .pf-error svg {
+  flex: none;
+}
+
+/* the same small shake the paper would make if you tapped it */
+@keyframes pfNudge {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .pf-error {
+    animation: none;
+  }
+}
+
+/* ====== REVIEW ====== */
+/* every reviewed answer walks back to its own question */
+.db-shell .pv-review .pf-review-row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 160ms;
+}
+
+.db-shell .pv-review .pf-review-row:hover {
+  background: var(--surface-card);
+}
+
+/* ====== FOOTER ====== */
+.db-shell .pf-foot-link {
+  color: var(--accent-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.db-shell .pf-foot-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .db-shell .pf-top {
+    padding: 14px 18px 10px;
+  }
+
+  .db-shell .pf-brand {
+    font-size: 1.1rem;
+  }
+
+  /* the bar has the brand and the progress on one line; the progress gives way first */
+  .db-shell .pf-stage .pv-progress {
+    width: 96px;
+  }
+}

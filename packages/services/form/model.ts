@@ -450,3 +450,80 @@ export const formStatusListOutputSchema = z.object({
 })
 
 export type FormStatusListOutputSchemaType = z.infer<typeof formStatusListOutputSchema>
+
+/* ============================================================
+   PUBLIC FORM · what an anonymous respondent may see and send
+   ============================================================ */
+
+export const getPublicFormInputSchema = z.object({
+    slug: z.string().min(1).max(255).describe("slug of the form, as it appears in the public link"),
+    formId: z.string().uuid().describe("id of the form, as it appears in the public link"),
+});
+
+export type GetPublicFormProps = z.infer<typeof getPublicFormInputSchema>;
+
+/** why a live form is no longer taking answers — `null` means it still is */
+export const PUBLIC_FORM_CLOSED_REASONS = ["expired", "limit_reached"] as const;
+
+/** the creator, the response counts and every internal timestamp stay on the server;
+ *  a respondent only ever receives what the page has to paint */
+export const publicFormFieldOutputSchema = formFieldOutputSchema.pick({
+    id: true,
+    formId: true,
+    type: true,
+    label: true,
+    description: true,
+    placeholder: true,
+    helpText: true,
+    required: true,
+    order: true,
+    validation: true,
+    options: true,
+    defaultValue: true,
+});
+
+export const getPublicFormOutputSchema = z.object({
+    id: z.string().uuid(),
+    title: z.string().describe("title of the form"),
+    description: z.string().nullable().describe("description of the form"),
+    logoUrl: z.string().nullable().describe("logo url of the form"),
+    slug: z.string().describe("slug of the form"),
+    accepting: z.boolean().describe("whether the form is still taking responses"),
+    closedReason: z
+        .enum(PUBLIC_FORM_CLOSED_REASONS)
+        .nullable()
+        .describe("why the form stopped taking responses, when it has"),
+    fields: z.array(publicFormFieldOutputSchema).describe("fields of the form, in display order"),
+});
+
+export type GetPublicFormOutputSchemaType = z.infer<typeof getPublicFormOutputSchema>;
+
+export const submitPublicResponseInputSchema = z.object({
+    slug: z.string().min(1).max(255).describe("slug of the form being answered"),
+    formId: z.string().uuid().describe("id of the form being answered"),
+    answers: z
+        .array(
+            z.object({
+                fieldId: z.string().uuid().describe("id of the field being answered"),
+                // multi-select answers arrive as a list and are stored as one joined value
+                value: z.union([z.string(), z.array(z.string())]).describe("the respondent's answer"),
+            }),
+        )
+        .describe("one entry per answered field; unanswered optional fields may be omitted"),
+    completionTimeInSec: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe("how long the respondent spent on the form"),
+});
+
+export type SubmitPublicResponseProps = z.infer<typeof submitPublicResponseInputSchema>;
+
+export const submitPublicResponseOutputSchema = z.object({
+    success: z.boolean().describe("whether the response was recorded"),
+    responseId: z.string().uuid().describe("id of the recorded response"),
+    message: z.string().describe("success message"),
+});
+
+export type SubmitPublicResponseOutputSchemaType = z.infer<typeof submitPublicResponseOutputSchema>;

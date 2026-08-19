@@ -1,8 +1,8 @@
 import { RouterOutputs } from "@repo/trpc/client";
 import { ICONS, TINTS } from "./constants";
-import { NumberFieldValidation, PageOptions, Status } from "./types";
+import { PageOptions, Status } from "./types";
 import { relativeTime } from "../utils";
-import { BlockType, BuilderField, BuilderForm, LayoutType } from "./builder/types";
+import { BlockType, BuilderField, BuilderForm, LayoutType, NumberFieldValidation } from "./builder/types";
 import {
     BLOCK_META,
     HEADING,
@@ -30,6 +30,7 @@ type ApiForm = RouterOutputs["forms"]["getAllForms"]["forms"][number];
 export const toUiForm = (f: ApiForm) => ({
     id: f.id,
     title: f.title,
+    slug: f.slug,
     icon: ICONS[hash(f.id) % ICONS.length]!,
     tint: TINTS[hash(f.id) % TINTS.length]!,
     // `unlisted` is a visibility on the API, but a status in this UI.

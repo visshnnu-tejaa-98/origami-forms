@@ -563,6 +563,24 @@
   color: var(--ink-1);
 }
 
+/* a draft has no live link yet — the action stays in place, greyed, so the row of tools
+   doesn't reshuffle between a draft and a published form */
+.db-shell .c-actions .tool.is-disabled,
+.db-shell .form-card .icon-act.is-disabled {
+  color: var(--ink-5);
+  cursor: not-allowed;
+}
+
+.db-shell .c-actions .tool.is-disabled:hover {
+  background: transparent;
+  color: var(--ink-5);
+}
+
+.db-shell .form-card .icon-act.is-disabled:hover {
+  color: var(--ink-5);
+  border-color: var(--rule-line);
+}
+
 /* ============================================================
    GRID VIEW · origami paper cards
    ============================================================ */

@@ -22,6 +22,9 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                 const isDraft = f.status === "draft";
                 const builderLink = `/builder/${f.id}?from=list`
                 const previewLink = `/builder/${f.id}/preview?from=list`
+                // the live sheet a respondent gets — only a published form has one
+                const isLive = f.status === "published";
+                const publicLink = `/form/${f.slug}/${f.id}`
                 return (
                     <div
                         key={f.id}
@@ -73,6 +76,26 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                                 <Link className="tool" title="Preview" aria-label="Preview" href={previewLink}>
                                     <Icon name="eye" size={15} />
                                 </Link>
+                                {isLive ? (
+                                    <Link
+                                        className="tool"
+                                        title="Open the live form"
+                                        aria-label="Open the live form"
+                                        href={publicLink}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <Icon name="link" size={15} />
+                                    </Link>
+                                ) : (
+                                    <span
+                                        className="tool is-disabled"
+                                        title="Publish this form to open its live link"
+                                        aria-disabled
+                                    >
+                                        <Icon name="link" size={15} />
+                                    </span>
+                                )}
                                 <button className="tool" title="Share link" aria-label="Share">
                                     <Icon name="share" size={15} />
                                 </button>

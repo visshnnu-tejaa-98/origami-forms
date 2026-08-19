@@ -318,6 +318,87 @@ Returns \`{
     };
 }
 
+const getPublicFormMeta = ({ getPathFn, tags }: FormMetaInputProps): OpenApiMetaConfig => {
+    const pathType = getPathFn() as `/${string}`;
+    return {
+        openapi: {
+            method: GET,
+            path: pathType,
+            tags: tags ?? ["Form"],
+            summary: "Get a published form for a respondent",
+            description: `
+### Overview
+
+Fetches a published form by the two halves of its public link — its \`slug\` and its
+\`formId\`. No authentication is required. Both halves have to match the same row, so an
+id on its own never opens a form.
+
+### Path Parameters
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`slug\` | string | Yes | Slug from the public link. |
+| \`formId\` | string (uuid) | Yes | Form id from the public link. |
+
+### Response
+
+Returns the form's public shape: \`{ id, title, description, logoUrl, slug, accepting,
+closedReason, fields }\`. The creator, the submission counts and the internal timestamps
+are never included. \`accepting\` is false once the form has expired or has reached its
+\`maxSubmissions\`, and \`closedReason\` says which.
+
+### Errors
+
+- **Not found** — no published form matches that slug and id, or it has been deleted.\n
+`,
+        },
+    };
+}
+
+const submitPublicResponseMeta = ({ getPathFn, tags }: FormMetaInputProps): OpenApiMetaConfig => {
+    const pathType = getPathFn() as `/${string}`;
+    return {
+        openapi: {
+            method: POST,
+            path: pathType,
+            tags: tags ?? ["Form"],
+            summary: "Submit a response to a published form",
+            description: `
+### Overview
+
+Records an anonymous respondent's answers against a published form and bumps the form's
+\`submissionCount\`, both in one transaction so a submission cap cannot be walked past.
+
+### Request Body
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`slug\` | string | Yes | Slug from the public link. |
+| \`formId\` | string (uuid) | Yes | Form id from the public link. |
+| \`answers\` | array | Yes | \`{ fieldId, value }\` per answered field; \`value\` may be a string or a list of strings. |
+| \`completionTimeInSec\` | number | No | How long the respondent spent on the form. |
+
+### Flow
+
+1. The form is re-read and re-checked — published, not expired, not full.
+2. Answers for fields the form does not own are dropped, and empty answers are ignored.
+3. Every required field must be answered, or the submission is rejected.
+4. The response, its answers and the incremented count are written together.
+
+### Response
+
+Returns \`{ success, responseId, message }\`.
+
+### Errors
+
+- **Not found** — no published form matches that slug and id.\n
+- **Closed** — the form has expired or has reached its submission limit.\n
+- **Validation** — a required field was left unanswered.\n
+`,
+        },
+    };
+}
+
 export {
     createFormMeta,
     getFormByIdMeta,
@@ -325,5 +406,7 @@ export {
     updateFormMeta,
     deleteFormMeta,
     cloneFormMeta,
-    formStatsMeta
+    formStatsMeta,
+    getPublicFormMeta,
+    submitPublicResponseMeta
 };

@@ -5,13 +5,26 @@ import {
     formStatusListOutputSchema,
     getFormByIdInputSchema,
     getFormByIdOutputSchema,
+    getPublicFormInputSchema,
+    getPublicFormOutputSchema,
     listFormsInputSchema,
     listFormsOutputSchema,
+    submitPublicResponseInputSchema,
+    submitPublicResponseOutputSchema,
     updateFormInputSchema,
     updateFormOutputSchema,
 } from "@repo/services/form/model";
-import { createFormMeta, formStatsMeta, getFormByIdMeta, listFormsMeta, updateFormMeta } from "@repo/services/form/meta";
-import { protectedProcedure, router } from "../../trpc";
+import {
+    createFormMeta,
+    formStatsMeta,
+    getFormByIdMeta,
+    getPublicFormMeta,
+    listFormsMeta,
+    submitPublicResponseMeta,
+    updateFormMeta,
+} from "@repo/services/form/meta";
+import { TRPCError } from "@trpc/server";
+import { protectedProcedure, publicProcedure, router } from "../../trpc";
 import { formService } from "../../services";
 
 const TAGS = ["Forms"];
@@ -85,6 +98,36 @@ export const formsRouter = router({
 
             if (!result) {
                 throw new Error("Something went wrong while fetching form stats");
+            }
+
+            return result;
+        }),
+
+    /* ====== PUBLIC · no session required ====== */
+
+    getPublicForm: publicProcedure
+        .meta(getPublicFormMeta({ getPathFn: () => "/public/form/{slug}/{formId}", tags: TAGS }))
+        .input(getPublicFormInputSchema)
+        .output(getPublicFormOutputSchema)
+        .query(async ({ input }) => {
+            const result = await formService.getPublicForm(input);
+
+            if (!result) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "This form isn't available" });
+            }
+
+            return result;
+        }),
+
+    submitPublicResponse: publicProcedure
+        .meta(submitPublicResponseMeta({ getPathFn: () => "/public/form/submit", tags: TAGS }))
+        .input(submitPublicResponseInputSchema)
+        .output(submitPublicResponseOutputSchema)
+        .mutation(async ({ input }) => {
+            const result = await formService.submitPublicResponse(input);
+
+            if (!result) {
+                throw new Error("Something went wrong while recording your response");
             }
 
             return result;

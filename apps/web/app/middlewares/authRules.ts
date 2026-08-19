@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ADMIN, PUBLIC_ROUTES, LOGGED_IN_ONLY_ROUTES, LOGGED_OUT_ONLY_ROUTES } from "../(auth)/constants";
+import { ADMIN, PUBLIC_ROUTES, PUBLIC_ROUTE_PREFIXES, LOGGED_IN_ONLY_ROUTES, LOGGED_OUT_ONLY_ROUTES } from "../(auth)/constants";
 
 type handleRouteProps = {
     req: NextRequest;
@@ -10,9 +10,18 @@ type handleRouteProps = {
 export const handleAuthRouting = ({ req, userId, role }: handleRouteProps) => {
     const currentPath = req.nextUrl.pathname
 
+    const isPublicPath =
+        PUBLIC_ROUTES.includes(currentPath) ||
+        PUBLIC_ROUTE_PREFIXES.some((prefix) => currentPath.startsWith(prefix));
+
+    // a published form is answered by strangers, signed in or not
+    if (PUBLIC_ROUTE_PREFIXES.some((prefix) => currentPath.startsWith(prefix))) {
+        return NextResponse.next();
+    }
+
     if (!userId) {
         // Logged-out users may see public and logged-out-only routes.
-        if (PUBLIC_ROUTES.includes(currentPath) || LOGGED_OUT_ONLY_ROUTES.includes(currentPath)) {
+        if (isPublicPath || LOGGED_OUT_ONLY_ROUTES.includes(currentPath)) {
             return NextResponse.next();
         }
 
