@@ -5,7 +5,8 @@ import { BLOCK_META } from "../../../(main)/builder/constants";
 import { estimatedTimeToCompleteForm } from "../../../(main)/utils";
 import HelpTip from "../../../(main)/builder/components/HelpTip";
 import PreviewInput from "../../../(main)/builder/[formId]/preview/components/PreviewInput";
-import { Clip, Crane, ScribbleArrow } from "~/components/origami/deco";
+import { Crane, ScribbleArrow } from "~/components/origami/deco";
+import PaperSheet from "~/components/origami/paper-sheet";
 import type { PublicFormStageProps } from "../types";
 import { isAnswered } from "../utils";
 
@@ -53,17 +54,7 @@ const PublicFormStage = ({
             </header>
 
             <div className="pv-pages">
-                <div className={`pv-card${back ? " is-back" : ""}`} key={at}>
-                    <span className="pv-grain-card" aria-hidden />
-                    <span className="pv-margin-rule" aria-hidden />
-                    <span className="pv-watermark" aria-hidden>
-                        <Crane size={190} />
-                    </span>
-                    <span className="pv-clip" aria-hidden>
-                        <Clip size={34} />
-                    </span>
-                    <span className="pv-fold" aria-hidden />
-
+                <PaperSheet at={at} total={total} back={back}>
                     {step.kind === "cover" && (
                         <div className="pv-centered">
                             <span className="pv-mascot">
@@ -216,7 +207,7 @@ const PublicFormStage = ({
                             </div>
                         </div>
                     )}
-                </div>
+                </PaperSheet>
             </div>
 
             <footer className="pv-bot">
