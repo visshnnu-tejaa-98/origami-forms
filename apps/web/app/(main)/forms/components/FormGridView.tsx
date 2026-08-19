@@ -10,6 +10,8 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
             {forms.map((f, idx) => {
                 const badge = STATUS_BADGE[f.status];
                 const isDraft = f.status === "draft";
+                const builderLink = `/builder/${f.id}?from=list`
+                const previewLink = `/builder/${f.id}/preview?from=list`
                 return (
                     <article key={f.id} className={`form-card ${f.tint}${isDraft ? " is-draft" : ""}`}>
                         {/* washi tape holding the sheet + a folded dog-ear corner */}
@@ -56,13 +58,13 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
 
                         {/* actions */}
                         <div className="card-foot">
-                            <Link className="o-btn o-btn--sm" href={`/builder/${f.id}`}>
+                            <Link className="o-btn o-btn--sm" href={builderLink}>
                                 <Icon name="edit" size={13} /> {isDraft ? "Continue folding" : "Edit"}
                             </Link>
                             <span className="foot-spacer" />
-                            <button className="icon-act" title="Preview" aria-label="Preview">
+                            <Link className="icon-act" title="Preview" aria-label="Preview" href={previewLink}>
                                 <Icon name="eye" size={15} />
-                            </button>
+                            </Link>
                             <button className="icon-act" title="Share link" aria-label="Share">
                                 <Icon name="share" size={15} />
                             </button>

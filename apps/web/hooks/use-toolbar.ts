@@ -11,7 +11,7 @@ import {
 } from "~/app/(main)/constants";
 import type { SORT_ORDER, SelectionAll, SortField, Status, ToolbarProps } from "~/app/(main)/types";
 import { useQueryParams } from "./use-query-params";
-import { useViewHydrated, useViewStore } from "~/stores/view-store";
+import { useUserStore } from "~/app/store/user-store";
 
 const TAB_VALUES = [ALL, ...FORM_STATUS_OPTIONS] as readonly (Status | SelectionAll)[];
 const SORT_VALUES = SORTS.map((s) => s.key) as readonly SortField[];
@@ -23,12 +23,9 @@ export function useToolbar() {
     const tab = getParam("tab", ALL as Status | SelectionAll, TAB_VALUES);
     const sort = getParam("sort", UPDATED_AT as SortField, SORT_VALUES);
     const sortOrder = getParam("order", DESC as SORT_ORDER, ORDER_VALUES);
-
-    const storedView = useViewStore((s) => s.view);
-    const setView = useViewStore((s) => s.setView);
-    const hydrated = useViewHydrated();
-    // until localStorage is read, render what the server rendered
-    const view = hydrated ? storedView : GRID;
+    const storedView = useUserStore(state => state.settings.view)
+    const setView = useUserStore(state => state.updateSettings)
+    const view = storedView ?? GRID;
 
     const setTab = useCallback(
         (next: Status | SelectionAll) => {

@@ -13,8 +13,7 @@ const FormPreviewPage = () => {
   const { formId } = useParams<{ formId: string }>();
   const router = useRouter();
   const { formData, getFormIsPending, getFormError } = useFormById(formId);
-
-  const backToBuilder = () => router.push(`/builder/${formId}`);
+  const goBack = () => router.back()
 
   if (getFormIsPending) {
     return (
@@ -33,7 +32,7 @@ const FormPreviewPage = () => {
         <div className="insp-empty">
           <Icon name="clip" size={30} />
           <p>{getFormError?.message ?? "We couldn't find that form."}</p>
-          <button className="o-btn o-btn--sm" onClick={backToBuilder}>
+          <button className="o-btn o-btn--sm" onClick={goBack}>
             <Icon name="arrow-left" size={13} /> Back to builder
           </button>
         </div>
@@ -41,7 +40,7 @@ const FormPreviewPage = () => {
     );
   }
 
-  return <PreviewScreen form={toBuilderForm(formData)} status={formData.status} onClose={backToBuilder} />;
+  return <PreviewScreen form={toBuilderForm(formData)} status={formData.status} onClose={goBack} />;
 };
 
 export default FormPreviewPage;

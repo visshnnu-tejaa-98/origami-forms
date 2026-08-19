@@ -5,6 +5,7 @@ import { STATUS_BADGE } from "../../utils";
 import { Form } from "../../types";
 
 const FromListView = ({ forms }: { forms: Form[] }) => {
+
     return (
         <div className="otable" role="table" aria-label="Your forms">
             <span className="o-tape table-tape tape-matcha" aria-hidden />
@@ -19,6 +20,8 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
             {forms.map((f: Form) => {
                 const badge = STATUS_BADGE[f.status];
                 const isDraft = f.status === "draft";
+                const builderLink = `/builder/${f.id}?from=list`
+                const previewLink = `/builder/${f.id}/preview?from=list`
                 return (
                     <div
                         key={f.id}
@@ -64,12 +67,12 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                                     className="tool"
                                     title={isDraft ? "Continue editing" : "Edit"}
                                     aria-label="Edit"
-                                    href={`/builder/${f.id}`}>
+                                    href={builderLink}>
                                     <Icon name="edit" size={15} />
                                 </Link>
-                                <button className="tool" title="Preview" aria-label="Preview">
+                                <Link className="tool" title="Preview" aria-label="Preview" href={previewLink}>
                                     <Icon name="eye" size={15} />
-                                </button>
+                                </Link>
                                 <button className="tool" title="Share link" aria-label="Share">
                                     <Icon name="share" size={15} />
                                 </button>

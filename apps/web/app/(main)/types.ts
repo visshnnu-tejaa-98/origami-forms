@@ -13,7 +13,7 @@ import {
     TITLE_SORT,
     UPDATED_AT,
 } from "./constants";
-import { BuilderForm, FieldBlock } from "./builder/types";
+import { UserSettingsType } from "../store/user-store";
 
 export type Status = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED;
 
@@ -49,8 +49,8 @@ export type ToolbarProps = {
     setTab: (tab: Status | SelectionAll) => void;
     handleSort: (sort: SortField) => void;
     sortOrder: SORT_ORDER;
-    setView: (view: "grid" | "list") => void;
-    view: "grid" | "list";
+    setView: (settings: Partial<UserSettingsType>) => void
+    view: View;
     sort: SortField;
 };
 

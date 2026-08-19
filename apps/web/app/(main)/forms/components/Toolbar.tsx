@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { SORTS, STATUS_TABS } from '../../constants';
+import { GRID, LIST, SORTS, STATUS_TABS } from '../../constants';
 import { Icon, IconName } from '../../components/icons';
 import { SortField, Status, ToolbarProps } from '../../types';
 import { useFormStore } from '~/app/store/form-store';
 import { ToolbarSkeleton } from '../skeletons';
+import { UserSettingsType, useUserStore } from '~/app/store/user-store';
 
 
 const Toolbar = (props: ToolbarProps) => {
@@ -30,6 +31,12 @@ const Toolbar = (props: ToolbarProps) => {
             return t
         }))
     }, [published, draft, archived])
+
+    const { updateSettings } = useUserStore()
+
+    const handleViewChange = (view: UserSettingsType["view"]) => {
+        updateSettings({ view })
+    }
 
     return (
         <div className="forms-toolbar">
@@ -76,7 +83,7 @@ const Toolbar = (props: ToolbarProps) => {
             <div className="view-toggle" role="group" aria-label="View mode">
                 <button
                     className={view === "grid" ? "active" : ""}
-                    onClick={() => setView("grid")}
+                    onClick={() => handleViewChange(GRID)}
                     aria-label="Grid view"
                     title="Grid view"
                 >
@@ -84,7 +91,7 @@ const Toolbar = (props: ToolbarProps) => {
                 </button>
                 <button
                     className={view === "list" ? "active" : ""}
-                    onClick={() => setView("list")}
+                    onClick={() => handleViewChange(LIST)}
                     aria-label="List view"
                     title="List view"
                 >

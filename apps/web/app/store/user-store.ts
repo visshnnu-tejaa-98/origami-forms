@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { combine, createJSONStorage, devtools, persist } from "zustand/middleware";
+import { GRID, LIST } from "../(main)/constants";
 
-interface User {
+type User = {
     clerkId: string;
     firstName: string;
     lastName: string;
@@ -9,19 +10,25 @@ interface User {
     imageUrl: string;
 }
 
-interface UserInitialState {
+export type UserSettingsType = {
+    view: typeof LIST | typeof GRID
+}
+
+type UserInitialState = {
     user: User | null;
     loading: boolean;
     error: boolean;
     errorMessage: string;
+    settings: UserSettingsType
 }
 
-interface UserActions {
+type UserActions = {
     setUser: (user: User) => void;
     clearUser: () => void;
     setLoading: (loading: boolean) => void;
     setError: (error: boolean) => void;
     setErrorMessage: (errorMessage: string) => void;
+    updateSettings: (settings: Partial<UserSettingsType>) => void;
 }
 
 const userInitialState: UserInitialState = {
@@ -29,7 +36,8 @@ const userInitialState: UserInitialState = {
     loading: false,
     error: false,
     errorMessage: "",
-};
+    settings: { view: GRID }
+}
 
 export const useUserStore = create(
     devtools(
@@ -41,6 +49,9 @@ export const useUserStore = create(
                     setLoading: (loading: boolean) => set({ loading }),
                     setError: (error: boolean) => set({ error }),
                     setErrorMessage: (errorMessage: string) => set({ errorMessage }),
+                    updateSettings: (settings: Partial<UserSettingsType>) => set((state) => ({
+                        settings: { ...state.settings, ...settings }
+                    })),
                 };
             }),
             {

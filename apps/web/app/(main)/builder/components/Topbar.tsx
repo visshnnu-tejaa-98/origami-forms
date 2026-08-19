@@ -2,16 +2,24 @@ import React from "react";
 import Link from "next/link";
 import { Icon } from "../../components/icons";
 import { TopbarProps } from "../types";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const Topbar = (props: TopbarProps) => {
   const { title, setTitle, saveAsDraft, saveAndPublish, preview } = props;
 
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectedFrom = searchParams.get("from")
+  const isFromList = redirectedFrom === "list";
+
+  const backNavigationLabel = isFromList ? "Back to List" : "Dashboard";
+
   return (
     <header className="b-top">
-      <Link href="/dashboard" className="back">
+      <button className="back" onClick={() => router.back()}>
         <Icon name="arrow-left" size={16} />
-        <span>Dashboard</span>
-      </Link>
+        <span>{backNavigationLabel}</span>
+      </button>
 
       <div className="title">
         <input

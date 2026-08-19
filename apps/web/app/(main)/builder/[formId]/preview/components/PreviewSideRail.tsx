@@ -2,12 +2,19 @@ import React, { useEffect, useRef } from 'react'
 import { Icon } from '~/app/(main)/components/icons';
 import { PreviewSideRailProps, } from '../../../types';
 import { BLOCK_META, HEADING, PAGE_BREAK } from '../../../constants';
+import { useSearchParams } from 'next/navigation';
 
 
 
 const PreviewSideRail = ({ form, at, steps, questions, onClose, go }: PreviewSideRailProps) => {
     const total = steps.length - 1;
     const activeItem = useRef<HTMLButtonElement | null>(null);
+
+    const searchParams = useSearchParams()
+    const redirectedFrom = searchParams.get("from")
+
+    const isFromList = redirectedFrom === "list";
+    const backNavigationLabel = isFromList ? 'Back to List' : 'Builder'
 
     useEffect(() => {
         activeItem.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -17,7 +24,7 @@ const PreviewSideRail = ({ form, at, steps, questions, onClose, go }: PreviewSid
         <aside className="pv-rail">
             <div className="pv-rail-head">
                 <button type="button" className="o-btn o-btn--sm o-btn--ghost" onClick={onClose}>
-                    <Icon name="arrow-left" size={13} /> builder
+                    <Icon name="arrow-left" size={13} /> {backNavigationLabel}
                 </button>
                 <span className="o-badge o-badge--matcha">▶ live preview</span>
             </div>
