@@ -451,10 +451,6 @@ export const formStatusListOutputSchema = z.object({
 
 export type FormStatusListOutputSchemaType = z.infer<typeof formStatusListOutputSchema>
 
-/* ============================================================
-   PUBLIC FORM · what an anonymous respondent may see and send
-   ============================================================ */
-
 export const getPublicFormInputSchema = z.object({
     slug: z.string().min(1).max(255).describe("slug of the form, as it appears in the public link"),
     formId: z.string().uuid().describe("id of the form, as it appears in the public link"),
@@ -465,8 +461,16 @@ export type GetPublicFormProps = z.infer<typeof getPublicFormInputSchema>;
 /** why a live form is no longer taking answers — `null` means it still is */
 export const PUBLIC_FORM_CLOSED_REASONS = ["expired", "limit_reached"] as const;
 
-/** the creator, the response counts and every internal timestamp stay on the server;
- *  a respondent only ever receives what the page has to paint */
+export type FormClosedReason = (typeof PUBLIC_FORM_CLOSED_REASONS)[number];
+
+export const formClosedReasonPropsSchema = z.object({
+    expiresAt: z.coerce.date().nullable().optional().describe("the date when the form expires"),
+    maxSubmissions: z.number().int().positive().nullable().optional().describe("the maximum number of submissions"),
+    submissionCount: z.number().int().nonnegative().describe("the number of submissions"),
+})
+
+export type FormClosedReasonProps = z.infer<typeof formClosedReasonPropsSchema>
+
 export const publicFormFieldOutputSchema = formFieldOutputSchema.pick({
     id: true,
     formId: true,
@@ -499,7 +503,6 @@ export const getPublicFormOutputSchema = z.object({
 export type GetPublicFormOutputSchemaType = z.infer<typeof getPublicFormOutputSchema>;
 
 export const submitPublicResponseInputSchema = z.object({
-    slug: z.string().min(1).max(255).describe("slug of the form being answered"),
     formId: z.string().uuid().describe("id of the form being answered"),
     answers: z
         .array(

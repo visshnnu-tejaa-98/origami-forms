@@ -20,10 +20,10 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
             {forms.map((f: Form) => {
                 const badge = STATUS_BADGE[f.status];
                 const isDraft = f.status === "draft";
+                const isLive = f.status === "published";
+
                 const builderLink = `/builder/${f.id}?from=list`
                 const previewLink = `/builder/${f.id}/preview?from=list`
-                // the live sheet a respondent gets — only a published form has one
-                const isLive = f.status === "published";
                 const publicLink = `/form/${f.slug}/${f.id}`
                 return (
                     <div

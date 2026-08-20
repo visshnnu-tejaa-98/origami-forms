@@ -26,6 +26,7 @@ import {
     SubmitPublicResponseProps,
     UpdateFormProps,
     UpSertFormFieldsInputProps,
+    FormClosedReasonProps
 } from "./model";
 import {
     ADMIN,
@@ -536,35 +537,27 @@ export default class FormService {
         };
     }
 
-    /* ========================================================
-       PUBLIC · the form as an anonymous respondent meets it
-       ======================================================== */
-
-    /** the link carries both the slug and the id, so both have to agree before anything is
-     *  handed back — an id on its own is never enough to open somebody's form */
-    private publicFormCondition(formId: string, slug: string) {
+    private publicFormCondition(formId: string) {
         return and(
             eq(forms.id, formId),
-            eq(forms.slug, slug),
             eq(forms.status, PUBLISHED),
             isNull(forms.deletedAt),
         );
     }
 
-    /** why a live form is no longer taking answers — null while it still is */
-    private closedReason(form: { expiresAt: Date | null; maxSubmissions: number | null; submissionCount: number }) {
+    private closedReason(form: FormClosedReasonProps) {
         if (form.expiresAt && form.expiresAt.getTime() <= Date.now()) return "expired" as const;
-        if (form.maxSubmissions !== null && form.submissionCount >= form.maxSubmissions) {
+        if (form.maxSubmissions && form.submissionCount >= form.maxSubmissions) {
             return "limit_reached" as const;
         }
         return null;
     }
 
     public async getPublicForm(payload: GetPublicFormProps) {
-        const { formId, slug } = payload;
+        const { formId } = payload;
 
         const form = await db.query.forms.findFirst({
-            where: this.publicFormCondition(formId, slug),
+            where: this.publicFormCondition(formId),
             with: {
                 fields: {
                     where: isNull(formFields.deletedAt),
@@ -585,7 +578,6 @@ export default class FormService {
             slug: form.slug,
             accepting: closedReason === null,
             closedReason,
-            // the respondent never receives the creator, the counts or the timestamps
             fields: form.fields.map((field) => ({
                 id: field.id,
                 formId: field.formId,
@@ -604,10 +596,10 @@ export default class FormService {
     }
 
     public async submitPublicResponse(payload: SubmitPublicResponseProps) {
-        const { formId, slug, answers, completionTimeInSec } = payload;
+        const { formId, answers, completionTimeInSec } = payload;
 
         const form = await db.query.forms.findFirst({
-            where: this.publicFormCondition(formId, slug),
+            where: this.publicFormCondition(formId),
             with: {
                 fields: {
                     where: isNull(formFields.deletedAt),
@@ -629,6 +621,9 @@ export default class FormService {
                 .filter((field) => !LAYOUT_FIELD_TYPES.includes(field.type as (typeof LAYOUT_FIELD_TYPES)[number]))
                 .map((field) => [field.id, field]),
         );
+
+        console.log(JSON.stringify({ apple: 22222, answerable: [...answerable], formFields: form.fields }, null, 2))
+
 
         const toStore = answers
             .filter((answer) => answerable.has(answer.fieldId))

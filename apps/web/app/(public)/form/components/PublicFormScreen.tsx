@@ -26,7 +26,7 @@ const PublicFormScreen = ({ form }: { form: PublicForm }) => {
     const total = steps.length - 1;
     const step = steps[Math.min(at, total)]!;
     const questions = useMemo(
-        () => steps.filter((s): s is PublicQuestion => s.kind === "field"),
+        () => steps.filter((s) => s.kind === "field") as PublicQuestion[],
         [steps],
     );
 
@@ -75,7 +75,7 @@ const PublicFormScreen = ({ form }: { form: PublicForm }) => {
 
         try {
             await submitResponseAsync({
-                slug: form.slug,
+                // slug: form.slug,
                 formId: form.id,
                 answers: toSubmittedAnswers(answers),
                 completionTimeInSec: Math.round((Date.now() - startedAt.current) / 1000),

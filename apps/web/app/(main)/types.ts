@@ -20,7 +20,6 @@ export type Status = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED;
 export type Form = {
     id: string;
     title: string;
-    /** the public link is /form/<slug>/<id>, so the list carries both halves */
     slug: string;
     icon: IconName;
     tint: string; // k1..k6

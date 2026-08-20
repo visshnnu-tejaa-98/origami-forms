@@ -28,8 +28,6 @@ export type PublicFormStageProps = {
     answers: Answers;
     setAnswer: (id: string, value: AnswerValue) => void;
     go: (to: number) => void;
-    /** walks to the sheet a given question lives on — headings and page breaks sit in
-     *  the same run of steps, so a question's place in the flow is not its place in the list */
     goToQuestion: (question: PublicQuestion) => void;
     advance: () => void;
     error: string | null;
@@ -41,6 +39,5 @@ export type PublicStateScreenProps = {
     icon: "crane" | "clip" | "lock" | "sparkles";
     title: string;
     description: string;
-    /** an optional action shown under the copy */
     action?: { label: string; onClick: () => void };
 };

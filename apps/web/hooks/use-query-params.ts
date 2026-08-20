@@ -34,8 +34,6 @@ export function useQueryParams() {
         (updates: Record<string, ParamValue>) => {
             const next = new URLSearchParams(searchParams.toString());
 
-            console.log({ searchParams: searchParams.toString(), next });
-
             for (const [key, value] of Object.entries(updates)) {
                 if (value === null || value === undefined || value === "") {
                     next.delete(key);

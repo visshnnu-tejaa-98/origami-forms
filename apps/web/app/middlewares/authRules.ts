@@ -14,7 +14,6 @@ export const handleAuthRouting = ({ req, userId, role }: handleRouteProps) => {
         PUBLIC_ROUTES.includes(currentPath) ||
         PUBLIC_ROUTE_PREFIXES.some((prefix) => currentPath.startsWith(prefix));
 
-    // a published form is answered by strangers, signed in or not
     if (PUBLIC_ROUTE_PREFIXES.some((prefix) => currentPath.startsWith(prefix))) {
         return NextResponse.next();
     }

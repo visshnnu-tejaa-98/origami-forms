@@ -36,7 +36,6 @@ export const formsRouter = router({
         .output(listFormsOutputSchema)
         .query(async ({ input, ctx }) => {
             const result = await formService.listForms({ ...input, requesterId: ctx.userId });
-            console.log({ result });
 
             if (!result) {
                 throw new Error("Something went wrong while fetching forms");
@@ -50,7 +49,6 @@ export const formsRouter = router({
     })).input(createFormInputModel).output(createFormOutputSchema).mutation(
         async ({ input, ctx }) => {
             const result = await formService.createForm(ctx.userId, input);
-            console.log({ result });
 
             if (!result) {
                 throw new Error("Something went wrong while creating form");
@@ -92,9 +90,7 @@ export const formsRouter = router({
         .input(formStatusListInputSchema.omit({ requesterId: true }))
         .output(formStatusListOutputSchema)
         .query(async ({ input, ctx }) => {
-            console.log({ input })
             const result = await formService.formStats({ ...input, requesterId: ctx.userId });
-            console.log({ result });
 
             if (!result) {
                 throw new Error("Something went wrong while fetching form stats");
@@ -102,8 +98,6 @@ export const formsRouter = router({
 
             return result;
         }),
-
-    /* ====== PUBLIC · no session required ====== */
 
     getPublicForm: publicProcedure
         .meta(getPublicFormMeta({ getPathFn: () => "/public/form/{slug}/{formId}", tags: TAGS }))

@@ -2,8 +2,6 @@ import { HEADING, LAYOUT_TYPES, OPTION_TYPES, PAGE_BREAK } from "../../(main)/bu
 import type { AnswerValue, FieldBlock } from "../../(main)/builder/types";
 import type { Answers, PublicForm, PublicFormField, PublicStep } from "./types";
 
-/** a saved field becomes the same block the builder and the preview render, so the public
- *  form paints with one set of input components rather than a second, drifting set */
 export const toFieldBlock = (field: PublicFormField): FieldBlock => {
     const question = {
         id: field.id,
@@ -31,7 +29,6 @@ export const toFieldBlock = (field: PublicFormField): FieldBlock => {
     } as FieldBlock;
 };
 
-/** cover → every block in order → review */
 export const toSteps = (form: PublicForm): PublicStep[] => {
     let page = 1;
 
@@ -57,14 +54,11 @@ export const toSteps = (form: PublicForm): PublicStep[] => {
     return [{ kind: "cover" }, ...middle, { kind: "review" }];
 };
 
-/** every field type stores its answer as a string or a list of them */
 export const isAnswered = (value: AnswerValue | undefined) =>
     Array.isArray(value) ? value.length > 0 : (value ?? "").trim() !== "";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** the same rules the field was configured with, checked before the sheet turns.
- *  the server re-checks what it stores — this is the friendly half, not the safe half. */
 export const validateAnswer = (field: FieldBlock, value: AnswerValue | undefined): string | null => {
     const answered = isAnswered(value);
 
