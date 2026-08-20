@@ -1,5 +1,6 @@
 import React, { useId } from "react";
 import { Icon } from "../../components/icons";
+import "./HelpTip.css";
 
 type HelpTipProps = {
   /** the note to unfold on hover — nothing renders when this is empty */

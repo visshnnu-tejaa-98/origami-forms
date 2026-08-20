@@ -64,11 +64,8 @@ const PublicFormStage = ({
                             {form.description && <p className="pv-help">{form.description}</p>}
                             <div className="pv-actions pv-actions--center">
                                 <button className="o-btn o-btn--accent o-btn--lg" onClick={advance}>
-                                    Start <Icon name="arrow" size={16} />
+                                    Start folding<Icon name="arrow" size={16} />
                                 </button>
-                                <span className="ok-hint">
-                                    or press <span className="o-kbd">↵</span> enter
-                                </span>
                             </div>
                             <p className="pv-margin-note">↓ a few folds, {estimatedTime}</p>
                             <div className="pv-facts">
@@ -88,7 +85,7 @@ const PublicFormStage = ({
                             {step.description && <p className="pv-help">{step.description}</p>}
                             <div className="pv-actions pv-actions--center">
                                 <button className="o-btn o-btn--accent o-btn--lg" onClick={advance}>
-                                    Continue <Icon name="arrow" size={16} />
+                                    Turn the leaf <Icon name="arrow" size={16} />
                                 </button>
                             </div>
                         </div>
@@ -96,11 +93,11 @@ const PublicFormStage = ({
 
                     {step.kind === "page-break" && (
                         <div className="pv-centered">
-                            <div className="pv-page-turn">
+                            {/* <div className="pv-page-turn">
                                 <span className="rule" />
                                 <span className="n">page {step.page}</span>
                                 <span className="rule" />
-                            </div>
+                            </div> */}
                             <p className="pv-quote">{step.label || "halfway there"}</p>
                             <div className="pv-actions pv-actions--center">
                                 <button className="o-btn o-btn--accent o-btn--lg" onClick={advance}>
@@ -150,11 +147,8 @@ const PublicFormStage = ({
 
                             <div className="pv-actions">
                                 <button className="o-btn o-btn--accent o-btn--lg" onClick={advance}>
-                                    OK <Icon name="check" size={16} />
+                                    Fold and continue <Icon name="check" size={16} />
                                 </button>
-                                <span className="ok-hint">
-                                    press <span className="o-kbd">↵</span> enter
-                                </span>
                             </div>
                         </>
                     )}

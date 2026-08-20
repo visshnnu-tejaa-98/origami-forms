@@ -1,0 +1,79 @@
+/* ----- help tip · an info nib that unfolds a sticky note ----- */
+.db-shell .help-tip {
+  position: relative;
+  display: inline-flex;
+}
+
+.db-shell .tip-nib {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-4);
+  cursor: pointer;
+  transition: color var(--transition-snap), background var(--transition-snap);
+}
+
+.db-shell .tip-nib:hover,
+.db-shell .tip-nib:focus-visible {
+  color: var(--ink-2);
+  background: var(--bg-sunken);
+  outline: none;
+}
+
+.db-shell .tip-note {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  z-index: 5;
+  width: max-content;
+  max-width: 240px;
+  padding: 9px 12px;
+  background: var(--surface-sticky);
+  color: var(--ink-1);
+  border-radius: var(--r-sticky);
+  box-shadow: var(--shadow-sticky);
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: left;
+  white-space: normal;
+  /* folded shut until asked for */
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px) rotate(-1.5deg) scale(0.96);
+  transform-origin: bottom center;
+  transition: opacity var(--transition-snap), transform var(--transition-snap);
+}
+
+/* the dog-ear that points back down at the nib */
+.db-shell .tip-note .fold {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--surface-sticky);
+}
+
+.db-shell .help-tip:hover .tip-note,
+.db-shell .tip-nib:focus-visible + .tip-note {
+  opacity: 1;
+  transform: translate(-50%, 0) rotate(-1.5deg) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .tip-note {
+    transition: none;
+  }
+}
