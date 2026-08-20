@@ -55,54 +55,6 @@
   color: var(--accent);
 }
 
-/* ====== VALIDATION ====== */
-/* a note in the margin rather than a red slab — it belongs to the sheet */
-.db-shell .pf-error {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin: 14px 0 0;
-  padding: 7px 12px;
-  border-radius: var(--r-pill);
-  background: var(--sakura-soft);
-  color: var(--sakura-deep);
-  font-size: 0.86rem;
-  animation: pfNudge 320ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
-}
-
-.db-shell .pf-error svg {
-  flex: none;
-}
-
-/* the same small shake the paper would make if you tapped it */
-@keyframes pfNudge {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .db-shell .pf-error {
-    animation: none;
-  }
-}
-
-/* ====== REVIEW ====== */
-/* every reviewed answer walks back to its own question */
-.db-shell .pv-review .pf-review-row {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 160ms;
-}
-
-.db-shell .pv-review .pf-review-row:hover {
-  background: var(--surface-card);
-}
 
 /* ====== FOOTER ====== */
 .db-shell .pf-foot-link {

@@ -1,29 +1,12 @@
 import React, { useMemo } from "react";
 import { Clip, Crane } from "../../../../components/origami/deco";
+import { FieldCardProps } from "~/components/form-flow/types";
 
-type FieldCardProps = {
-    /** which sheet in the run is on top — drives the pile's fan and the card's re-entry */
-    at: number;
-    /** the last sheet's index, so the pile knows how many are still underneath */
-    total: number;
-    /** stepping back reverses the travel: the sheet drops in from the other side */
-    back?: boolean;
-    children: React.ReactNode;
-};
-
-/**
- * The sheet of paper a question is written on, with the rest of the pile fanned beneath it.
- *
- * The builder preview and the published form both render this, so a form looks the same
- * to its author as it does to the stranger answering it — there is one card here, not two
- * that happen to share class names. Styling lives in `preview.css` (`.pv-card`, `.pv-stack`).
- */
 const FieldCard = ({ at, total, back = false, children }: FieldCardProps) => {
     const stack = useMemo(() => {
         const under = Math.max(0, Math.min(2, total - at));
         return Array.from({ length: under }, (_, k) => {
             const depth = k + 1;
-            // deterministic wobble — the pile is never squared up, but it is never random either
             const wobble = ((at * 13 + depth * 29) % 9) - 4;
             return {
                 depth,
@@ -36,7 +19,6 @@ const FieldCard = ({ at, total, back = false, children }: FieldCardProps) => {
 
     return (
         <>
-            {/* deepest sheet first, so the nearest one paints on top */}
             {[...stack].reverse().map((sheet) => (
                 <span
                     key={sheet.depth}
@@ -52,7 +34,6 @@ const FieldCard = ({ at, total, back = false, children }: FieldCardProps) => {
                 />
             ))}
 
-            {/* keyed on the step, so a new sheet animates in rather than mutating in place */}
             <div className={`pv-card${back ? " is-back" : ""}`} key={at}>
                 <span className="pv-grain-card" aria-hidden />
                 <span className="pv-margin-rule" aria-hidden />
