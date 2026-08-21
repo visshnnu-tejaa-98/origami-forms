@@ -2,21 +2,20 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import "../../../../(main)/builder/preview.css";
-import "../../public-form.css";
+import "../../../(main)/builder/preview.css";
+import "../public-form.css";
 import { usePublicForm } from "~/hooks/use-public-form";
-import PreviewCanvas from "../../../../(main)/builder/[formId]/preview/components/PreviewCanvas";
-import PublicFormScreen from "../../components/PublicFormScreen";
-import PublicFormState from "../../components/PublicFormState";
+import PreviewCanvas from "../../../(main)/builder/[formId]/preview/components/PreviewCanvas";
+import PublicFormScreen from "../components/PublicFormScreen";
+import PublicFormState from "../components/PublicFormState";
 
-/** the public link is /form/<slug>/<formId> — both halves have to match the same row,
- *  so a form id on its own never opens somebody's form */
+/** the public link is /form/<formId> — the id is an unguessable uuid, and only a published,
+ *  undeleted form answers to it */
 const PublicFormPage = () => {
-    const { slug, formId } = useParams<{ slug: string; formId: string }>();
+    const { formId } = useParams<{ formId: string }>();
     const router = useRouter();
 
     const { publicForm, publicFormError, publicFormIsPending, refetchPublicForm } = usePublicForm({
-        slug,
         formId,
     });
 

@@ -24,7 +24,7 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
 
                 const builderLink = `/builder/${f.id}?from=list`
                 const previewLink = `/builder/${f.id}/preview?from=list`
-                const publicLink = `/form/${f.slug}/${f.id}`
+                const publicLink = `/form/${f.id}`
                 return (
                     <div
                         key={f.id}

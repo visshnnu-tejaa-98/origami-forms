@@ -1,8 +1,8 @@
 "use client";
 import { trpc } from "~/trpc/client";
 
-/** the published form behind a public link — no session, both halves of the link required */
-export function usePublicForm({ slug, formId }: { slug: string; formId: string }) {
+/** the published form behind a public link — no session, the form id is the whole link */
+export function usePublicForm({ formId }: { formId: string }) {
     const {
         data: publicForm,
         error: publicFormError,
@@ -11,10 +11,9 @@ export function usePublicForm({ slug, formId }: { slug: string; formId: string }
         isPending: publicFormIsPending,
         refetch: refetchPublicForm,
     } = trpc.forms.getPublicForm.useQuery(
-        { slug, formId },
+        { formId },
         {
-            enabled: Boolean(slug && formId),
-            // a respondent gets one shot at a bad link; don't hammer the api behind it
+            enabled: Boolean(formId),
             retry: false,
         },
     );

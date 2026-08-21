@@ -100,7 +100,7 @@ export const formsRouter = router({
         }),
 
     getPublicForm: publicProcedure
-        .meta(getPublicFormMeta({ getPathFn: () => "/public/form/{slug}/{formId}", tags: TAGS }))
+        .meta(getPublicFormMeta({ getPathFn: () => "/public/form/{formId}", tags: TAGS }))
         .input(getPublicFormInputSchema)
         .output(getPublicFormOutputSchema)
         .query(async ({ input }) => {

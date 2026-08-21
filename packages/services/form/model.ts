@@ -452,7 +452,6 @@ export const formStatusListOutputSchema = z.object({
 export type FormStatusListOutputSchemaType = z.infer<typeof formStatusListOutputSchema>
 
 export const getPublicFormInputSchema = z.object({
-    slug: z.string().min(1).max(255).describe("slug of the form, as it appears in the public link"),
     formId: z.string().uuid().describe("id of the form, as it appears in the public link"),
 });
 

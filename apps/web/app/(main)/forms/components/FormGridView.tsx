@@ -14,7 +14,7 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
 
                 const builderLink = `/builder/${f.id}?from=list`
                 const previewLink = `/builder/${f.id}/preview?from=list`
-                const publicLink = `/form/${f.slug}/${f.id}`
+                const publicLink = `/form/${f.id}`
                 return (
                     <article key={f.id} className={`form-card ${f.tint}${isDraft ? " is-draft" : ""}`}>
                         {/* washi tape holding the sheet + a folded dog-ear corner */}
