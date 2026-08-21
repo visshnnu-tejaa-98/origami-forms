@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Icon } from "~/app/(main)/components/icons";
 
 import { BLOCK_META } from "~/app/(main)/builder/constants";
 import HelpTip from "~/app/(main)/builder/components/HelpTip";
 import { ScribbleArrow } from "../origami/deco";
 import PreviewInput from "~/app/(main)/builder/[formId]/preview/components/PreviewInput";
-import { HeadingTypeProps, InputFieldTypeProps, PageBreakTypeProps, ReviewTypeProps, CoverTypeProps } from "./types";
+import { HeadingTypeProps, InputFieldTypeProps, PageBreakTypeProps, ReviewTypeProps, CoverTypeProps, FlowQuestion } from "./types";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const CoverType = (props: CoverTypeProps) => {
     const { title, description, estimatedTime, questions, next } = props;
@@ -64,7 +65,7 @@ const PageBreakType = (props: PageBreakTypeProps) => {
 };
 
 const InputFieldType = (props: InputFieldTypeProps) => {
-    const { at, step, answers, error, showError, setAnswer, next } = props;
+    const { at, step, answers, error, showError, visitedReviewPage, goToReview, setAnswer, next } = props;
     return (
         <>
             <div className="pv-num-row">
@@ -74,6 +75,18 @@ const InputFieldType = (props: InputFieldTypeProps) => {
                     {BLOCK_META[step.field.type]?.label.toLowerCase() ?? step.field.type}
                 </span>
                 {step.field.required && <span className="pv-req">required</span>}
+
+                {visitedReviewPage && (
+                    <button
+                        type="button"
+                        className="pf-to-review"
+                        onClick={goToReview}
+                        title="Return to the summary"
+                    >
+                        <Icon name="list" size={13} />
+                        <span>Review</span>
+                    </button>
+                )}
             </div>
 
             <h2 className="pv-title">
@@ -113,9 +126,14 @@ const InputFieldType = (props: InputFieldTypeProps) => {
 };
 
 const ReviewType = (props: ReviewTypeProps) => {
-    const { answered, questions, answers, error, isPreview, submitting, goToQuestion, submit } =
+    const { answered, questions, answers, error, isPreview, submitting, setVisitedReviewPage, goToQuestion, submit } =
         props;
     const NOT_SUMMARISED = ["long_text", "file_upload"];
+
+
+    useEffect(() => {
+        setVisitedReviewPage(true)
+    }, [])
 
     return (
         <div className="pv-centered">

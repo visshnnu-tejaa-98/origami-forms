@@ -36,6 +36,7 @@ export type FormFlow = {
     setAnswer: (id: string, value: AnswerValue) => void;
     go: (to: number, keepError?: boolean) => void;
     goToQuestion: (question: FlowQuestion, keepError?: boolean) => void;
+    goToReview: () => void;
     advance: () => void;
     submit: () => void;
 };
@@ -92,6 +93,8 @@ export type InputFieldTypeProps = {
     answers: Answers,
     error: string | null,
     showError: string | boolean | null,
+    visitedReviewPage: boolean
+    goToReview: () => void,
     setAnswer: (id: string, value: AnswerValue) => void;
     next: () => void,
 }
@@ -103,6 +106,7 @@ export type ReviewTypeProps = {
     error: string | null,
     isPreview: boolean,
     submitting: boolean,
+    setVisitedReviewPage: (visited: boolean) => void,
     goToQuestion: (question: FlowQuestion, keepError?: boolean) => void,
     submit: () => void,
 }
@@ -113,4 +117,10 @@ export type PublicFormFooterProps = {
     total: number,
     go: (to: number, keepError?: boolean) => void,
     next: () => void,
+}
+
+export type goToQuestionProps = {
+    question: FlowQuestion
+    from?: string,
+    keepError?: boolean
 }

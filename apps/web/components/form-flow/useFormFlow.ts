@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AnswerValue } from "~/app/(main)/builder/types";
 import { validateAnswer } from "./flow";
-import type { Answers, FlowMode, FlowQuestion, FlowStep, FormFlow } from "./types";
+import type { Answers, FlowMode, FlowQuestion, FlowStep, FormFlow, goToQuestionProps } from "./types";
 
 type UseFormFlowProps = {
     steps: FlowStep[];
@@ -47,6 +47,10 @@ export const useFormFlow = ({ steps, mode, onSubmit, onClose }: UseFormFlowProps
         (question: FlowQuestion, keepError = false) => go(steps.indexOf(question), keepError),
         [go, steps],
     );
+
+
+    const goToReview = useCallback(() => go(total), [go, steps]);
+
 
     const setAnswer = useCallback((id: string, value: AnswerValue) => {
         setAnswers((current) => ({ ...current, [id]: value }));
@@ -115,6 +119,7 @@ export const useFormFlow = ({ steps, mode, onSubmit, onClose }: UseFormFlowProps
         setAnswer,
         go,
         goToQuestion,
+        goToReview,
         advance,
         submit,
     };

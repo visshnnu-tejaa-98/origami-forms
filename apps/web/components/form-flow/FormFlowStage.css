@@ -40,8 +40,6 @@
   }
 }
 
-/* ====== REVIEW ====== */
-/* every reviewed answer walks back to its own question */
 .db-shell .pv-review .pf-review-row {
   width: 100%;
   border: 0;
@@ -55,4 +53,63 @@
 
 .db-shell .pv-review .pf-review-row:hover {
   background: var(--surface-card);
+}
+
+/* ====== BACK TO REVIEW ====== */
+/* rides at the end of the card's meta strip, opposite the fold number — wayfinding sits
+   with the other wayfinding, and stays clear of the primary action at the foot of the
+   sheet. matcha rather than accent, so it reads as a way back and not a way on. */
+.db-shell .pf-to-review {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--matcha-soft);
+  color: var(--matcha-deep);
+  /* the same lettering as the type pill it sits beside */
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform var(--transition-snap), box-shadow var(--transition-snap);
+}
+
+.db-shell .pf-to-review:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sticky);
+}
+
+.db-shell .pf-to-review:focus-visible {
+  outline: 2px solid var(--matcha-deep);
+  outline-offset: 2px;
+}
+
+.db-shell .pf-to-review svg {
+  flex: none;
+}
+
+/* on a narrow sheet the meta strip gives up a line rather than crushing the pills */
+@media (max-width: 560px) {
+  .db-shell .pv-num-row {
+    flex-wrap: wrap;
+  }
+
+  .db-shell .pf-to-review {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .pf-to-review {
+    transition: none;
+  }
+
+  .db-shell .pf-to-review:hover {
+    transform: none;
+  }
 }

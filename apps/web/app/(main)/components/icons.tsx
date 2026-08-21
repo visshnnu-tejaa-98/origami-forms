@@ -42,6 +42,7 @@ export type IconName =
     | 'empty-box'
     | 'error'
     | 'arrow-left'
+    | 'sign-out'
     | 'text'
     | 'align'
     | 'hash'
@@ -203,6 +204,8 @@ const paths: Record<IconName, React.ReactNode> = {
         </>
     ),
     'arrow-left': <path d="M19 12H5M11.5 5.5 5 12l6.5 6.5" />,
+    /* a door left open and the way out through it */
+    'sign-out': <path d="M10 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4M16 16l4-4-4-4M20 12H10" />,
     /* ====== field-type glyphs (form builder palette) ====== */
     text: <path d="M5 4h14M12 4v16M9 20h6" />,
     align: <path d="M4 6h16M4 12h11M4 18h16" />,

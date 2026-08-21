@@ -105,7 +105,7 @@ const Sidebar = () => {
         <Icon name="settings" size={17} /><span>Settings</span>
       </Link>
       <Link className={`sb-item${isActive("/auth/signout") ? " active" : ""}`} href="" onClick={handleSignOutUser} title="Sign out">
-        <Icon name="users" size={17} /><span>Signout →</span>
+        <Icon name="sign-out" size={17} /><span>Sign out</span>
       </Link>
 
       <div className="sb-user">
