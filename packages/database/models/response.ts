@@ -10,27 +10,23 @@ import {
 import { formFields, forms } from "./forms";
 import { responseStatusEnum } from "./enum";
 import { relations } from "drizzle-orm";
+import { users } from "./user";
 
 
 type FormMetadata = {
-    ip: string;
-    country: string;
-    deviceType: string;
-    userAgent: string;
-    referrer?: string;
+    country?: string;
+    city?: string;
+    device?: string,
+    browser?: string,
 };
 
 export const formResponses = pgTable("responses", {
     id: uuid("id").primaryKey().defaultRandom(),
     formId: uuid("form_id").notNull().references(() => forms.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id),
 
     status: responseStatusEnum("status").default("partial").notNull(),
     metaData: jsonb("metadata").$type<FormMetadata>(),
-
-    device: varchar("device", { length: 50 }),
-    browser: varchar("browser", { length: 50 }),
-    city: varchar("city", { length: 50 }),
-    country: varchar("country", { length: 50 }),
 
     startedAt: timestamp("started_at", { withTimezone: true }),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
@@ -61,7 +57,11 @@ export const formResponsesRelations = relations(formResponses, ({ one, many }) =
         fields: [formResponses.formId],
         references: [forms.id]
     }),
-    answers: many(responseAnswers)
+    answers: many(responseAnswers),
+    user: one(users, {
+        fields: [formResponses.userId],
+        references: [users.id]
+    })
 }))
 
 export const responseAnswersRelations = relations(responseAnswers, ({ one }) => ({
@@ -72,5 +72,6 @@ export const responseAnswersRelations = relations(responseAnswers, ({ one }) => 
     field: one(formFields, {
         fields: [responseAnswers.formFieldId],
         references: [formFields.id]
-    })
+    }),
+
 }))

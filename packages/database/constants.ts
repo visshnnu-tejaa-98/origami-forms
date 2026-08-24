@@ -57,8 +57,9 @@ export const FORM_FIELD_TYPES = [...FIELD_TYPES, ...LAYOUT_FIELD_TYPES] as const
 
 export const PARTIAL = "partial";
 export const COMPLETED = "completed";
+export const ALL = "all";
 
-export const RESPONSE_STATUS = [PARTIAL, COMPLETED] as const;
+export const RESPONSE_STATUS = [PARTIAL, COMPLETED, ALL] as const;
 
 export const VIEWED = "viewed";
 export const STARTED = "started";

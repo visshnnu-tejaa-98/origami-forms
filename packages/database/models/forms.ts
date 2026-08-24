@@ -13,6 +13,7 @@ import {
 import { users } from "./user";
 import { formFieldTypeEnum, formStatusEnum, formVisibilityEnum } from "./enum";
 import { relations } from "drizzle-orm";
+import { formResponses, responseAnswers } from "./response";
 
 export const forms = pgTable("forms", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -87,14 +88,15 @@ export const formRelations = relations(forms, ({ one, many }) => ({
         fields: [forms.creatorId],
         references: [users.id]
     }),
-    fields: many(formFields)
+    fields: many(formFields),
+    responses: many(formResponses)
 }))
 
 export const formFieldRelations = relations(formFields, ({ one }) => ({
     form: one(forms, {
         fields: [formFields.formId],
         references: [forms.id]
-    })
+    }),
 }))
 
 export const formViewsRelations = relations(views, ({ one }) => ({
