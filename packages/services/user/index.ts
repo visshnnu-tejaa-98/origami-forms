@@ -49,16 +49,6 @@ export default class UserService {
                 avatarUrl: avatarUrl || null,
                 role,
             })
-            .onConflictDoUpdate({
-                target: users.email,
-                set: {
-                    clerkUserId,
-                    firstName: resolvedFirstName,
-                    lastName: lastName || null,
-                    avatarUrl: avatarUrl || null,
-                    deletedAt: null,
-                },
-            })
             .returning({
                 id: users.id,
                 clerkUserId: users.clerkUserId,
