@@ -15,13 +15,13 @@ type NavItem = {
   href: string;
   icon: IconName;
   label: string;
-  count?: string;
+  count?: number;
 };
 
 const workspace: NavItem[] = [
   { href: "/dashboard", icon: "home", label: "Overview" },
   { href: "/forms", icon: "forms", label: "My forms", },
-  { href: "/responses", icon: "mail", label: "Responses", count: "218" },
+  { href: "/responses", icon: "mail", label: "Responses", count: 218 },
   { href: "/analytics", icon: "analytics", label: "Analytics" },
 ];
 
@@ -57,7 +57,7 @@ const Sidebar = () => {
       setWorkSpaceLinks((prevLinks) =>
         prevLinks.map((link) =>
           link.href === "/forms"
-            ? { ...link, count: formsStatsData.draft.toString() }
+            ? { ...link, count: formsStatsData.draft as number }
             : link
         )
       );
@@ -65,8 +65,9 @@ const Sidebar = () => {
     }
   }, [formsStatsData]);
 
-  const renderItem = (item: NavItem) => (
-    <Link
+  const renderItem = (item: NavItem) => {
+    const showCount = !!(item.count && item.count > 0);
+    return <Link
       key={item.href}
       className={`sb-item${isActive(item.href) ? " active" : ""}`}
       href={item.href}
@@ -74,9 +75,9 @@ const Sidebar = () => {
     >
       <Icon name={item.icon} size={17} />
       <span>{item.label}</span>
-      {item.count && <span className="count">{item.count}</span>}
+      {showCount && <span className="count">{item.count}</span>}
     </Link>
-  );
+  }
 
   return (
     <aside className="sidebar">
