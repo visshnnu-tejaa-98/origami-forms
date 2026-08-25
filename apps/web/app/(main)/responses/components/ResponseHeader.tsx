@@ -22,6 +22,17 @@ const ResponseHeader = (props: ResponseHeaderProps) => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search responses…"
                     />
+                    {searchQuery !== "" && (
+                        <button
+                            type="button"
+                            className="search-clear"
+                            onClick={() => setSearchQuery("")}
+                            aria-label="Clear search"
+                            title="Clear search"
+                        >
+                            <Icon name="x" size={13} />
+                        </button>
+                    )}
                 </div>
                 <button className="o-btn o-btn--sm"
                 // onClick={() => exportCsv(visible)}

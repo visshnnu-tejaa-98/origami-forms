@@ -21,12 +21,15 @@ import {
   type ResponseTab,
 } from "../constants";
 import GlobalToolar from "../components/Toolbar";
+import { useDebounce } from "~/hooks/use-debounce";
 
 const Responses = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
+
+  const debouncedQuery = useDebounce(searchQuery.trim(), 400);
 
   const { page, pageSize, getPaginationProps } = usePagination({ pageSize: 10 });
   const { toolbarProps, tab, sort, sortOrder, view } = useToolbar<ResponseTab, ResponseSortField>({
@@ -41,6 +44,7 @@ const Responses = () => {
       sortBy: sort,
       sortOrder,
       status: tab,
+      search: debouncedQuery !== "" ? debouncedQuery : undefined,
       page: page,
       pageSize: pageSize,
     });
@@ -72,7 +76,7 @@ const Responses = () => {
           totalItems={totalItems}
         />
 
-        <GlobalToolar<ResponseTab, ResponseSortField>
+        <GlobalToolar
           {...toolbarProps}
           tabs={RESPONSE_STATUS_TABS}
           sorts={RESPONSE_SORTS}
