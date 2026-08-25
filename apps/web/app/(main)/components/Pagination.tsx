@@ -2,18 +2,24 @@ import React from "react";
 import { Icon } from "./icons";
 import type { PaginationProps } from "../types";
 
-const Pagination = ({ data, pageOptions, setPage }: Omit<PaginationProps, "showPagination">) => {
+const Pagination = ({
+    data,
+    pageOptions,
+    setPage,
+    className = "forms-pager",
+    itemLabel = "form",
+}: Omit<PaginationProps, "showPagination">) => {
     if (!data || !pageOptions) return null;
     const { rangeStart, rangeEnd, currentPage, totalPages } = pageOptions;
     return (
-        <nav className="forms-pager" aria-label="Forms pagination">
+        <nav className={className} aria-label="Pagination">
             <span className="pager-info">
                 Showing{" "}
                 <strong>
                     {rangeStart}–{rangeEnd}
                 </strong>{" "}
                 of {data?.totalItems}
-                {rangeEnd - rangeStart > 1 ? " forms" : " form"}
+                {` ${itemLabel}${data?.totalItems === 1 ? "" : "s"}`}
             </span>
             <div className="pager-controls">
                 {data.hasPrevPage && (

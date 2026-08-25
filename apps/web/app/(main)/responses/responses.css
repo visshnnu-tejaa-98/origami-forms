@@ -98,7 +98,7 @@
 .db-shell .rsp-th,
 .db-shell .rsp-tr {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) 92px minmax(0, 1fr) 84px 26px;
+  grid-template-columns: 20px minmax(0, 1.6fr) minmax(0, 1.15fr) minmax(0, 1fr) 92px  84px 26px;
   gap: 14px;
   align-items: center;
   padding: 11px 16px;
@@ -174,13 +174,13 @@
   background: var(--accent-soft); color: var(--accent-deep);
 }
 .db-shell .rsp-av.lg { width: 44px; height: 44px; flex: 0 0 44px; font-size: 1.35rem; }
-.db-shell .rsp-av.t-sakura { background: var(--sakura-soft); color: var(--sakura-deep); }
-.db-shell .rsp-av.t-matcha { background: var(--matcha-soft); color: var(--matcha-deep); }
-.db-shell .rsp-av.t-peach { background: var(--peach-soft); color: var(--peach-deep); }
-.db-shell .rsp-av.t-lavender { background: var(--lavender-soft); color: var(--lavender-deep); }
-.db-shell .rsp-av.t-indigo { background: var(--indigo-soft); color: var(--indigo-deep); }
-.db-shell .rsp-av.t-coral { background: var(--coral-soft); color: var(--coral-deep); }
-.db-shell .rsp-av.t-highlighter { background: var(--highlighter-soft); color: var(--highlighter-deep); }
+.db-shell .rsp-av.t-k1 { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .rsp-av.t-k2 { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .rsp-av.t-k3 { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .rsp-av.t-k4 { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .rsp-av.t-k5 { background: var(--indigo-soft); color: var(--indigo-deep); }
+.db-shell .rsp-av.t-k6 { background: var(--coral-soft); color: var(--coral-deep); }
+.db-shell .rsp-av.t-k1 { background: var(--highlighter-soft); color: var(--highlighter-deep); }
 
 /* ====== PAGINATION ====== */
 .db-shell .rsp-pager {

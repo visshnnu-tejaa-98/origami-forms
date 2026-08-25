@@ -32,6 +32,33 @@ export const SORTS: { key: SortField; label: string }[] = [
     { key: SUBMISSION_COUNT, label: "Responses" },
 ];
 
+// Responses toolbar
+export const SUBMITTED_AT = "submittedAt";
+export const COMPLETION_TIME = "completionTimeInSec";
+export const PARTIAL = "partial";
+export const COMPLETED = "completed";
+
+export type ResponseTab = typeof ALL | typeof PARTIAL | typeof COMPLETED;
+export type ResponseSortField = typeof SUBMITTED_AT | typeof COMPLETION_TIME;
+
+export const RESPONSE_TAB_VALUES = [ALL, COMPLETED, PARTIAL] as const;
+
+export const RESPONSE_STATUS_TABS: { key: ResponseTab; label: string; icon: IconName }[] = [
+    { key: ALL, label: "All", icon: "forms" },
+    { key: COMPLETED, label: "Completed", icon: "check" },
+    { key: PARTIAL, label: "Partial", icon: "clock" },
+];
+
+export const RESPONSE_SORTS: { key: ResponseSortField; label: string }[] = [
+    { key: SUBMITTED_AT, label: "Submitted" },
+    { key: COMPLETION_TIME, label: "Time taken" },
+];
+
+export const RESPONSE_SORT_VALUES = [SUBMITTED_AT, COMPLETION_TIME] as const;
+
+export const FORM_TAB_VALUES = [ALL, DRAFT, PUBLISHED, ARCHIVED] as const;
+export const FORM_SORT_VALUES = [UPDATED_AT, TITLE_SORT, SUBMISSION_COUNT] as const;
+
 export const LIST = "list"
 export const GRID = "grid"
 

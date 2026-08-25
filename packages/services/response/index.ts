@@ -192,18 +192,18 @@ export default class ResponseService {
     }
 }
 
-const responseService = new ResponseService();
+// const responseService = new ResponseService();
 
-responseService
-    .listResponses({
-        formId: "9ab9bdf7-705b-4bd8-a860-d1c41ce5b4a9",
-        requesterId: "477c6c48-ae0c-4bd5-8f36-9c5687e74be6",
-        page: 1,
-        pageSize: 5,
-        search: undefined,
-        status: "completed",
-        sortBy: "submittedAt",
-        sortOrder: "desc",
-    })
-    .then((data) => console.log(data))
-    .catch((err) => console.log(err));
+// responseService
+//     .listResponses({
+//         formId: "9ab9bdf7-705b-4bd8-a860-d1c41ce5b4a9",
+//         requesterId: "477c6c48-ae0c-4bd5-8f36-9c5687e74be6",
+//         page: 1,
+//         pageSize: 5,
+//         search: undefined,
+//         status: "completed",
+//         sortBy: "submittedAt",
+//         sortOrder: "desc",
+//     })
+//     .then((data) => console.log(data))
+//     .catch((err) => console.log(err));

@@ -26,7 +26,7 @@ export type Form = {
     status: Status;
     responses: number;
     completion: number; // 0..100
-    edited: string; // human label
+    edited: string | null // human label
     editedRank: number; // for sorting (lower = more recent)
     pinned: boolean;
     description: string;
@@ -45,14 +45,17 @@ export type SortField = typeof UPDATED_AT | typeof TITLE_SORT | typeof SUBMISSIO
 export type SelectionAll = typeof ALL;
 export type SORT_ORDER = typeof ASC | typeof DESC;
 
-export type ToolbarProps = {
-    tab: Status | SelectionAll;
-    setTab: (tab: Status | SelectionAll) => void;
-    handleSort: (sort: SortField) => void;
+export type ToolbarProps<
+    TTab extends string = Status | SelectionAll,
+    TSort extends string = SortField,
+> = {
+    tab: TTab;
+    setTab: (tab: TTab) => void;
+    handleSort: (sort: TSort) => void;
     sortOrder: SORT_ORDER;
     setView: (settings: Partial<UserSettingsType>) => void
     view: View;
-    sort: SortField;
+    sort: TSort;
 };
 
 
@@ -64,19 +67,19 @@ export type FormHeaderProps = {
 
 export type View = typeof GRID | typeof LIST
 
-/** what `updatePageOptions` derives from a paginated response */
 export type PaginationOptions = PageOptions & {
     currentPage: number
     rangeStart: number
     rangeEnd: number
 }
 
-/** produced by `usePagination().getPaginationProps(data)` */
 export type PaginationProps = {
     data?: PageOptions
     pageOptions: PaginationOptions | null
     setPage: Dispatch<SetStateAction<number>>
     showPagination: boolean
+    className?: string
+    itemLabel?: string
 }
 
 export type FormsContentProps = {

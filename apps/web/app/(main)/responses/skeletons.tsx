@@ -8,7 +8,7 @@ const Bar = ({ w, h = 10 }: { w: string; h?: number }) => (
 /* TABLE · skeleton rows that mirror the real response columns. */
 export const ResponsesSkeleton = ({ count = 8 }: { count?: number }) => (
   <>
-    <OrigamiLoader caption="Collecting your responses…" />
+    {/* <OrigamiLoader caption="Collecting your responses…" /> */}
     <div className="rsp-table" aria-hidden>
       <div className="rsp-th">
         <span />

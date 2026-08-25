@@ -1,0 +1,74 @@
+/* ====== SHARED TOOLBAR ATOMS (sort chips + view toggle) ======
+   Tabs stay per-page (.forms-tab, .rsp-tab) so each list keeps its own
+   rhythm; everything below is identical wherever a toolbar appears. */
+
+.db-shell .sort-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-sunken);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.db-shell .sort-chip {
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding: 6px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  outline: 0;
+  transition:
+    background 160ms,
+    color 160ms,
+    border-color 160ms;
+}
+
+.db-shell .sort-chip:hover {
+  background: var(--bg-elevated);
+  color: var(--ink-1);
+}
+
+.db-shell .sort-chip.active {
+  background: var(--surface-card);
+  border-color: var(--rule-line);
+  color: var(--ink-1);
+  box-shadow: var(--shadow-paper-1);
+}
+
+.db-shell .sort-chip.active svg {
+  color: var(--accent-deep);
+}
+
+.db-shell .view-toggle {
+  display: inline-flex;
+  background: var(--bg-sunken);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.db-shell .view-toggle button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink-3);
+  padding: 6px 9px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+}
+
+.db-shell .view-toggle button.active {
+  background: var(--surface-card);
+  color: var(--ink-1);
+  box-shadow: var(--shadow-paper-1);
+}

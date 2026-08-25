@@ -9,7 +9,8 @@ import { useDebounce } from "~/hooks/use-debounce";
 import { useToolbar } from "~/hooks/use-toolbar";
 import { usePagination } from "~/hooks/use-pagination";
 import { useQueryParams } from "~/hooks/use-query-params";
-import { Form } from "../types";
+import { Form, SelectionAll, SortField, Status } from "../types";
+import { ALL, DESC, FORM_SORT_VALUES, FORM_TAB_VALUES, UPDATED_AT } from "../constants";
 import { toUiForm } from "../utils";
 import Toolbar from "./components/Toolbar";
 import FormsHeader from "./components/FormsHeader";
@@ -19,7 +20,16 @@ import { useFormStore } from "~/app/store/form-store";
 
 const Forms = () => {
   const { searchParams, setParams } = useQueryParams();
-  const { toolbarProps, tab, sort, sortOrder, view, status } = useToolbar();
+  const { toolbarProps, tab, sort, sortOrder, view, status } = useToolbar<
+    Status | SelectionAll,
+    SortField
+  >({
+    tabs: FORM_TAB_VALUES,
+    defaultTab: ALL,
+    sorts: FORM_SORT_VALUES,
+    defaultSort: UPDATED_AT,
+    defaultOrder: DESC,
+  });
   const { isLoaded: isUserLoaded } = useUser();
 
   const urlSearch = searchParams.get("search") ?? "";

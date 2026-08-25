@@ -52,4 +52,4 @@ export const listResponsesOutputSchema = z.object({
     hasPrevPage: z.boolean().describe("whether a previous page exists"),
 })
 
-export type ListResponseOutputType = z.output<typeof listResponsesOutputSchema>
+export type ListResponseOutputType = z.infer<typeof listResponsesOutputSchema>
