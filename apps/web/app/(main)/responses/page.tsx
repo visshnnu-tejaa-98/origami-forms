@@ -22,6 +22,7 @@ import {
 } from "../constants";
 import GlobalToolar from "../components/Toolbar";
 import { useDebounce } from "~/hooks/use-debounce";
+import ResponseAnswerDetails from "./components/ResponseAnswerDetails";
 
 const Responses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,6 +52,7 @@ const Responses = () => {
 
 
 
+
   console.log({ responsesData });
 
   if (listResponsesIsPending) {
@@ -61,7 +63,9 @@ const Responses = () => {
     return <>Error loading responses</>;
   }
 
-  const { totalItems } = responsesData;
+  const { totalItems, responses } = responsesData;
+  const selected = responses!.find((response) => response.id === selectedId) ?? null;
+
 
   const { pageOptions, setPage } = getPaginationProps(responsesData)
 
@@ -99,7 +103,13 @@ const Responses = () => {
           className="rsp-pager"
           itemLabel="response"
         />
+
       </section>
+
+      <ResponseAnswerDetails
+        selected={selected}
+        setSelectedId={setSelectedId}
+      />
     </div>
   );
 };

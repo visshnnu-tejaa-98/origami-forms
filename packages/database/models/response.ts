@@ -13,7 +13,7 @@ import { relations } from "drizzle-orm";
 import { users } from "./user";
 
 
-type FormMetadata = {
+export type FormMetadata = {
     country?: string;
     city?: string;
     device?: string,

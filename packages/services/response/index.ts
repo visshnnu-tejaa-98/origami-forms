@@ -164,6 +164,7 @@ export default class ResponseService {
             return {
                 id: response.id,
                 status: response.status,
+                metaData: response.metaData,
                 submittedAt: response.submittedAt ? response.submittedAt.toISOString() : undefined,
                 completionTimeInSec: response.CompletionTimeInSec,
                 email: user?.email || undefined,

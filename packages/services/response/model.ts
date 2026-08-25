@@ -30,6 +30,13 @@ export const responseAnswersSchema = z.object({
     order: z.number().describe("order of the field"),
 })
 
+export const metaDataSchema = z.object({
+    city: z.string().nullish().describe("city of the response"),
+    device: z.string().nullish().describe("device used to submit the response"),
+    browser: z.string().nullish().describe("browser used to submit the response"),
+    country: z.string().nullish().describe("country of the response"),
+})
+
 export const responseSchema = z.object({
     id: z.string().uuid().describe("id of the response"),
     name: z.string().nullish().describe("name of the user who submitted the response"),
@@ -39,7 +46,9 @@ export const responseSchema = z.object({
     formTitle: z.string().describe("title of the form to which this response belongs"),
     submittedAt: z.string().datetime().nullish().describe("date and time of when the response was submitted"),
     completionTimeInSec: z.number().int().nonnegative().nullish().describe("time in seconds it took to complete the response"),
-    answers: z.array(responseAnswersSchema).describe("array of answers submitted in this response")
+    answers: z.array(responseAnswersSchema).describe("array of answers submitted in this response"),
+    metaData: metaDataSchema.nullish().describe("metadata of the response"),
+
 })
 
 export const listResponsesOutputSchema = z.object({

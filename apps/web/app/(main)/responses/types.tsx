@@ -12,3 +12,8 @@ export type ResponsesListProps = {
     setSelectedId: (id: string | null) => void,
     checked: Set<string>
 }
+
+export type ResponseAnswerDetailsProps = {
+    selected: ListResponseOutputType["responses"][number] | null,
+    setSelectedId: (id: string | null) => void
+}

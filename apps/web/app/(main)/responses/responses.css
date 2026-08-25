@@ -293,12 +293,12 @@
   font-size: 0.62rem; padding: 1px 6px; border-radius: 4px;
   background: var(--accent-soft); color: var(--accent-deep);
 }
-.db-shell .rsp-ans .type-pill.t-sakura { background: var(--sakura-soft); color: var(--sakura-deep); }
-.db-shell .rsp-ans .type-pill.t-matcha { background: var(--matcha-soft); color: var(--matcha-deep); }
-.db-shell .rsp-ans .type-pill.t-peach { background: var(--peach-soft); color: var(--peach-deep); }
-.db-shell .rsp-ans .type-pill.t-lavender { background: var(--lavender-soft); color: var(--lavender-deep); }
-.db-shell .rsp-ans .type-pill.t-indigo { background: var(--indigo-soft); color: var(--indigo-deep); }
-.db-shell .rsp-ans .type-pill.t-highlighter { background: var(--highlighter-soft); color: var(--highlighter-deep); }
+.db-shell .rsp-ans .type-pill.t-k1 { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .rsp-ans .type-pill.t-k2 { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .rsp-ans .type-pill.t-k3 { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .rsp-ans .type-pill.t-k4 { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .rsp-ans .type-pill.t-k5 { background: var(--indigo-soft); color: var(--indigo-deep); }
+.db-shell .rsp-ans .type-pill.t-k6 { background: var(--highlighter-soft); color: var(--highlighter-deep); }
 
 .db-shell .rsp-ans .q {
   font-family: var(--font-body); font-weight: 600; color: var(--ink-1);
