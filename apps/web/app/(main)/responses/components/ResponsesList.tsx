@@ -5,10 +5,16 @@ import { TINTS } from '../../constants'
 import { Icon } from '../../components/icons'
 import { hash } from '../../utils'
 import { ResponsesListProps } from '../types'
+import EmptyTemplate from '../../forms/components/EmptyTemplate'
+import { ResponsesSkeleton } from '../skeletons'
 
 const ResponsesList = (props: ResponsesListProps) => {
-    const { responsesData, selectedId, setSelectedId, checked } = props;
+    const { responsesData, selectedId, listResponsesIsFetching, checked, isFiltered, setSelectedId, onClick } = props;
 
+    const responses = responsesData?.responses ?? [];
+    if (listResponsesIsFetching) {
+        return <ResponsesSkeleton count={Math.max(responses.length, 3)} />
+    }
     return (
         <div className="rsp-table" role="table" aria-label="Form responses">
             <span className="o-tape rsp-table-tape" aria-hidden />
@@ -23,8 +29,17 @@ const ResponsesList = (props: ResponsesListProps) => {
                 <span>Submitted at</span>
                 <span />
             </div>
-            {/* TODO: remove this any type */}
-            {responsesData?.responses.map((response: ListResponseOutputType["responses"][number]) => {
+            {responses.length === 0 && (
+                <EmptyTemplate
+                    icon="mail"
+                    title={isFiltered ? "Nothing matches that fold." : "No responses yet."}
+                    description={isFiltered ? "Nothing came back for that search or filter. Try a different word, or open the gates to everyone with <em>all</em>." : "Once someone fills in one of your forms, their answers land here — ready to unfold, one crease at a time."}
+                    cta={isFiltered ? "Clear filters" : "Create a form"}
+                    onClick={onClick}
+                />
+            )}
+
+            {responses.map((response: ListResponseOutputType["responses"][number]) => {
                 const { id } = response
                 const name = response.name ?? "Anonymous User"
                 const email = response.email ?? ""

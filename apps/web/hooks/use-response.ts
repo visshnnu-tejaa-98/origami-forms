@@ -11,6 +11,7 @@ export function useListResponses(props: Omit<ListResponsesInput, "requesterId">)
         isSuccess: listResponsesIsSuccess,
         status: listResponsesStatus,
         isPending: listResponsesIsPending,
+        isFetching: listResponsesIsFetching,
         refetch: refetchResponses,
     } = trpc.responses.listResponses.useQuery(props, {
         placeholderData: keepPreviousData,
@@ -23,6 +24,7 @@ export function useListResponses(props: Omit<ListResponsesInput, "requesterId">)
         listResponsesIsSuccess,
         listResponsesStatus,
         listResponsesIsPending,
+        listResponsesIsFetching,
         refetchResponses,
     };
 }

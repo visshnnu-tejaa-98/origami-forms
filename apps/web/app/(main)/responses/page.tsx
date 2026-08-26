@@ -1,11 +1,11 @@
 "use client";
+import { isEqual } from "lodash"
 import "./responses.css";
 import FloatingResponseOrigamiDecorations from "./components/FloatingResponseOrigamiDecorations";
 import { useState } from "react";
 import { useListResponses } from "~/hooks/use-response";
 import ResponseHeader from "./components/ResponseHeader";
 import { usePagination } from "~/hooks/use-pagination";
-
 import ResponsesList from "./components/ResponsesList";
 import Pagination from "../components/Pagination";
 import { useToolbar } from "~/hooks/use-toolbar";
@@ -17,6 +17,7 @@ import {
   RESPONSE_STATUS_TABS,
   RESPONSE_TAB_VALUES,
   SUBMITTED_AT,
+  defaultResponsesFilterOptions,
   type ResponseSortField,
   type ResponseTab,
 } from "../constants";
@@ -24,6 +25,8 @@ import GlobalToolar from "../components/Toolbar";
 import { useDebounce } from "~/hooks/use-debounce";
 import ResponseAnswerDetails from "./components/ResponseAnswerDetails";
 import { ResponsesPageSkeleton, ResponsesSkeleton } from "./skeletons";
+import { DefaultFilterOptions } from "./types";
+import { useRouter } from "next/navigation";
 
 const Responses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,14 +37,14 @@ const Responses = () => {
   const debouncedQuery = useDebounce(searchQuery.trim(), 400);
 
   const { page, pageSize, getPaginationProps } = usePagination({ pageSize: 10 });
-  const { toolbarProps, tab, sort, sortOrder, view } = useToolbar<ResponseTab, ResponseSortField>({
+  const { toolbarProps, tab, sort, sortOrder, setTab, } = useToolbar<ResponseTab, ResponseSortField>({
     tabs: RESPONSE_TAB_VALUES,
     defaultTab: ALL,
     sorts: RESPONSE_SORT_VALUES,
     defaultSort: SUBMITTED_AT,
     defaultOrder: DESC,
   });
-  const { responsesData, listResponsesIsError, listResponsesIsPending, refetchResponses } =
+  const { responsesData, listResponsesIsError, listResponsesIsPending, listResponsesIsFetching } =
     useListResponses({
       sortBy: sort,
       sortOrder,
@@ -51,8 +54,22 @@ const Responses = () => {
       pageSize: pageSize,
     });
 
+  const router = useRouter()
 
+  const filterOptions: DefaultFilterOptions = {
+    sortBy: sort,
+    sortOrder,
+    status: tab,
+    search: debouncedQuery,
+  };
+  const isFiltered = !isEqual(filterOptions, defaultResponsesFilterOptions);
 
+  const onClearFilters = () => {
+    setSearchQuery("");
+    setTab(ALL);
+  };
+
+  const onClickCreateForm = () => router.push("/builder");
 
   const firstLoad = listResponsesIsPending && !responsesData;
 
@@ -95,16 +112,15 @@ const Responses = () => {
           itemsLabel="responses"
         />
 
-        {listResponsesIsPending ? (
-          <ResponsesSkeleton count={pageSize} />
-        ) : (
-          <ResponsesList
-            responsesData={responsesData}
-            selectedId={selectedId}
-            setSelectedId={setSelectedId}
-            checked={checked}
-          />
-        )}
+        <ResponsesList
+          responsesData={responsesData}
+          selectedId={selectedId}
+          checked={checked}
+          isFiltered={isFiltered}
+          listResponsesIsFetching={listResponsesIsFetching}
+          setSelectedId={setSelectedId}
+          onClick={isFiltered ? onClearFilters : onClickCreateForm}
+        />
 
         <Pagination
           data={responsesData}

@@ -214,6 +214,19 @@
 .db-shell .rsp-empty p { color: var(--ink-3); font-size: 0.95rem; line-height: 1.55; margin: 0 auto; max-width: 34ch; }
 .db-shell .rsp-empty em { font-style: italic; color: var(--ink-2); }
 
+/* the empty state now sits inside the taped table, under the header row */
+.db-shell .rsp-table .rsp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0 auto;
+  padding: 52px 24px 56px;
+  max-width: 44ch;
+}
+.db-shell .rsp-table .rsp-empty h3 { margin: 4px 0 2px; }
+.db-shell .rsp-table .rsp-empty .o-btn { margin-top: 14px; }
+
 /* ============================================================
    DETAIL PANE · one response, unfolded
    ============================================================ */

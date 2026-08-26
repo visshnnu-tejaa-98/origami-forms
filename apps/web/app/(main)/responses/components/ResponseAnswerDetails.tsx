@@ -187,9 +187,9 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                     </div>
 
                     <div className="rsp-detail-foot">
-                        <a className="o-btn o-btn--sm" href={`mailto:${selected.email}`}>
+                        {email && <a className="o-btn o-btn--sm" href={`mailto:${selected.email}`}>
                             <Icon name="mail" size={13} /> Reply
-                        </a>
+                        </a>}
                         <button className="o-btn o-btn--sm">
                             <Icon name={"download"} size={13} /> Export
                         </button>

@@ -16,7 +16,7 @@ const FormsContent = (props: FormsContentProps) => {
     const router = useRouter();
 
     const handleCreateNewForm = () => {
-        router.push("/forms/new");
+        router.push("/builder");
     };
 
     if (loading) {

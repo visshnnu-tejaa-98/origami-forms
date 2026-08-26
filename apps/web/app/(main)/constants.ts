@@ -1,4 +1,5 @@
 import { IconName } from "./components/icons";
+import { DefaultFilterOptions } from "./responses/types";
 import { SortField, Status } from "./types";
 
 // Icons and Tints
@@ -80,3 +81,11 @@ export const EMPTY_COPY: Record<Status | typeof ALL, { title: string; descriptio
         description: "Forms you retire will rest here, safe and out of the way.",
     },
 };
+
+
+export const defaultResponsesFilterOptions: DefaultFilterOptions = {
+    sortBy: "submittedAt",
+    sortOrder: "desc",
+    status: "all",
+    search: "",
+}

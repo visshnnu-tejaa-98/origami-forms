@@ -1,6 +1,5 @@
 import React from 'react'
 import { Icon, IconName } from '../../components/icons'
-import Link from 'next/link'
 import { EmptyScreenProps } from '../../types'
 
 const EmptyTemplate = (props: EmptyScreenProps) => {
@@ -12,9 +11,9 @@ const EmptyTemplate = (props: EmptyScreenProps) => {
             </span>
             <h3>{title}</h3>
             <p>{description}</p>
-            <Link href="#" className="o-btn o-btn--accent o-btn--lg" onClick={onClick}>
+            <button type="button" className="o-btn o-btn--accent o-btn--lg" onClick={onClick}>
                 <Icon name="plus" size={15} /> {cta}
-            </Link>
+            </button>
         </div>
     )
 }
