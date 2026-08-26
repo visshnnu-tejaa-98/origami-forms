@@ -90,14 +90,14 @@ export const FormsTableSkeleton = ({ count = 8 }: { count?: number }) => (
   </>
 );
 
-const Ink = ({ w, h = "0.8em" }: { w: number | string; h?: string }) => (
+export const Ink = ({ w, h = "0.8em" }: { w: number | string; h?: string }) => (
   <span
     className="sk sk-shimmer"
     style={{ width: w, height: h, display: "inline-block", verticalAlign: "middle" }}
   />
 );
 
-const Slab = ({ w, h = 32, r = 10 }: { w: number | string; h?: number; r?: number }) => (
+export const Slab = ({ w, h = 32, r = 10 }: { w: number | string; h?: number; r?: number }) => (
   <span
     className="sk sk-shimmer"
     style={{ width: w, height: h, borderRadius: r, flex: "none", display: "inline-block" }}
@@ -117,17 +117,27 @@ export const FormsHeaderSkeleton = () => (
   </header>
 );
 
-export const ToolbarSkeleton = () => (
-  <div className="forms-toolbar" aria-hidden>
-    <div className="forms-tabs">
-      {[78, 86, 98, 116].map((w) => (
-        <Slab key={w} w={w} />
+export const ToolbarSkeleton = ({
+  classNames,
+  tabWidths = [78, 86, 98, 116],
+  sortWidth = "250px",
+  showViewToggle = true,
+}: {
+  classNames?: { toolbar?: string; tabs?: string };
+  tabWidths?: number[];
+  sortWidth?: number | string;
+  showViewToggle?: boolean;
+}) => (
+  <div className={classNames?.toolbar ?? "forms-toolbar"} aria-hidden>
+    <div className={classNames?.tabs ?? "forms-tabs"}>
+      {tabWidths.map((w, i) => (
+        <Slab key={i} w={w} />
       ))}
     </div>
 
     <span className="spacer" />
 
-    <Slab w={"250px"} h={34} />
-    <Slab w={78} h={34} r={8} />
+    <Slab w={sortWidth} h={34} />
+    {showViewToggle && <Slab w={78} h={34} r={8} />}
   </div>
 );

@@ -23,6 +23,7 @@ import {
 import GlobalToolar from "../components/Toolbar";
 import { useDebounce } from "~/hooks/use-debounce";
 import ResponseAnswerDetails from "./components/ResponseAnswerDetails";
+import { ResponsesPageSkeleton, ResponsesSkeleton } from "./skeletons";
 
 const Responses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,10 +54,15 @@ const Responses = () => {
 
 
 
-  console.log({ responsesData });
+  const firstLoad = listResponsesIsPending && !responsesData;
 
-  if (listResponsesIsPending) {
-    return <>Loading...</>;
+  if (firstLoad) {
+    return (
+      <div className="rsp-page">
+        <FloatingResponseOrigamiDecorations />
+        <ResponsesPageSkeleton />
+      </div>
+    );
   }
 
   if (listResponsesIsError || !responsesData) {
@@ -89,12 +95,16 @@ const Responses = () => {
           itemsLabel="responses"
         />
 
-        <ResponsesList
-          responsesData={responsesData}
-          selectedId={selectedId}
-          setSelectedId={setSelectedId}
-          checked={checked}
-        />
+        {listResponsesIsPending ? (
+          <ResponsesSkeleton count={pageSize} />
+        ) : (
+          <ResponsesList
+            responsesData={responsesData}
+            selectedId={selectedId}
+            setSelectedId={setSelectedId}
+            checked={checked}
+          />
+        )}
 
         <Pagination
           data={responsesData}

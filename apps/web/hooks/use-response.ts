@@ -1,3 +1,4 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import { trpc } from "~/trpc/client";
 import { ListResponsesInput } from "@repo/services/response/model";
 
@@ -11,7 +12,9 @@ export function useListResponses(props: Omit<ListResponsesInput, "requesterId">)
         status: listResponsesStatus,
         isPending: listResponsesIsPending,
         refetch: refetchResponses,
-    } = trpc.responses.listResponses.useQuery(props);
+    } = trpc.responses.listResponses.useQuery(props, {
+        placeholderData: keepPreviousData,
+    });
     return {
         responsesData,
         listResponsesError,
