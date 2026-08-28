@@ -4,7 +4,7 @@ import { Icon } from '../../components/icons'
 import { formatItemCount } from '~/app/utils'
 
 const ResponseHeader = (props: ResponseHeaderProps) => {
-    const { totalItems, searchQuery, setSearchQuery } = props
+    const { totalItems, searchQuery, setSearchQuery, onExportCsv, canExport } = props
 
     return (
         <header className="rsp-head">
@@ -34,13 +34,13 @@ const ResponseHeader = (props: ResponseHeaderProps) => {
                         </button>
                     )}
                 </div>
-                <button className="o-btn o-btn--sm"
-                // onClick={() => exportCsv(visible)}
+                <button
+                    className="o-btn o-btn--sm o-btn--accent"
+                    onClick={onExportCsv}
+                    disabled={!canExport}
+                    title={canExport ? "Export the responses on this page" : "Nothing to export"}
                 >
                     <Icon name="download" size={14} /> Export CSV
-                </button>
-                <button className="o-btn o-btn--sm o-btn--accent">
-                    <Icon name="share" size={14} /> Share view
                 </button>
             </div>
         </header>

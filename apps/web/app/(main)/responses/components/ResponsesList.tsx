@@ -4,24 +4,64 @@ import { formatCompletionTime, relativeTime } from '~/app/utils'
 import { TINTS } from '../../constants'
 import { Icon } from '../../components/icons'
 import { hash } from '../../utils'
-import { ResponsesListProps } from '../types'
+import { ActionsBarProps, ResponsesListProps } from '../types'
 import EmptyTemplate from '../../forms/components/EmptyTemplate'
 import { ResponsesSkeleton } from '../skeletons'
 
 const ResponsesList = (props: ResponsesListProps) => {
-    const { responsesData, selectedId, listResponsesIsFetching, checked, isFiltered, setSelectedId, onClick } = props;
+    const { responsesData, selectedId, listResponsesIsFetching, checked, isFiltered, setSelectedId, setChecked, onClick } = props;
 
     const responses = responsesData?.responses ?? [];
     if (listResponsesIsFetching) {
         return <ResponsesSkeleton count={Math.max(responses.length, 3)} />
     }
+
+    const toggleCheckAll = () => {
+        if (allOnPageChecked) {
+            setChecked((prev) => {
+                const next = new Map(prev);
+                responses.forEach((r) => next.delete(r.id));
+                return next;
+            });
+        } else {
+            setChecked((prev) => {
+                const next = new Map(prev);
+                responses.forEach((r) => next.set(r.id, r));
+                return next;
+            });
+        }
+    };
+
+    const toggleCheck = (response: ListResponseOutputType["responses"][number]) => {
+        const { id } = response
+        if (checked.has(id)) {
+            setChecked(prev => {
+                const next = new Map(prev);
+                next.delete(id);
+                return next;
+            })
+        } else {
+            setChecked(prev => {
+                const next = new Map(prev);
+                next.set(id, response)
+                return next;
+            })
+        }
+    }
+    const allOnPageChecked = responses.length > 0 && responses.every((r) => checked.has(r.id));
     return (
         <div className="rsp-table" role="table" aria-label="Form responses">
             <span className="o-tape rsp-table-tape" aria-hidden />
 
             <div className="rsp-th" role="row">
-                {/* TODO: this is for checkbox selection */}
-                <span></span>
+                <button
+                    className={`rsp-check${allOnPageChecked ? " on" : ""}`}
+                    onClick={toggleCheckAll}
+                    aria-label={allOnPageChecked ? "Deselect all on page" : "Select all on page"}
+                    aria-pressed={allOnPageChecked}
+                >
+                    {allOnPageChecked && <Icon name="check" size={12} />}
+                </button>
                 <span>respondent</span>
                 <span className="col-picked">Form Title</span>
                 <span className="col-head">Status</span>
@@ -68,6 +108,7 @@ const ResponsesList = (props: ResponsesListProps) => {
                         className={`rsp-check${checked.has(id) ? " on" : ""}`}
                         onClick={(e) => {
                             e.stopPropagation();
+                            toggleCheck(response)
                         }}
                         aria-label={`Select ${name}`}
                         aria-pressed={checked.has(id)}

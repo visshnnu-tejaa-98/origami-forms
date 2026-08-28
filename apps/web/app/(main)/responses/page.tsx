@@ -24,18 +24,22 @@ import {
 import GlobalToolar from "../components/Toolbar";
 import { useDebounce } from "~/hooks/use-debounce";
 import ResponseAnswerDetails from "./components/ResponseAnswerDetails";
-import { ResponsesPageSkeleton, ResponsesSkeleton } from "./skeletons";
+import { ResponsesPageSkeleton } from "./skeletons";
 import { DefaultFilterOptions } from "./types";
 import { useRouter } from "next/navigation";
+import { ListResponseOutputType } from "@repo/services/response/model";
+import { exportResponsesToCsv } from "./utils";
+import ActionsBar from "./components/ActionBar";
+import EmptyComponent from "../components/EmptyComponent";
 
 const Responses = () => {
   const [searchQuery, setSearchQuery] = useState("");
-
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [checked, setChecked] = useState<Map<string, ListResponseOutputType["responses"][number]>>(
+    new Map<string, ListResponseOutputType["responses"][number]>(),
+  );
 
   const debouncedQuery = useDebounce(searchQuery.trim(), 400);
-
   const { page, pageSize, getPaginationProps } = usePagination({ pageSize: 10 });
   const { toolbarProps, tab, sort, sortOrder, setTab, } = useToolbar<ResponseTab, ResponseSortField>({
     tabs: RESPONSE_TAB_VALUES,
@@ -83,7 +87,9 @@ const Responses = () => {
   }
 
   if (listResponsesIsError || !responsesData) {
-    return <>Error loading responses</>;
+    return <EmptyComponent title="Failed to load responses"
+      message=""
+      onClick={() => { }} />;
   }
 
   const { totalItems, responses } = responsesData;
@@ -101,6 +107,8 @@ const Responses = () => {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           totalItems={totalItems}
+          onExportCsv={() => exportResponsesToCsv(responses)}
+          canExport={!!checked.size}
         />
 
         <GlobalToolar
@@ -112,6 +120,8 @@ const Responses = () => {
           itemsLabel="responses"
         />
 
+        <ActionsBar checked={checked} setChecked={setChecked} />
+
         <ResponsesList
           responsesData={responsesData}
           selectedId={selectedId}
@@ -119,6 +129,7 @@ const Responses = () => {
           isFiltered={isFiltered}
           listResponsesIsFetching={listResponsesIsFetching}
           setSelectedId={setSelectedId}
+          setChecked={setChecked}
           onClick={isFiltered ? onClearFilters : onClickCreateForm}
         />
 

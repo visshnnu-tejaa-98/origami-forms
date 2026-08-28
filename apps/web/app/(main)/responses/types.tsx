@@ -5,14 +5,17 @@ export type ResponseHeaderProps = {
     totalItems: number;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
+    onExportCsv: () => void;
+    canExport: boolean;
 };
 
 export type ResponsesListProps = {
     responsesData: ListResponseOutputType;
     selectedId: string | null;
-    checked: Set<string>;
+    checked: Map<string, ListResponseOutputType["responses"][number]>;
     isFiltered: boolean;
     listResponsesIsFetching: boolean;
+    setChecked: React.Dispatch<React.SetStateAction<Map<string, ListResponseOutputType["responses"][number]>>>;
     setSelectedId: (id: string | null) => void;
     onClick: () => void;
 };
@@ -28,3 +31,8 @@ export type DefaultFilterOptions = {
     status: ResponseTab;
     search: string;
 };
+
+export type ActionsBarProps = {
+    checked: Map<string, ListResponseOutputType["responses"][number]>;
+    setChecked: React.Dispatch<React.SetStateAction<Map<string, ListResponseOutputType["responses"][number]>>>;
+}
