@@ -10,7 +10,9 @@ export type ResponseHeaderProps = {
 };
 
 export type ResponsesListProps = {
-    responsesData: ListResponseOutputType;
+    responsesData?: ListResponseOutputType;
+    listResponsesIsError: boolean;
+    refetchResponses: () => void;
     selectedId: string | null;
     checked: Map<string, ListResponseOutputType["responses"][number]>;
     isFiltered: boolean;

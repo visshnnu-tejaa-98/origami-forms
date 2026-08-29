@@ -9,7 +9,7 @@ import EmptyTemplate from '../../forms/components/EmptyTemplate'
 import { ResponsesSkeleton } from '../skeletons'
 
 const ResponsesList = (props: ResponsesListProps) => {
-    const { responsesData, selectedId, listResponsesIsFetching, checked, isFiltered, setSelectedId, setChecked, onClick } = props;
+    const { responsesData, selectedId, listResponsesIsFetching, listResponsesIsError, checked, isFiltered, setSelectedId, setChecked, refetchResponses, onClick } = props;
 
     const responses = responsesData?.responses ?? [];
     if (listResponsesIsFetching) {
@@ -69,7 +69,15 @@ const ResponsesList = (props: ResponsesListProps) => {
                 <span>Submitted at</span>
                 <span />
             </div>
-            {responses.length === 0 && (
+            {listResponsesIsError ? (
+                <EmptyTemplate
+                    icon="error"
+                    title="That fetch came apart."
+                    description="We couldn't reach your responses just now. Nothing is lost — give it another go."
+                    cta="Try again"
+                    onClick={refetchResponses}
+                />
+            ) : responses.length === 0 && (
                 <EmptyTemplate
                     icon="mail"
                     title={isFiltered ? "Nothing matches that fold." : "No responses yet."}

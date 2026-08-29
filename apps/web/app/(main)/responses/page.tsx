@@ -30,7 +30,6 @@ import { useRouter } from "next/navigation";
 import { ListResponseOutputType } from "@repo/services/response/model";
 import { exportResponsesToCsv } from "./utils";
 import ActionsBar from "./components/ActionBar";
-import EmptyComponent from "../components/EmptyComponent";
 
 const Responses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,7 +47,7 @@ const Responses = () => {
     defaultSort: SUBMITTED_AT,
     defaultOrder: DESC,
   });
-  const { responsesData, listResponsesIsError, listResponsesIsPending, listResponsesIsFetching } =
+  const { responsesData, listResponsesIsError, listResponsesIsPending, listResponsesIsFetching, refetchResponses } =
     useListResponses({
       sortBy: sort,
       sortOrder,
@@ -86,14 +85,9 @@ const Responses = () => {
     );
   }
 
-  if (listResponsesIsError || !responsesData) {
-    return <EmptyComponent title="Failed to load responses"
-      message=""
-      onClick={() => { }} />;
-  }
-
-  const { totalItems, responses } = responsesData;
-  const selected = responses!.find((response) => response.id === selectedId) ?? null;
+  const responses = responsesData?.responses ?? [];
+  const totalItems = responsesData?.totalItems ?? 0;
+  const selected = responses.find((response) => response.id === selectedId) ?? null;
 
 
   const { pageOptions, setPage } = getPaginationProps(responsesData)
@@ -124,6 +118,8 @@ const Responses = () => {
 
         <ResponsesList
           responsesData={responsesData}
+          listResponsesIsError={listResponsesIsError}
+          refetchResponses={refetchResponses}
           selectedId={selectedId}
           checked={checked}
           isFiltered={isFiltered}
