@@ -4,6 +4,7 @@ import { Icon } from "../../components/icons";
 import { TINTS } from "../../constants";
 import { hash } from "../../utils";
 import { formatCompletionTime } from "~/app/utils";
+import { exportResponsesToCsv } from "../utils";
 
 const PLAIN_TEXT_FIELD_TYPES = [
     "short_text",
@@ -190,7 +191,7 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                         {email && <a className="o-btn o-btn--sm" href={`mailto:${selected.email}`}>
                             <Icon name="mail" size={13} /> Reply
                         </a>}
-                        <button className="o-btn o-btn--sm">
+                        <button className="o-btn o-btn--sm" onClick={() => exportResponsesToCsv([selected])}>
                             <Icon name={"download"} size={13} /> Export
                         </button>
                     </div>

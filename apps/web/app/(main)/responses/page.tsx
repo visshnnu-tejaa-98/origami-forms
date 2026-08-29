@@ -92,6 +92,10 @@ const Responses = () => {
 
   const { pageOptions, setPage } = getPaginationProps(responsesData)
 
+  const handleExportCsv = () => {
+    exportResponsesToCsv(Array.from(checked.values()))
+    setChecked(new Map())
+  }
   return (
     <div className="rsp-page">
       <FloatingResponseOrigamiDecorations />
@@ -101,7 +105,7 @@ const Responses = () => {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           totalItems={totalItems}
-          onExportCsv={() => exportResponsesToCsv(responses)}
+          onExportCsv={handleExportCsv}
           canExport={!!checked.size}
         />
 
