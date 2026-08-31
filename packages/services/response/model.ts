@@ -62,3 +62,16 @@ export const listResponsesOutputSchema = z.object({
 })
 
 export type ListResponseOutputType = z.infer<typeof listResponsesOutputSchema>
+
+export const formResponsesStatsListInputSchema = z.object({
+    requesterId: z.string().uuid().describe("id of the requesting user")
+})
+
+export type FormResponsesStatsInputType = z.infer<typeof formResponsesStatsListInputSchema>
+
+export const formResponsesStatsOutputSchema = z.object({
+    completed: z.number().int().nonnegative().describe("number of completed responses"),
+    partial: z.number().int().nonnegative().describe("number of partial responses"),
+})
+
+export type FormResponsesStatsOutputType = z.infer<typeof formResponsesStatsOutputSchema>

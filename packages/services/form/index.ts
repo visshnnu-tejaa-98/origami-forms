@@ -19,7 +19,7 @@ import {
     CreateFormInputModel,
     DeleteFormFieldInputProps,
     DeleteFormProps,
-    FormStatusListInputProps,
+    FormStatsListInputProps,
     GetFormByIdProps,
     GetPublicFormProps,
     ListFormsProps,
@@ -521,7 +521,7 @@ export default class FormService {
         return { success: true, message: "Form field deleted successfully" };
     }
 
-    public async formStats(payload: FormStatusListInputProps) {
+    public async formStats(payload: FormStatsListInputProps) {
         const { requesterId } = payload;
 
         const isAdmin = await this.userService.isAdmin(requesterId);

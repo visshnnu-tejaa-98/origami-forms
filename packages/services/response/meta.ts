@@ -91,4 +91,49 @@ Respondent telemetry stored on the response (IP, city, device, referrer) is neve
     };
 };
 
-export { listResponsesMeta };
+const responsesStatsMeta = ({ getPathFn, tags }: ResponseMetaInputProps): OpenApiMetaConfig => {
+    const pathType = getPathFn() as `/${string}`;
+    return {
+        openapi: {
+            method: GET,
+            path: pathType,
+            tags: tags ?? ["Response"],
+            summary: "Get response statistics",
+            description: `
+### Overview
+
+Returns counts of responses broken down by status, across non-deleted forms. Access is
+scoped by role: an admin sees responses across all forms, while a regular user only sees
+responses to the forms they created. Unlike *List form responses*, this endpoint takes no
+filters — it always reports over the requester's full visible set.
+
+### Query Parameters
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`requesterId\` | string (uuid) | Yes | Id of the requesting user (admins see responses to all forms). |
+
+### Flow
+
+1. The requester's role is resolved to determine admin access.
+2. Responses are scoped to non-deleted forms; a non-admin is further scoped to forms they created.
+3. The statuses of the matching responses are counted, and the total is counted alongside them.
+
+### Response
+
+Returns \`{ completed, partial, totalItems }\`, where:
+
+- \`completed\` — number of responses with status \`completed\`;
+- \`partial\` — number of responses with status \`partial\`;
+- \`totalItems\` — total number of responses in scope.
+
+### Errors
+
+- **Validation** — \`requesterId\` is missing or is not a valid uuid.
+- **User not found** — \`requesterId\` does not match a known user.
+`,
+        },
+    };
+};
+
+export { listResponsesMeta, responsesStatsMeta };

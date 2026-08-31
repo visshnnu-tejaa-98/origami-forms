@@ -44,7 +44,7 @@ export type ResponseSortField = typeof SUBMITTED_AT | typeof COMPLETION_TIME;
 
 export const RESPONSE_TAB_VALUES = [ALL, COMPLETED, PARTIAL] as const;
 
-export const RESPONSE_STATUS_TABS: { key: ResponseTab; label: string; icon: IconName }[] = [
+export const RESPONSE_STATUS_TABS: { key: ResponseTab; label: string; icon: IconName, count?: number }[] = [
     { key: ALL, label: "All", icon: "forms" },
     { key: COMPLETED, label: "Completed", icon: "check" },
     { key: PARTIAL, label: "Partial", icon: "clock" },

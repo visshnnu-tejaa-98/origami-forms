@@ -3,7 +3,7 @@ import { isEqual } from "lodash"
 import "./responses.css";
 import FloatingResponseOrigamiDecorations from "./components/FloatingResponseOrigamiDecorations";
 import { useEffect, useState } from "react";
-import { useListResponses } from "~/hooks/use-response";
+import { useListResponses, useResponsesStats } from "~/hooks/use-response";
 import ResponseHeader from "./components/ResponseHeader";
 import { usePagination } from "~/hooks/use-pagination";
 import ResponsesList from "./components/ResponsesList";
@@ -11,7 +11,9 @@ import Pagination from "../components/Pagination";
 import { useToolbar } from "~/hooks/use-toolbar";
 import {
   ALL,
+  COMPLETED,
   DESC,
+  PARTIAL,
   RESPONSE_SORTS,
   RESPONSE_SORT_VALUES,
   RESPONSE_STATUS_TABS,
@@ -38,6 +40,7 @@ const Responses = () => {
   const [checked, setChecked] = useState<Map<string, ListResponseOutputType["responses"][number]>>(
     new Map<string, ListResponseOutputType["responses"][number]>(),
   );
+  const [tabs, setTabs] = useState(RESPONSE_STATUS_TABS)
 
   const debouncedQuery = useDebounce(searchQuery.trim(), 400);
   const { page, pageSize, getPaginationProps } = usePagination({ pageSize: 10 });
@@ -58,6 +61,8 @@ const Responses = () => {
       pageSize: pageSize,
     });
 
+  const { responsesStatsData } = useResponsesStats({})
+
   const router = useRouter()
   const setResponsesData = useResponsesStore(state => state.setResponsesData)
 
@@ -66,6 +71,28 @@ const Responses = () => {
       setResponsesData(responsesData)
     }
   }, [responsesData])
+
+  useEffect(() => {
+    if (!responsesStatsData) return;
+
+    const { completed, partial } = responsesStatsData;
+    const counts: Record<string, number> = {
+      [ALL]: completed + partial,
+      [COMPLETED]: completed,
+      [PARTIAL]: partial
+    };
+
+    setTabs((prev) =>
+      prev.map((tab) => ({
+        ...tab,
+        count: counts[tab.key] ?? tab.count
+      }))
+    );
+  }, [responsesStatsData]);
+
+  useEffect(() => {
+    console.log({ tabs })
+  }, [tabs])
 
   const filterOptions: DefaultFilterOptions = {
     sortBy: sort,
@@ -119,7 +146,7 @@ const Responses = () => {
 
         <GlobalToolar
           {...toolbarProps}
-          tabs={RESPONSE_STATUS_TABS}
+          tabs={tabs}
           sorts={RESPONSE_SORTS}
           showViewToggle={false}
           classNames={{ toolbar: "rsp-toolbar", tabs: "rsp-tabs", tab: "rsp-tab" }}

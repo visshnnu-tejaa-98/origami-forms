@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { combine, devtools, persist } from "zustand/middleware";
-import { FormStatusListOutputSchemaType, ListFormsOutputSchemaType } from "@repo/services/form/model";
+import { FormStatsListOutputSchemaType, ListFormsOutputSchemaType } from "@repo/services/form/model";
 
 const formsInitialState = {
     formsData: {
@@ -27,7 +27,7 @@ export const useFormStore = create(
                 return {
                     setForms: (formsData: ListFormsOutputSchemaType) => set({ formsData }),
                     getFormsData: () => useFormStore.getState().formsData,
-                    setFormsStats: (formsStats: FormStatusListOutputSchemaType) => set({ formsStats }),
+                    setFormsStats: (formsStats: FormStatsListOutputSchemaType) => set({ formsStats }),
                 };
             }),
             {

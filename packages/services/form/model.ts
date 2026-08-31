@@ -432,13 +432,13 @@ export const deleteFormFieldOutputSchema = z.object({
 export type DeleteFormFieldOutputSchemaType = z.infer<typeof deleteFormFieldOutputSchema>
 
 
-export const formStatusListInputSchema = z.object({
+export const formStatsListInputSchema = z.object({
     requesterId: z.string().uuid().describe("id of the requesting user")
 })
 
-export type FormStatusListInputProps = z.infer<typeof formStatusListInputSchema>
+export type FormStatsListInputProps = z.infer<typeof formStatsListInputSchema>
 
-export const formStatusListOutputSchema = z.object({
+export const formStatsListOutputSchema = z.object({
     published: z.number().int().nonnegative().describe("number of published forms"),
     draft: z.number().int().nonnegative().describe("number of draft forms"),
     archived: z.number().int().nonnegative().describe("number of archived forms"),
@@ -452,7 +452,7 @@ export const formStatusListOutputSchema = z.object({
     // totalShares: z.number().int().nonnegative().describe("total number of shares"),
 })
 
-export type FormStatusListOutputSchemaType = z.infer<typeof formStatusListOutputSchema>
+export type FormStatsListOutputSchemaType = z.infer<typeof formStatsListOutputSchema>
 
 export const getPublicFormInputSchema = z.object({
     formId: z.string().uuid().describe("id of the form, as it appears in the public link"),

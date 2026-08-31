@@ -12,7 +12,7 @@ import {
     inArray,
     eq
 } from "@repo/database";
-import { ListResponseOutputType, ListResponsesInput, listResponsesInputSchema, listResponsesOutputSchema } from "./model";
+import { FormResponsesStatsInputType, formResponsesStatsListInputSchema, formResponsesStatsOutputSchema, FormResponsesStatsOutputType, ListResponseOutputType, ListResponsesInput, listResponsesInputSchema, listResponsesOutputSchema } from "./model";
 import UserService from "../user";
 import { ALL } from "@repo/database/constants";
 
@@ -190,6 +190,33 @@ export default class ResponseService {
         const result = await listResponsesOutputSchema.safeParseAsync(hydratedResult);
 
         return result.data
+    }
+
+    public async responsesStats(payload: FormResponsesStatsInputType) {
+        const { requesterId } = formResponsesStatsListInputSchema.parse(payload);
+
+        const isAdmin = await this.userService.isAdmin(requesterId);
+
+        const formConditions = [isNull(forms.deletedAt)];
+        if (!isAdmin) formConditions.push(eq(forms.creatorId, requesterId));
+
+        const whereCondition = and(
+            isNull(formResponses.deletedAt),
+            inArray(
+                formResponses.formId,
+                db.select({ id: forms.id }).from(forms).where(and(...formConditions)),
+            ),
+        )!;
+
+        const rows = await db.query.formResponses.findMany({
+            where: whereCondition,
+            columns: { status: true },
+        });
+
+        return {
+            completed: rows.filter((r) => r.status === "completed").length,
+            partial: rows.filter((r) => r.status === "partial").length,
+        };
     }
 }
 

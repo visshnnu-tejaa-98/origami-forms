@@ -1,6 +1,6 @@
 "use client";
 import { trpc } from "~/trpc/client";
-import { FormStatusListInputProps, ListFormsInput } from "@repo/services/form/model";
+import { FormStatsListInputProps, ListFormsInput } from "@repo/services/form/model";
 
 /** the form payload is passed to `createForm(...)` at call time, not to the hook */
 export function useCreateForm() {
@@ -113,7 +113,7 @@ export function useListForms(props: Omit<ListFormsInput, 'requesterId'>) {
     };
 }
 
-export function useFormsStats(props: Omit<FormStatusListInputProps, 'requesterId'>) {
+export function useFormsStats(props: Omit<FormStatsListInputProps, 'requesterId'>) {
     const {
         data: formsStatsData,
         error: formsStatsError,

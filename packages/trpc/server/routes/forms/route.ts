@@ -3,8 +3,8 @@ import {
     createFormOutputSchema,
     deleteFormInputSchema,
     deleteFormOutputSchema,
-    formStatusListInputSchema,
-    formStatusListOutputSchema,
+    formStatsListInputSchema,
+    formStatsListOutputSchema,
     getFormByIdInputSchema,
     getFormByIdOutputSchema,
     getPublicFormInputSchema,
@@ -105,8 +105,8 @@ export const formsRouter = router({
 
     formsStats: protectedProcedure
         .meta(formStatsMeta({ getPathFn: () => "/forms/stats", tags: TAGS }))
-        .input(formStatusListInputSchema.omit({ requesterId: true }))
-        .output(formStatusListOutputSchema)
+        .input(formStatsListInputSchema.omit({ requesterId: true }))
+        .output(formStatsListOutputSchema)
         .query(async ({ input, ctx }) => {
             const result = await formService.formStats({ ...input, requesterId: ctx.userId });
 
