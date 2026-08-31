@@ -1,104 +1,139 @@
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { STATUS_BADGE, TAPE } from "../../utils";
 import { Icon } from "../../components/icons";
-import { Form } from "../../types";
+import { Form, FormGridViewProps } from "../../types";
+import ConfirmDialog from "../../components/ConfirmDialog";
 
-const FormGridView = ({ forms }: { forms: Form[] }) => {
+const FormGridView = (props: FormGridViewProps) => {
+    const { forms, onDeleteForm, deleting = false } = props;
+    const [pendingDelete, setPendingDelete] = useState<Form | null>(null);
+
+    const confirmDelete = () => {
+        if (!pendingDelete) return;
+        onDeleteForm?.(pendingDelete);
+        setPendingDelete(null);
+    };
+
     return (
-        <div className="forms-grid">
-            {forms.map((f, idx) => {
-                const badge = STATUS_BADGE[f.status];
-                const isDraft = f.status === "draft";
-                const isLive = f.status === "published";
+        <>
+            <div className="forms-grid">
+                {forms.map((f, idx) => {
+                    const badge = STATUS_BADGE[f.status];
+                    const isDraft = f.status === "draft";
+                    const isLive = f.status === "published";
 
-                const builderLink = `/builder/${f.id}?from=list`
-                const previewLink = `/builder/${f.id}/preview?from=list`
-                const publicLink = `/form/${f.id}`
-                return (
-                    <article key={f.id} className={`form-card ${f.tint}${isDraft ? " is-draft" : ""}`}>
-                        {/* washi tape holding the sheet + a folded dog-ear corner */}
-                        <span className={`o-tape card-tape ${TAPE[Number(idx) % TAPE.length]}`} aria-hidden />
-                        <span className="fold" aria-hidden />
+                    const builderLink = `/builder/${f.id}?from=list`
+                    const previewLink = `/builder/${f.id}/preview?from=list`
+                    const publicLink = `/form/${f.id}`
+                    return (
+                        <article key={f.id} className={`form-card ${f.tint}${isDraft ? " is-draft" : ""}`}>
+                            {/* washi tape holding the sheet + a folded dog-ear corner */}
+                            <span className={`o-tape card-tape ${TAPE[Number(idx) % TAPE.length]}`} aria-hidden />
+                            <span className="fold" aria-hidden />
 
-                        {/* identity */}
-                        <div className="card-top">
-                            <span className="ic tint-ic">
-                                <Icon name={f.icon} size={22} />
-                            </span>
-                            <div className="ct-txt">
-                                <div className="title-row">
-                                    <span className="title" title={f.title}>
-                                        {f.title}
-                                    </span>
-                                </div>
-                                <div className="meta">
-                                    <span className={`o-badge ${badge.cls}`}>{badge.label}</span>
-                                    <span className="dot-sep">·</span>
-                                    <span className="meta-txt">{f.edited}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <p className="blurb">{f.description}</p>
-
-                        {/* two handwritten stats */}
-                        <div className="card-stats">
-                            <div className="st">
-                                <div className="n">{f.responses ? f.responses.toLocaleString() : "—"}</div>
-                                <div className="l">responses</div>
-                            </div>
-                            <div className="st">
-                                <div className="n">{f.completion}%</div>
-                                <div className="l">{isDraft ? "built" : "complete"}</div>
-                            </div>
-                        </div>
-
-                        {/* stitched progress line */}
-                        <div className="o-progress">
-                            <div className="bar" style={{ "--p": `${f.completion}%` } as React.CSSProperties} />
-                        </div>
-
-                        {/* actions */}
-                        <div className="card-foot">
-                            <Link className="o-btn o-btn--sm" href={builderLink}>
-                                <Icon name="edit" size={13} /> {isDraft ? "Continue folding" : "Edit"}
-                            </Link>
-                            <span className="foot-spacer" />
-                            <Link className="icon-act" title="Preview" aria-label="Preview" href={previewLink}>
-                                <Icon name="eye" size={15} />
-                            </Link>
-                            {isLive ? (
-                                <Link
-                                    className="icon-act"
-                                    title="Open the live form"
-                                    aria-label="Open the live form"
-                                    href={publicLink}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    <Icon name="link" size={15} />
-                                </Link>
-                            ) : (
-                                <span
-                                    className="icon-act is-disabled"
-                                    title="Publish this form to open its live link"
-                                    aria-disabled
-                                >
-                                    <Icon name="link" size={15} />
+                            {/* identity */}
+                            <div className="card-top">
+                                <span className="ic tint-ic">
+                                    <Icon name={f.icon} size={22} />
                                 </span>
-                            )}
-                            <button className="icon-act" title="Share link" aria-label="Share">
-                                <Icon name="share" size={15} />
-                            </button>
-                            <button className="icon-act" title="More" aria-label="More">
-                                <Icon name="more" size={15} />
-                            </button>
-                        </div>
-                    </article>
-                );
-            })}
-        </div>
+                                <div className="ct-txt">
+                                    <div className="title-row">
+                                        <span className="title" title={f.title}>
+                                            {f.title}
+                                        </span>
+                                    </div>
+                                    <div className="meta">
+                                        <span className={`o-badge ${badge.cls}`}>{badge.label}</span>
+                                        <span className="dot-sep">·</span>
+                                        <span className="meta-txt">{f.edited}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="blurb">{f.description}</p>
+
+                            {/* two handwritten stats */}
+                            <div className="card-stats">
+                                <div className="st">
+                                    <div className="n">{f.responses ? f.responses.toLocaleString() : "—"}</div>
+                                    <div className="l">responses</div>
+                                </div>
+                                <div className="st">
+                                    <div className="n">{f.completion}%</div>
+                                    <div className="l">{isDraft ? "built" : "complete"}</div>
+                                </div>
+                            </div>
+
+                            {/* stitched progress line */}
+                            <div className="o-progress">
+                                <div className="bar" style={{ "--p": `${f.completion}%` } as React.CSSProperties} />
+                            </div>
+
+                            {/* actions */}
+                            <div className="card-foot">
+                                <Link className="o-btn o-btn--sm" href={builderLink}>
+                                    <Icon name="edit" size={13} /> {isDraft ? "Continue folding" : "Edit"}
+                                </Link>
+                                <span className="foot-spacer" />
+                                <Link className="icon-act" title="Preview" aria-label="Preview" href={previewLink}>
+                                    <Icon name="eye" size={15} />
+                                </Link>
+                                {isLive ? (
+                                    <Link
+                                        className="icon-act"
+                                        title="Open the live form"
+                                        aria-label="Open the live form"
+                                        href={publicLink}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <Icon name="link" size={15} />
+                                    </Link>
+                                ) : (
+                                    <span
+                                        className="icon-act is-disabled"
+                                        title="Publish this form to open its live link"
+                                        aria-disabled
+                                    >
+                                        <Icon name="link" size={15} />
+                                    </span>
+                                )}
+                                <button className="icon-act" title="Share link" aria-label="Share">
+                                    <Icon name="share" size={15} />
+                                </button>
+                                <button
+                                    className="icon-act"
+                                    title="Delete"
+                                    aria-label={`Delete ${f.title}`}
+                                    onClick={() => setPendingDelete(f)}
+                                >
+                                    <Icon name="trash" size={15} />
+                                </button>
+                            </div>
+                        </article>
+                    );
+                })}
+            </div>
+
+            <ConfirmDialog
+                open={pendingDelete !== null}
+                icon="trash"
+                tone="danger"
+                title="Unfold this one for good?"
+                description={
+                    <>
+                        <strong>{pendingDelete?.title}</strong> and every response folded into it will be
+                        thrown away. This cannot be smoothed back out.
+                    </>
+                }
+                confirmLabel="Delete form"
+                cancelLabel="Keep it"
+                busy={deleting}
+                onConfirm={confirmDelete}
+                onCancel={() => setPendingDelete(null)}
+            />
+        </>
     );
 };
 

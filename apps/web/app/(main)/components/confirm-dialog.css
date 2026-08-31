@@ -1,0 +1,122 @@
+/* ====== CONFIRM SHEET · one paper card asking "are you sure?" ====== */
+
+.o-confirm-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(30, 24, 22, 0.42);
+  backdrop-filter: blur(2px);
+  animation: oConfirmVeil 160ms ease-out;
+}
+
+.o-confirm {
+  position: relative;
+  width: min(400px, 100%);
+  padding: 30px 26px 22px;
+  text-align: center;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-paper-2);
+  animation: oConfirmSheet 200ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+/* washi tape holding the sheet to the veil */
+.o-confirm .o-confirm-tape {
+  top: -11px;
+  left: 50%;
+  margin-left: -34px;
+  transform: rotate(-3deg);
+  background-color: rgba(237, 157, 174, 0.82);
+}
+
+.o-confirm-ic {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 14px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.o-confirm h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--ink-1);
+}
+
+.o-confirm .o-confirm-desc {
+  margin: 0 auto;
+  max-width: 36ch;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink-3);
+}
+
+.o-confirm .o-confirm-foot {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.o-confirm .o-confirm-go {
+  color: #fff;
+  border-color: transparent;
+  background: var(--accent-deep);
+}
+
+.o-confirm .o-confirm-go:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.o-confirm .o-confirm-foot .o-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* tones — the icon tile and the confirm button follow the intent */
+.o-confirm.t-danger .o-confirm-ic {
+  background: var(--coral-soft);
+  color: var(--coral-deep);
+}
+
+.o-confirm.t-danger .o-confirm-go {
+  background: var(--danger);
+}
+
+.o-confirm.t-matcha .o-confirm-ic {
+  background: var(--matcha-soft);
+  color: var(--matcha-deep);
+}
+
+.o-confirm.t-matcha .o-confirm-go {
+  background: var(--matcha-deep);
+}
+
+@keyframes oConfirmVeil {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes oConfirmSheet {
+  from {
+    opacity: 0;
+    transform: translateY(10px) rotate(-0.4deg) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .o-confirm-veil,
+  .o-confirm {
+    animation: none;
+  }
+}
