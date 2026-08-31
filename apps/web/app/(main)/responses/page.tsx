@@ -65,6 +65,7 @@ const Responses = () => {
 
   const router = useRouter()
   const setResponsesData = useResponsesStore(state => state.setResponsesData)
+  const setResponsesStats = useResponsesStore(state => state.setResponsesStats)
 
   useEffect(() => {
     if (responsesData) {
@@ -73,9 +74,14 @@ const Responses = () => {
   }, [responsesData])
 
   useEffect(() => {
-    if (!responsesStatsData) return;
+    if (responsesStatsData) {
+      setResponsesStats(responsesStatsData)
+    }
+  }, [responsesStatsData])
 
-    const { completed, partial } = responsesStatsData;
+  useEffect(() => {
+    const responsesStats = useResponsesStore.getState().responsesStats
+    const { completed, partial } = responsesStats;
     const counts: Record<string, number> = {
       [ALL]: completed + partial,
       [COMPLETED]: completed,

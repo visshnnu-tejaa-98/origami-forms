@@ -1,9 +1,9 @@
-import { ListResponseOutputType } from "@repo/services/response/model";
+import { ListResponseOutputType, FormResponsesStatsOutputType } from "@repo/services/response/model";
 import { create } from "zustand";
 import { combine, devtools, persist } from "zustand/middleware";
 
 
-const responsesInitialState: { responsesData: ListResponseOutputType } = {
+const responsesInitialState: { responsesData: ListResponseOutputType, responsesStats: FormResponsesStatsOutputType } = {
     responsesData: {
         responses: [],
         page: 0,
@@ -12,6 +12,10 @@ const responsesInitialState: { responsesData: ListResponseOutputType } = {
         totalPages: 0,
         hasNextPage: false,
         hasPrevPage: false,
+    },
+    responsesStats: {
+        completed: 0,
+        partial: 0
     }
 }
 
@@ -23,6 +27,7 @@ export const useResponsesStore = create(
             combine(responsesInitialState, (set) => {
                 return {
                     setResponsesData: (responsesData: ListResponseOutputType) => set({ responsesData }),
+                    setResponsesStats: (responsesStats: FormResponsesStatsOutputType) => set({ responsesStats }),
                 }
             }),
             {
