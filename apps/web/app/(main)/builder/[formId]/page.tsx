@@ -14,9 +14,6 @@ import Topbar from "../components/Topbar";
 import { Icon } from "../../components/icons";
 import type { BuilderForm } from "../types";
 
-/** the studio, seeded from a saved form. it is a separate component from the page so the
- *  seed is only ever handed to `useBuilder` once the form has actually loaded — the hook
- *  copies the seed into state on mount and never looks at it again */
 const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) => {
   const router = useRouter();
 
@@ -26,9 +23,12 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
     selectedId,
     selectedField,
     selectedIndex,
+    settingsOpen,
     selectField,
     setTitle,
     setDescription,
+    updateSettings,
+    openSettings,
     addField,
     updateField,
     duplicateField,
@@ -37,6 +37,12 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
     saveAndPublish,
     preview,
   } = useBuilder(seed, formId);
+
+  const formSettings = {
+    visibility: form.visibility,
+    maxSubmissions: form.maxSubmissions,
+    expiresAt: form.expiresAt,
+  }
 
   return (
     <div className="builder-studio">
@@ -49,7 +55,7 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
       />
 
       <div className="b-main">
-        <FieldPalette addField={addField} />
+        <FieldPalette addField={addField} openSettings={openSettings} settingsOpen={settingsOpen} />
 
         <main className="b-center">
           <CanvasHead
@@ -70,6 +76,9 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
         <Inspector
           field={selectedField}
           index={selectedIndex}
+          settingsOpen={settingsOpen}
+          settings={formSettings}
+          updateSettings={updateSettings}
           updateField={updateField}
           removeField={removeField}
           duplicateField={duplicateField}

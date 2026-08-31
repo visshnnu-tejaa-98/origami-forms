@@ -30,6 +30,10 @@ export const optionsSchema = z.object({
     value: z.string().min(1).max(255).describe("value for the option"),
 });
 
+export const isoDateSchema = z.date()
+    .transform((val) => val.toISOString())
+    .pipe(z.iso.datetime());
+
 export const layoutField = {
     type: z.enum(LAYOUT_FIELD_TYPES),
     label: z
@@ -205,13 +209,12 @@ export const createFormInputModel = z.object({
         .optional()
         .describe("max submissions for the form"),
     fields: z.array(createFieldSchema).min(1),
+    status: z.enum(FORM_STATUS_OPTIONS).nullish().describe("status of the form"),
+    expiresAt: isoDateSchema.nullish().describe("date and time when submissions will stop")
 });
 
 export type CreateFormInputModel = z.infer<typeof createFormInputModel>;
 
-export const isoDateSchema = z.date()
-    .transform((val) => val.toISOString())
-    .pipe(z.iso.datetime());
 
 export const formFieldOutputSchema = z.object({
     id: z.string().uuid(),

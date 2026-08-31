@@ -194,6 +194,81 @@
   gap: 8px;
 }
 
+/* the single entry that opens form settings in the inspector */
+.db-shell .b-left .pl-settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 12px;
+  text-align: left;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  transition: transform var(--transition-snap), background var(--transition-snap),
+    border-color var(--transition-snap), box-shadow var(--transition-snap);
+}
+
+.db-shell .b-left .pl-settings-btn .nm {
+  margin-right: auto;
+}
+
+.db-shell .b-left .pl-settings-btn .ic {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.db-shell .b-left .pl-settings-btn:hover {
+  border-color: var(--rule-strong);
+  box-shadow: var(--shadow-paper-1);
+  transform: translateY(-1px);
+}
+
+.db-shell .b-left .pl-settings-btn.active {
+  border-color: var(--accent);
+  color: var(--ink-1);
+  box-shadow: var(--shadow-paper-1);
+}
+
+/* hint + clear links inside inspector rows */
+.db-shell .insp-row .insp-hint {
+  margin: 4px 0 0;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--ink-4);
+}
+
+.db-shell .insp-row .insp-clear {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.db-shell .insp-row .insp-clear:hover {
+  color: var(--ink-1);
+}
+
 .db-shell .field-chip {
   display: flex;
   flex-direction: column;

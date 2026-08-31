@@ -17,7 +17,7 @@ const Chip = ({ block, onAdd }: { block: FieldTypeMeta; onAdd: (type: BlockType)
   </button>
 );
 
-const FieldPalette = ({ addField }: FieldPaletteProps) => {
+const FieldPalette = ({ addField, openSettings, settingsOpen }: FieldPaletteProps) => {
   return (
     <aside className="b-left">
       <div className="pl-head">
@@ -35,6 +35,21 @@ const FieldPalette = ({ addField }: FieldPaletteProps) => {
           <Chip key={block.key} block={block as FieldTypeMeta} onAdd={addField} />
         ))}
       </div>
+
+      <div className="pl-head pl-head--spaced">Form Settings</div>
+      <button
+        type="button"
+        className={`pl-settings-btn${settingsOpen ? " active" : ""}`}
+        onClick={openSettings}
+        aria-pressed={settingsOpen}
+        title="Visibility, submission cap and closing date"
+      >
+        <span className="ic">
+          <Icon name="settings" size={14} />
+        </span>
+        <span className="nm">Form settings</span>
+        <Icon name="chevron" size={13} />
+      </button>
     </aside>
   );
 };

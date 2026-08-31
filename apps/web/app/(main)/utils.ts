@@ -197,6 +197,7 @@ export const toBuilderForm = (form: SavedForm): BuilderForm => ({
     description: form.description ?? "",
     visibility: form.visibility,
     maxSubmissions: form.maxSubmissions ?? undefined,
+    expiresAt: form.expiresAt ?? null,
     fields: form.fields.map(toBuilderField),
 });
 

@@ -19,9 +19,12 @@ const BuilderPage = () => {
     selectedId,
     selectedField,
     selectedIndex,
+    settingsOpen,
     selectField,
     setTitle,
     setDescription,
+    updateSettings,
+    openSettings,
     addField,
     updateField,
     duplicateField,
@@ -30,6 +33,12 @@ const BuilderPage = () => {
     saveAndPublish,
     preview
   } = useBuilder();
+
+  const formSettings = {
+    visibility: form.visibility,
+    maxSubmissions: form.maxSubmissions,
+    expiresAt: form.expiresAt,
+  }
 
   return (
     <div className="builder-studio">
@@ -42,7 +51,7 @@ const BuilderPage = () => {
       />
 
       <div className="b-main">
-        <FieldPalette addField={addField} />
+        <FieldPalette addField={addField} openSettings={openSettings} settingsOpen={settingsOpen} />
 
         <main className="b-center">
           <CanvasHead questions={stats.questions} />
@@ -61,6 +70,9 @@ const BuilderPage = () => {
         <Inspector
           field={selectedField}
           index={selectedIndex}
+          settingsOpen={settingsOpen}
+          settings={formSettings}
+          updateSettings={updateSettings}
           updateField={updateField}
           removeField={removeField}
           duplicateField={duplicateField}

@@ -12,8 +12,9 @@ export const FORM_STATUS_OPTIONS = [DRAFT, PUBLISHED, ARCHIVED] as const
 
 export const PUBLIC = "public";
 export const UNLISTED = "unlisted";
+export const AUTHENTICATED = "authenticated"
 
-export const FORM_VISIBILITY_OPTIONS = [PUBLIC, UNLISTED] as const;
+export const FORM_VISIBILITY_OPTIONS = [PUBLIC, UNLISTED, AUTHENTICATED] as const;
 
 export const SHORT_TEXT = "short_text";
 export const LONG_TEXT = "long_text";

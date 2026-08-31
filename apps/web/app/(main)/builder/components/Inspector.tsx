@@ -1,16 +1,21 @@
 import React from "react";
 import { Icon } from "../../components/icons";
-import { BLOCK_META, hasOptions, isFieldBlock } from "../constants";
-import { FieldOption, InspectorProps } from "../types";
+import { isFieldBlock } from "../constants";
+import { InspectorProps } from "../types";
 import LayoutBlock from "./LayoutBlock";
 import Validations from "./Validations";
 import OptionFields from "./OptionFields";
 import InspectorActions from "./InspectorActions";
 import FormFieldConfiguration from "./FormFieldConfiguration";
 import InspectorHeader from "./InspectorHeader";
+import FormSettings from "./FormSettings";
 
 const Inspector = (props: InspectorProps) => {
-  const { field, index, updateField, removeField, duplicateField } = props;
+  const { field, index, updateField, removeField, duplicateField, settingsOpen, settings, updateSettings } = props;
+
+  if (settingsOpen) {
+    return <FormSettings settings={settings} updateSettings={updateSettings} />;
+  }
 
   if (!field) {
     return (

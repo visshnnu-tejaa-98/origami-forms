@@ -18,7 +18,7 @@ const FormFieldConfiguration = (props: FormFieldConfigurationProps) => {
                 <textarea
                     id="insp-label"
                     className="insp-textarea"
-                    value={label}
+                    placeholder={label}
                     onChange={(e) => updateField(field.id, { label: e.target.value })}
                 />
             </div>

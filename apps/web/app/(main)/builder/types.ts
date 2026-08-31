@@ -51,7 +51,24 @@ export type DateValidation = {
 
 export type BuilderField = FieldBlock | LayoutBlock;
 
-export type BuilderForm = Omit<CreateFormInputModel, "fields"> & { fields: BuilderField[] };
+export type MutationPayloadShape = Omit<CreateFormInputModel, "expiresAt"> & {
+  expiresAt?: Date | null;
+};
+
+
+export type BuilderForm = Omit<CreateFormInputModel, "fields"> & {
+  fields: BuilderField[];
+  expiresAt?: string | null;
+};
+
+export type FormSettings = Pick<BuilderForm, "visibility" | "maxSubmissions" | "expiresAt">;
+
+export type FormSettingsPatch = Partial<FormSettings>;
+
+export type FormSettingsProps = {
+  settings: FormSettings;
+  updateSettings: (patch: FormSettingsPatch) => void;
+};
 
 export type TopbarProps = {
   title: string;
@@ -63,6 +80,8 @@ export type TopbarProps = {
 
 export type FieldPaletteProps = {
   addField: (type: BlockType) => void;
+  openSettings: () => void;
+  settingsOpen: boolean;
 };
 
 export type FormCanvasProps = {
@@ -87,6 +106,9 @@ export type QuestionBlockProps = {
 
 export type InspectorProps = {
   index: number;
+  settingsOpen: boolean;
+  settings: FormSettings;
+  updateSettings: (patch: FormSettingsPatch) => void;
   field?: BuilderField;
   updateField: (id: string, patch: FieldPatch) => void;
   removeField: (id: string) => void;
@@ -112,7 +134,10 @@ export type ValidationsBlockProps = {
   updateField: (id: string, patch: FieldPatch) => void;
 };
 
-export type LayoutBlockProps = Omit<InspectorProps, "index"> & {
+export type LayoutBlockProps = Omit<
+  InspectorProps,
+  "index" | "settingsOpen" | "settings" | "updateSettings"
+> & {
   field: BuilderField;
 };
 

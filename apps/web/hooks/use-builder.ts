@@ -12,6 +12,8 @@ import type {
   BuilderField,
   BuilderForm,
   FieldPatch,
+  FormSettingsPatch,
+  MutationPayloadShape,
 } from "~/app/(main)/builder/types";
 import type { CreateFormInputModel } from "@repo/services/form/model";
 import { blankField, uid } from "~/app/(main)/utils";
@@ -34,7 +36,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     seed.fields.find((f) => !LAYOUT_TYPES.includes(f.type))?.id ?? null
   );
 
-  /** what the server last saw. the preview only needs a save when the form drifts from it */
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const savedPrint = useRef(fingerprint(seed));
 
   const { createFormAsync } = useCreateForm()
@@ -48,9 +51,22 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     []
   );
 
+  const selectField = useCallback((id: string | null) => {
+    setSettingsOpen(false);
+    setSelectedId(id);
+  }, []);
+
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
+
+  const updateSettings = useCallback(
+    (patch: FormSettingsPatch) => setForm((f) => ({ ...f, ...patch })),
+    []
+  );
+
   const addField = useCallback((type: BlockType) => {
     const field = blankField(type);
     setForm((f) => ({ ...f, fields: [...f.fields, field] }));
+    setSettingsOpen(false);
     setSelectedId(field.id);
   }, []);
 
@@ -115,20 +131,22 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   }, [form.fields]);
 
   const toCreatePayload = useCallback(
-    (): CreateFormInputModel => ({
+    (): MutationPayloadShape => ({
       ...form,
+      expiresAt: form.expiresAt ? new Date(form.expiresAt) : undefined,
+      status: form.status ? form.status : null,
       fields: form.fields.map(({ id: _id, ...field }) => field),
     }),
     [form]
   );
 
-  /** an editing save sends the whole field list — anything missing from it is removed —
-   *  keeping database ids so the server updates those rows instead of inserting copies */
   const toUpdatePayload = useCallback(
     () => ({
       title: form.title,
       description: form.description,
       visibility: form.visibility,
+      maxSubmissions: form.maxSubmissions ?? null,
+      expiresAt: form.expiresAt ?? null,
       fields: form.fields.map(({ id, ...field }) =>
         SAVED_ID.test(id) ? { ...field, id } : field
       ),
@@ -161,10 +179,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
           return result.formData;
         }
 
-        // forms are created as drafts — the database defaults `status` to draft
         const saved = await createFormAsync(toCreatePayload());
 
-        // create carries no status, so publishing is a second call against the new form
         if (status === PUBLISHED) await updateFormAsync({ formId: saved.id, status });
 
         savedPrint.current = fingerprint(form);
@@ -200,9 +216,12 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     selectedId,
     selectedField,
     selectedIndex,
-    selectField: setSelectedId,
+    settingsOpen,
+    selectField,
+    openSettings,
     setTitle,
     setDescription,
+    updateSettings,
     addField,
     updateField,
     duplicateField,

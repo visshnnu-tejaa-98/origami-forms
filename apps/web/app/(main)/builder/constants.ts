@@ -62,7 +62,12 @@ export const PREVIEW_PLACEHOLDER: Record<string, string> = {
 
 export const DEFAULT_OPTIONS = ["First option", "Second option"];
 
-/* ====== the sheet we open the studio with ====== */
+export const FORM_VISIBILITY: { key: BuilderForm["visibility"]; label: string }[] = [
+  { key: "unlisted", label: "Unlisted · link only" },
+  { key: "public", label: "Public · anyone" },
+  { key: "authenticated", label: "Authenticated · registered users only" }
+];
+
 export const SEED_FORM: BuilderForm = {
   title: "",
   description: "",
