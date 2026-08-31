@@ -50,6 +50,13 @@
       "when": 1787535461622,
       "tag": "0006_typical_scrambler",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788168520764,
+      "tag": "0007_milky_plazm",
+      "breakpoints": true
     }
   ]
 }

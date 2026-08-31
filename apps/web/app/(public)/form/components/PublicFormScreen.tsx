@@ -33,6 +33,11 @@ const PublicFormScreen = ({ form }: { form: PublicForm }) => {
 
     const flow = useFormFlow({ steps, mode: "live", onSubmit });
 
+    const ThankyouMessage = (titile?: string) => <div>
+        Your answers to <b>"{titile}"</b> have landed safely on the other desk.
+    </div>
+
+    const publicFormStateDescription = ThankyouMessage(form.title);
     if (sent) {
         return (
             <div className="db-shell db-shell--public o-scope">
@@ -42,7 +47,7 @@ const PublicFormScreen = ({ form }: { form: PublicForm }) => {
                         <PublicFormState
                             icon="sparkles"
                             title="Sent. Thank you."
-                            description={`Your answers to "${form.title}" have landed safely on the other desk.`}
+                            description={publicFormStateDescription}
                         />
                     </div>
                 </main>

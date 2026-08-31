@@ -125,3 +125,32 @@ export function useFormsStats(props: Omit<FormStatusListInputProps, 'requesterId
 
     return { formsStatsData, formsStatsError, formsStatsIsError, formsStatsIsSuccess, formsStatsIsPending, refetchFormsStats };
 }
+
+export function useDeleteForm() {
+    const utils = trpc.useUtils();
+
+    const {
+        mutateAsync: deleteFormAsync,
+        mutate: deleteForm,
+        data: deletedForm,
+        error: deleteFormError,
+        isError: deleteFormIsError,
+        isSuccess: deleteFormIsSuccess,
+        isPending: deleteFormIsPending,
+    } = trpc.forms.deleteForm.useMutation({
+        onSuccess: (_result, variables) => {
+            utils.forms.getAllForms.invalidate();
+            utils.forms.getFormById.invalidate({ formId: variables.formId });
+        },
+    });
+
+    return {
+        deleteFormAsync,
+        deleteForm,
+        deletedForm,
+        deleteFormError,
+        deleteFormIsError,
+        deleteFormIsSuccess,
+        deleteFormIsPending,
+    };
+}

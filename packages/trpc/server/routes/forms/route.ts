@@ -1,6 +1,8 @@
 import {
     createFormInputModel,
     createFormOutputSchema,
+    deleteFormInputSchema,
+    deleteFormOutputSchema,
     formStatusListInputSchema,
     formStatusListOutputSchema,
     getFormByIdInputSchema,
@@ -16,6 +18,7 @@ import {
 } from "@repo/services/form/model";
 import {
     createFormMeta,
+    deleteFormMeta,
     formStatsMeta,
     getFormByIdMeta,
     getPublicFormMeta,
@@ -85,6 +88,21 @@ export const formsRouter = router({
 
             return result;
         }),
+
+    deleteForm: protectedProcedure
+        .meta(deleteFormMeta({ getPathFn: () => "/form/delete/{formId}", tags: TAGS }))
+        .input(deleteFormInputSchema.omit({ requesterId: true }))
+        .output(deleteFormOutputSchema)
+        .mutation(async ({ input, ctx }) => {
+            const result = await formService.deleteForm({ ...input, requesterId: ctx.userId });
+
+            if (!result) {
+                throw new Error("Something went wrong while deleting form");
+            }
+
+            return result;
+        }),
+
     formsStats: protectedProcedure
         .meta(formStatsMeta({ getPathFn: () => "/forms/stats", tags: TAGS }))
         .input(formStatusListInputSchema.omit({ requesterId: true }))

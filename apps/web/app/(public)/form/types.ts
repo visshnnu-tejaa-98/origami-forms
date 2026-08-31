@@ -8,6 +8,6 @@ export type PublicFormField = PublicForm["fields"][number];
 export type PublicStateScreenProps = {
     icon: "crane" | "clip" | "lock" | "sparkles";
     title: string;
-    description: string;
+    description: string | React.ReactNode;
     action?: { label: string; onClick: () => void };
 };

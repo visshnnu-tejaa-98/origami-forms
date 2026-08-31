@@ -2,16 +2,17 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { STATUS_BADGE, TAPE } from "../../utils";
 import { Icon } from "../../components/icons";
-import { Form, FormGridViewProps } from "../../types";
+import { Form } from "../../types";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { useDeleteForm } from "~/hooks/use-form";
 
-const FormGridView = (props: FormGridViewProps) => {
-    const { forms, onDeleteForm, deleting = false } = props;
+const FormGridView = ({ forms }: { forms: Form[] }) => {
     const [pendingDelete, setPendingDelete] = useState<Form | null>(null);
+    const { deleteFormAsync } = useDeleteForm();
 
     const confirmDelete = () => {
         if (!pendingDelete) return;
-        onDeleteForm?.(pendingDelete);
+        deleteFormAsync({ formId: pendingDelete.id });
         setPendingDelete(null);
     };
 
@@ -23,9 +24,9 @@ const FormGridView = (props: FormGridViewProps) => {
                     const isDraft = f.status === "draft";
                     const isLive = f.status === "published";
 
-                    const builderLink = `/builder/${f.id}?from=list`
-                    const previewLink = `/builder/${f.id}/preview?from=list`
-                    const publicLink = `/form/${f.id}`
+                    const builderLink = `/builder/${f.id}?from=list`;
+                    const previewLink = `/builder/${f.id}/preview?from=list`;
+                    const publicLink = `/form/${f.id}`;
                     return (
                         <article key={f.id} className={`form-card ${f.tint}${isDraft ? " is-draft" : ""}`}>
                             {/* washi tape holding the sheet + a folded dog-ear corner */}
@@ -123,13 +124,12 @@ const FormGridView = (props: FormGridViewProps) => {
                 title="Unfold this one for good?"
                 description={
                     <>
-                        <strong>{pendingDelete?.title}</strong> and every response folded into it will be
-                        thrown away. This cannot be smoothed back out.
+                        <strong>{pendingDelete?.title}</strong> and every response folded into it will be thrown
+                        away. This cannot be smoothed back out.
                     </>
                 }
                 confirmLabel="Delete form"
                 cancelLabel="Keep it"
-                busy={deleting}
                 onConfirm={confirmDelete}
                 onCancel={() => setPendingDelete(null)}
             />

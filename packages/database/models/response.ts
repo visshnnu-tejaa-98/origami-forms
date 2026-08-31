@@ -31,6 +31,7 @@ export const formResponses = pgTable("responses", {
     startedAt: timestamp("started_at", { withTimezone: true }),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     CompletionTimeInSec: integer("completion_time"),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 export const responseAnswers = pgTable("response_answers", {
@@ -43,6 +44,7 @@ export const responseAnswers = pgTable("response_answers", {
         .references(() => formFields.id, { onDelete: "cascade" }),
     value: text("value").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true })
 })
 
 export type SelectResponse = typeof formResponses.$inferSelect;

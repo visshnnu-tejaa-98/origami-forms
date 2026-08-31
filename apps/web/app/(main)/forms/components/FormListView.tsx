@@ -1,113 +1,157 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from 'next/link'
 import { Icon } from "../../components/icons";
 import { STATUS_BADGE } from "../../utils";
 import { Form } from "../../types";
+import { useDeleteForm } from "~/hooks/use-form";
+import ConfirmDialog from "../../components/ConfirmDialog";
+
 
 const FromListView = ({ forms }: { forms: Form[] }) => {
+    const { deleteFormAsync } = useDeleteForm()
+    const [pendingDelete, setPendingDelete] = useState<Form | null>(null);
+
+    const confirmDelete = () => {
+        if (!pendingDelete) return;
+        deleteFormAsync({ formId: pendingDelete.id })
+        setPendingDelete(null);
+    };
 
     return (
-        <div className="otable" role="table" aria-label="Your forms">
-            <span className="o-tape table-tape tape-matcha" aria-hidden />
-            <div className="otable-head" role="row" aria-hidden>
-                <span>Form</span>
-                <span>Status</span>
-                <span className="ta-end">Responses</span>
-                <span className="col-comp">Completion</span>
-                <span className="col-updated">Updated</span>
-                <span className="ta-end">Actions</span>
-            </div>
-            {forms.map((f: Form) => {
-                const badge = STATUS_BADGE[f.status];
-                const isDraft = f.status === "draft";
-                const isLive = f.status === "published";
+        <>
+            <div className="otable" role="table" aria-label="Your forms">
+                <span className="o-tape table-tape tape-matcha" aria-hidden />
+                <div className="otable-head" role="row" aria-hidden>
+                    <span>Form</span>
+                    <span>Status</span>
+                    <span className="ta-end">Responses</span>
+                    <span className="col-comp">Completion</span>
+                    <span className="col-updated">Updated</span>
+                    <span className="ta-end">Actions</span>
+                </div>
+                {forms.map((f: Form) => {
+                    const badge = STATUS_BADGE[f.status];
+                    const isDraft = f.status === "draft";
+                    const isLive = f.status === "published";
 
-                const builderLink = `/builder/${f.id}?from=list`
-                const previewLink = `/builder/${f.id}/preview?from=list`
-                const publicLink = `/form/${f.id}`
-                return (
-                    <div
-                        key={f.id}
-                        className={`otable-row ${f.tint}${f.pinned ? " is-pinned" : ""}`}
-                        role="row"
-                    >
-                        <div className="c-form">
-                            <span className="ic tint-ic">
-                                <Icon name={f.icon} size={20} />
-                            </span>
-                            <div className="txt">
-                                <span className="title" title={f.title}>
-                                    {f.title}
+                    const builderLink = `/builder/${f.id}?from=list`
+                    const previewLink = `/builder/${f.id}/preview?from=list`
+                    const publicLink = `/form/${f.id}`
+                    return (
+                        <div
+                            key={f.id}
+                            className={`otable-row ${f.tint}${f.pinned ? " is-pinned" : ""}`}
+                            role="row"
+                        >
+                            <div className="c-form">
+                                <span className="ic tint-ic">
+                                    <Icon name={f.icon} size={20} />
                                 </span>
-                                <span className="sub">{f.description}</span>
+                                <div className="txt">
+                                    <span className="title" title={f.title}>
+                                        {f.title}
+                                    </span>
+                                    <span className="sub">{f.description}</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="c-status">
-                            <span className={`o-badge ${badge.cls}`}>{badge.label}</span>
-                        </div>
-
-                        <div className="c-resp">
-                            {f.responses ? (
-                                <span className="n">{f.responses.toLocaleString()}</span>
-                            ) : (
-                                <span className="dash">—</span>
-                            )}
-                        </div>
-
-                        <div className="c-comp">
-                            <div className="o-progress">
-                                <div className="bar" style={{ "--p": `${f.completion}%` } as React.CSSProperties} />
+                            <div className="c-status">
+                                <span className={`o-badge ${badge.cls}`}>{badge.label}</span>
                             </div>
-                            <span className="pct">{f.completion}%</span>
-                        </div>
 
-                        <div className="c-updated">{f.edited}</div>
+                            <div className="c-resp">
+                                {f.responses ? (
+                                    <span className="n">{f.responses.toLocaleString()}</span>
+                                ) : (
+                                    <span className="dash">—</span>
+                                )}
+                            </div>
 
-                        <div className="c-actions">
-                            <span className="row-tools">
-                                <Link
-                                    className="tool"
-                                    title={isDraft ? "Continue editing" : "Edit"}
-                                    aria-label="Edit"
-                                    href={builderLink}>
-                                    <Icon name="edit" size={15} />
-                                </Link>
-                                <Link className="tool" title="Preview" aria-label="Preview" href={previewLink}>
-                                    <Icon name="eye" size={15} />
-                                </Link>
-                                {isLive ? (
+                            <div className="c-comp">
+                                <div className="o-progress">
+                                    <div
+                                        className="bar"
+                                        style={{ "--p": `${f.completion}%` } as React.CSSProperties}
+                                    />
+                                </div>
+                                <span className="pct">{f.completion}%</span>
+                            </div>
+
+                            <div className="c-updated">{f.edited}</div>
+
+                            <div className="c-actions">
+                                <span className="row-tools">
                                     <Link
                                         className="tool"
-                                        title="Open the live form"
-                                        aria-label="Open the live form"
-                                        href={publicLink}
-                                        target="_blank"
-                                        rel="noreferrer"
+                                        title={isDraft ? "Continue editing" : "Edit"}
+                                        aria-label="Edit"
+                                        href={builderLink}
                                     >
-                                        <Icon name="link" size={15} />
+                                        <Icon name="edit" size={15} />
                                     </Link>
-                                ) : (
-                                    <span
-                                        className="tool is-disabled"
-                                        title="Publish this form to open its live link"
-                                        aria-disabled
+                                    <Link
+                                        className="tool"
+                                        title="Preview"
+                                        aria-label="Preview"
+                                        href={previewLink}
                                     >
-                                        <Icon name="link" size={15} />
-                                    </span>
-                                )}
-                                <button className="tool" title="Share link" aria-label="Share">
-                                    <Icon name="share" size={15} />
-                                </button>
-                                <button className="tool" title="More" aria-label="More">
-                                    <Icon name="more" size={15} />
-                                </button>
-                            </span>
+                                        <Icon name="eye" size={15} />
+                                    </Link>
+                                    {isLive ? (
+                                        <Link
+                                            className="tool"
+                                            title="Open the live form"
+                                            aria-label="Open the live form"
+                                            href={publicLink}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <Icon name="link" size={15} />
+                                        </Link>
+                                    ) : (
+                                        <span
+                                            className="tool is-disabled"
+                                            title="Publish this form to open its live link"
+                                            aria-disabled
+                                        >
+                                            <Icon name="link" size={15} />
+                                        </span>
+                                    )}
+                                    <button className="tool" title="Share link" aria-label="Share">
+                                        <Icon name="share" size={15} />
+                                    </button>
+                                    <button
+                                        className="tool"
+                                        title="Delete"
+                                        aria-label="Delete"
+                                        onClick={() => setPendingDelete(f)}
+                                    >
+                                        <Icon name="trash" size={15} />
+                                    </button>
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                );
-            })}
-        </div>
+                    );
+                })}
+            </div>
+            <ConfirmDialog
+                open={pendingDelete !== null}
+                icon="trash"
+                tone="danger"
+                title="Unfold this one for good?"
+                description={
+                    <>
+                        <strong>{pendingDelete?.title}</strong> and every response folded into it will be
+                        thrown away. This cannot be smoothed back out.
+                    </>
+                }
+                confirmLabel="Delete form"
+                cancelLabel="Keep it"
+                onConfirm={confirmDelete}
+                onCancel={() => setPendingDelete(null)}
+            />
+        </>
+
     );
 };
 

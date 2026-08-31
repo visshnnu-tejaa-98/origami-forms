@@ -340,10 +340,12 @@ export default class FormService {
 
         if (!form) throw new Error("Form not found");
 
-        if (form.status === PUBLISHED && form.submissionCount > 0) {
+        const isAdmin = await this.userService.isAdmin(requesterId)
+
+        if (!isAdmin && form.creatorId !== requesterId) {
             return {
                 success: false,
-                message: "Cannot delete published form when there are submissions",
+                message: "You are not authorized to delete this form",
             };
         }
 
@@ -361,6 +363,17 @@ export default class FormService {
                 .update(formFields)
                 .set({ deletedAt: now })
                 .where(and(eq(formFields.formId, formId), isNull(formFields.deletedAt)));
+            const deletedResponsesIds = await tx
+                .update(formResponses)
+                .set({ deletedAt: now })
+                .where(and(eq(formResponses.formId, formId), isNull(formResponses.deletedAt)))
+                .returning({ id: formResponses.id });
+            if (deletedResponsesIds.length > 0) {
+                await tx
+                    .update(responseAnswers)
+                    .set({ deletedAt: now })
+                    .where(inArray(responseAnswers.responseId, deletedResponsesIds.map((response) => response.id)));
+            }
         });
 
         return {

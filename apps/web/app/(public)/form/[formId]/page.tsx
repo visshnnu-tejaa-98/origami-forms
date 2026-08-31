@@ -59,11 +59,11 @@ const PublicFormPage = () => {
             publicForm.closedReason === "limit_reached"
                 ? {
                     title: "All folded up.",
-                    description: `"${publicForm.title}" has collected every response it was taking.`,
+                    description: <div>"<b>{publicForm.title}</b>" has collected every response it was taking.</div>
                 }
                 : {
                     title: "This form has closed.",
-                    description: `"${publicForm.title}" stopped taking responses. Ask whoever sent the link if it can be reopened.`,
+                    description: <div>"<b>{publicForm.title}</b>" has closed. Ask the sender if it can be reopened.</div>,
                 };
 
         return shell(
@@ -71,7 +71,7 @@ const PublicFormPage = () => {
                 icon="lock"
                 title={closed.title}
                 description={closed.description}
-                action={{ label: "Back to origami", onClick: () => router.push("/") }}
+            // action={{ label: "Back to origami", onClick: () => router.push("/") }}
             />,
         );
     }

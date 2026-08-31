@@ -99,9 +99,3 @@ export type EmptyScreenProps = {
     cta: string,
     onClick: () => void
 }
-
-export type FormGridViewProps = {
-    forms: Form[]
-    onDeleteForm?: (form: Form) => void
-    deleting?: boolean
-}

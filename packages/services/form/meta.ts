@@ -202,10 +202,10 @@ const deleteFormMeta = ({ getPathFn, tags }: FormMetaInputProps): OpenApiMetaCon
             description: `
 ### Overview
 
-Soft-deletes a form and cascades the soft-delete to its fields in a single transaction.
-Nothing is physically removed — \`deletedAt\` is set on the form and on every one of its
-still-live fields. Access is scoped by role (admins may delete any form; users only their
-own).
+Soft-deletes a form and cascades the soft-delete to its fields, its responses and those
+responses' answers, all in a single transaction. Nothing is physically removed —
+\`deletedAt\` is stamped on every still-live row. A \`published\` form can be deleted even
+when it already has submissions; its responses are soft-deleted alongside it.
 
 ### Request Body
 
@@ -216,9 +216,11 @@ own).
 
 ### Flow
 
-1. The form is fetched and authorized via the same rules as *Get a form by id*.
-2. \`deletedAt\` is set on the form; if no row matched the transaction is rolled back.
-3. \`deletedAt\` is set on all of the form's fields that are not already soft-deleted.
+1. The form is fetched; if it does not exist the request fails.
+2. The requester is authorized — an admin may delete any form, anyone else only a form they created.
+3. \`deletedAt\` is set on the form; if no row matched the transaction is rolled back.
+4. \`deletedAt\` is set on all of the form's fields that are not already soft-deleted.
+5. \`deletedAt\` is set on all of the form's live responses, and then on the answers belonging to those responses.
 
 ### Response
 
@@ -226,8 +228,8 @@ Returns \`{ success, message }\`.
 
 ### Errors
 
-- **Form not found** — no matching, non-deleted form for this requester.
-- **Blocked deletion** — a \`published\` form that already has submissions cannot be deleted (\`success: false\`).
+- **Form not found** — no matching, non-deleted form.
+- **Unauthorized** — a non-admin attempting to delete a form they do not own (\`success: false\`).
 `,
         },
     };
