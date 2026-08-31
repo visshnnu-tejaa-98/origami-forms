@@ -2,7 +2,7 @@
 import { isEqual } from "lodash"
 import "./responses.css";
 import FloatingResponseOrigamiDecorations from "./components/FloatingResponseOrigamiDecorations";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useListResponses } from "~/hooks/use-response";
 import ResponseHeader from "./components/ResponseHeader";
 import { usePagination } from "~/hooks/use-pagination";
@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation";
 import { ListResponseOutputType } from "@repo/services/response/model";
 import { exportResponsesToCsv } from "./utils";
 import ActionsBar from "./components/ActionBar";
+import { useResponsesStore } from "~/app/store/responses.store";
 
 const Responses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,6 +59,13 @@ const Responses = () => {
     });
 
   const router = useRouter()
+  const setResponsesData = useResponsesStore(state => state.setResponsesData)
+
+  useEffect(() => {
+    if (responsesData) {
+      setResponsesData(responsesData)
+    }
+  }, [responsesData])
 
   const filterOptions: DefaultFilterOptions = {
     sortBy: sort,
