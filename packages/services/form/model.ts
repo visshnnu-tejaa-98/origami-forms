@@ -522,6 +522,7 @@ export const submitPublicResponseInputSchema = z.object({
         .nonnegative()
         .optional()
         .describe("how long the respondent spent on the form"),
+    userId: z.string().nullish().describe("id of the logged in user"),
 });
 
 export type SubmitPublicResponseProps = z.infer<typeof submitPublicResponseInputSchema>;

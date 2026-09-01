@@ -135,8 +135,8 @@ export const formsRouter = router({
         .meta(submitPublicResponseMeta({ getPathFn: () => "/public/form/submit", tags: TAGS }))
         .input(submitPublicResponseInputSchema)
         .output(submitPublicResponseOutputSchema)
-        .mutation(async ({ input }) => {
-            const result = await formService.submitPublicResponse(input);
+        .mutation(async ({ input, ctx }) => {
+            const result = await formService.submitPublicResponse({ ...input, userId: ctx.userId ?? undefined });
 
             if (!result) {
                 throw new Error("Something went wrong while recording your response");

@@ -25,20 +25,21 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     if (!isSignedIn) return;
     if (!user?.id) return;
 
-    setUserToRedux({
-      clerkId: user.id,
-      emailAddress: user.emailAddresses[0]?.emailAddress!,
-      firstName: user.firstName!,
-      lastName: user.lastName!,
-      imageUrl: user.imageUrl!,
-    });
-
     createUserAsync({
       firstName: user.firstName ?? undefined,
       lastName: user.lastName ?? undefined,
       email: user.emailAddresses[0]?.emailAddress ?? "",
       avatarUrl: user.imageUrl || undefined,
       clerkUserId: user.id,
+    }).then((user) => {
+      setUserToRedux({
+        id: user.id,
+        clerkId: user.clerkUserId,
+        emailAddress: user.email!,
+        firstName: user.firstName!,
+        lastName: user.lastName!,
+        imageUrl: user.avatarUrl!,
+      });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, isSignedIn, user?.id]);

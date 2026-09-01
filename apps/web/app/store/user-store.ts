@@ -3,6 +3,7 @@ import { combine, createJSONStorage, devtools, persist } from "zustand/middlewar
 import { GRID, LIST } from "../(main)/constants";
 
 type User = {
+    id: string,
     clerkId: string;
     firstName: string;
     lastName: string;
