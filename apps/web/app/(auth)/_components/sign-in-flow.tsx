@@ -13,7 +13,6 @@ import { signInFlow } from "../constants";
 
 export function SignInFlow() {
   const [code, setCode] = useState("");
-  const [isSendingCode, setIsSendingCode] = useState(false);
 
   const {
     otpVerifying,

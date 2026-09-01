@@ -591,6 +591,7 @@ export default class FormService {
             slug: form.slug,
             accepting: closedReason === null,
             closedReason,
+            visibility: form.visibility,
             fields: form.fields.map((field) => ({
                 id: field.id,
                 formId: field.formId,

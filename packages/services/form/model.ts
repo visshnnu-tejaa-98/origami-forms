@@ -495,6 +495,7 @@ export const getPublicFormOutputSchema = z.object({
     logoUrl: z.string().nullable().describe("logo url of the form"),
     slug: z.string().describe("slug of the form"),
     accepting: z.boolean().describe("whether the form is still taking responses"),
+    visibility: z.string().describe("visibility of the form"),
     closedReason: z
         .enum(PUBLIC_FORM_CLOSED_REASONS)
         .nullable()

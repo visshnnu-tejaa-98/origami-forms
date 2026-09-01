@@ -19,7 +19,6 @@ export const handleAuthRouting = ({ req, userId, role }: handleRouteProps) => {
     }
 
     if (!userId) {
-        // Logged-out users may see public and logged-out-only routes.
         if (isPublicPath || LOGGED_OUT_ONLY_ROUTES.includes(currentPath)) {
             return NextResponse.next();
         }

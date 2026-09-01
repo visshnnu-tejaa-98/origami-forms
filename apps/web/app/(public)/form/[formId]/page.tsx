@@ -1,23 +1,34 @@
 "use client";
 
-import React from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useEffect } from "react";
+import { useParams, usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import "../../../(main)/builder/preview.css";
 import "../public-form.css";
 import { usePublicForm } from "~/hooks/use-public-form";
 import PreviewCanvas from "../../../(main)/builder/[formId]/preview/components/PreviewCanvas";
 import PublicFormScreen from "../components/PublicFormScreen";
 import PublicFormState from "../components/PublicFormState";
+import { useRouter } from "next/navigation";
 
-/** the public link is /form/<formId> — the id is an unguessable uuid, and only a published,
- *  undeleted form answers to it */
 const PublicFormPage = () => {
     const { formId } = useParams<{ formId: string }>();
-    const router = useRouter();
-
     const { publicForm, publicFormError, publicFormIsPending, refetchPublicForm } = usePublicForm({
         formId,
     });
+
+    const pathname = usePathname()
+    const router = useRouter()
+    const { isLoaded: authLoaded, isSignedIn } = useAuth()
+
+    const needsSignIn =
+        publicForm?.visibility === "authenticated" && authLoaded && !isSignedIn
+
+    useEffect(() => {
+        if (needsSignIn) {
+            router.replace(`/sign-in?redirect_url=${encodeURIComponent(pathname)}`)
+        }
+    }, [needsSignIn, pathname, router])
 
     const shell = (children: React.ReactNode) => (
         <div className="db-shell db-shell--public o-scope">
@@ -30,7 +41,7 @@ const PublicFormPage = () => {
         </div>
     );
 
-    if (publicFormIsPending) {
+    if (publicFormIsPending || needsSignIn) {
         return shell(
             <PublicFormState
                 icon="crane"
@@ -71,7 +82,6 @@ const PublicFormPage = () => {
                 icon="lock"
                 title={closed.title}
                 description={closed.description}
-            // action={{ label: "Back to origami", onClick: () => router.push("/") }}
             />,
         );
     }

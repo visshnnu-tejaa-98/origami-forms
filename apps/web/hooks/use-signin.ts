@@ -262,13 +262,11 @@ export function useSignInOrUp() {
     }
 
     const finalizeSignIn = async () => {
-        const redirectUrl = searchParams.get('redirect_url') || "/dashboard"
+        const redirectUrl = searchParams.get("redirect_url") ?? "/dashboard"
 
         await signIn.finalize({
             navigate: ({ session, decorateUrl }) => {
-                console.log({ session })
                 if (session?.currentTask) {
-                    console.log(session?.currentTask)
                     return
                 }
 
@@ -283,12 +281,11 @@ export function useSignInOrUp() {
     }
 
     const finalizeSignUp = async () => {
-        const redirectUrl = searchParams.get('redirect_url') || "/dashboard"
+        const redirectUrl = searchParams.get('redirect_url') ?? "/dashboard"
 
         await signUp.finalize({
             navigate: ({ session, decorateUrl }) => {
                 if (session?.currentTask) {
-                    console.log(session?.currentTask)
                     return
                 }
 
