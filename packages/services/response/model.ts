@@ -75,3 +75,16 @@ export const formResponsesStatsOutputSchema = z.object({
 })
 
 export type FormResponsesStatsOutputType = z.infer<typeof formResponsesStatsOutputSchema>
+
+export const isUserGaveResponseForFormInputSchema = z.object({
+    requesterId: z.string().uuid().describe("id of the requesting user"),
+    formId: z.string().uuid().describe("id of the form"),
+})
+
+export type IsUserGaveResponseForFormInputType = z.infer<typeof isUserGaveResponseForFormInputSchema>
+
+export const isUserGaveResponseForFormOutputSchema = z.object({
+    hasSubmitted: z.boolean().describe("whether the user has given a response for the form"),
+})
+
+export type IsUserGaveResponseForFormOutputType = z.infer<typeof isUserGaveResponseForFormOutputSchema>

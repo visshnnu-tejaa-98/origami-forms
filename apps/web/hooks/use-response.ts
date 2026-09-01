@@ -1,6 +1,6 @@
 import { keepPreviousData } from "@tanstack/react-query";
 import { trpc } from "~/trpc/client";
-import { FormResponsesStatsInputType, ListResponsesInput } from "@repo/services/response/model";
+import { FormResponsesStatsInputType, IsUserGaveResponseForFormInputType, ListResponsesInput } from "@repo/services/response/model";
 
 export function useListResponses(props: Omit<ListResponsesInput, "requesterId">) {
     const {
@@ -29,7 +29,6 @@ export function useListResponses(props: Omit<ListResponsesInput, "requesterId">)
     };
 }
 
-
 export function useResponsesStats(props: Omit<FormResponsesStatsInputType, "requesterId">) {
     const {
         data: responsesStatsData,
@@ -52,5 +51,30 @@ export function useResponsesStats(props: Omit<FormResponsesStatsInputType, "requ
         responsesStatsIsPending,
         responsesStatsIsFetching,
         refetchResponsesStats,
+    };
+}
+
+export function useIsUserGaveResponseForForm(props: Omit<IsUserGaveResponseForFormInputType, "requesterId">) {
+    const {
+        data: isUserGaveResponseForFormData,
+        error: isUserGaveResponseForFormError,
+        failureCount: isUserGaveResponseForFormFailureCount,
+        isError: isUserGaveResponseForFormIsError,
+        isSuccess: isUserGaveResponseForFormIsSuccess,
+        status: isUserGaveResponseForFormStatus,
+        isPending: isUserGaveResponseForFormIsPending,
+        isFetching: isUserGaveResponseForFormIsFetching,
+        refetch: refetchIsUserGaveResponseForForm,
+    } = trpc.responses.isUserGaveResponseForForm.useQuery(props)
+    return {
+        isUserGaveResponseForFormData,
+        isUserGaveResponseForFormError,
+        isUserGaveResponseForFormFailureCount,
+        isUserGaveResponseForFormIsError,
+        isUserGaveResponseForFormIsSuccess,
+        isUserGaveResponseForFormStatus,
+        isUserGaveResponseForFormIsPending,
+        isUserGaveResponseForFormIsFetching,
+        refetchIsUserGaveResponseForForm,
     };
 }

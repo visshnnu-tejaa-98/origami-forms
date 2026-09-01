@@ -12,16 +12,16 @@ import {
     inArray,
     eq
 } from "@repo/database";
-import { FormResponsesStatsInputType, formResponsesStatsListInputSchema, formResponsesStatsOutputSchema, FormResponsesStatsOutputType, ListResponseOutputType, ListResponsesInput, listResponsesInputSchema, listResponsesOutputSchema } from "./model";
+import { FormResponsesStatsInputType, formResponsesStatsListInputSchema, formResponsesStatsOutputSchema, FormResponsesStatsOutputType, IsUserGaveResponseForFormInputType, ListResponseOutputType, ListResponsesInput, listResponsesInputSchema, listResponsesOutputSchema } from "./model";
 import UserService from "../user";
 import { ALL } from "@repo/database/constants";
 
 export default class ResponseService {
     private readonly userService = new UserService();
 
-    public async listResponses(props: ListResponsesInput) {
+    public async listResponses(payload: ListResponsesInput) {
         const { requesterId, formId, page, pageSize, search, sortBy, sortOrder, status } =
-            listResponsesInputSchema.parse(props);
+            listResponsesInputSchema.parse(payload);
 
         const isAdmin = await this.userService.isAdmin(requesterId);
 
@@ -217,6 +217,27 @@ export default class ResponseService {
             completed: rows.filter((r) => r.status === "completed").length,
             partial: rows.filter((r) => r.status === "partial").length,
         };
+    }
+
+    public async isUserGaveResponseForForm(payload: IsUserGaveResponseForFormInputType) {
+        const { requesterId, formId } = payload
+
+        const conditions = [
+            isNull(formResponses.deletedAt),
+            eq(formResponses.userId, requesterId),
+            eq(formResponses.formId, formId),
+        ]
+
+        const whereCondition = and(...conditions)
+
+        const response = await db.query.formResponses.findFirst({
+            where: whereCondition,
+            columns: { id: true },
+        });
+
+        return {
+            hasSubmitted: !!response
+        }
     }
 }
 

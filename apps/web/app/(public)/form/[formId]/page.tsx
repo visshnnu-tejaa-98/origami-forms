@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import "../../../(main)/builder/preview.css";
@@ -10,8 +10,11 @@ import PreviewCanvas from "../../../(main)/builder/[formId]/preview/components/P
 import PublicFormScreen from "../components/PublicFormScreen";
 import PublicFormState from "../components/PublicFormState";
 import { useRouter } from "next/navigation";
+import { useIsUserGaveResponseForForm } from "~/hooks/use-response";
 
 const PublicFormPage = () => {
+
+    const [isUserAlreadyFilledForm, setIsUserAlreadyFilledForm] = useState(false)
     const { formId } = useParams<{ formId: string }>();
     const { publicForm, publicFormError, publicFormIsPending, refetchPublicForm } = usePublicForm({
         formId,
@@ -30,6 +33,17 @@ const PublicFormPage = () => {
         }
     }, [needsSignIn, pathname, router])
 
+
+    const { isUserGaveResponseForFormData } = useIsUserGaveResponseForForm({
+        formId,
+    });
+
+    useEffect(() => {
+        if (isUserGaveResponseForFormData) {
+            setIsUserAlreadyFilledForm(true)
+        }
+    }, [isUserGaveResponseForFormData])
+
     const shell = (children: React.ReactNode) => (
         <div className="db-shell db-shell--public o-scope">
             <main>
@@ -47,6 +61,16 @@ const PublicFormPage = () => {
                 icon="crane"
                 title="Unfolding…"
                 description="One moment while the paper flattens out."
+            />,
+        );
+    }
+
+    if (isUserAlreadyFilledForm) {
+        return shell(
+            <PublicFormState
+                icon="clip"
+                title="You have already submitted this form."
+                description="You cannot submit the form more than once."
             />,
         );
     }

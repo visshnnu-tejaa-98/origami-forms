@@ -136,4 +136,55 @@ Returns \`{ completed, partial, totalItems }\`, where:
     };
 };
 
-export { listResponsesMeta, responsesStatsMeta };
+const isUserGaveResponseForFormMeta = ({
+    getPathFn,
+    tags,
+}: ResponseMetaInputProps): OpenApiMetaConfig => {
+    const pathType = getPathFn() as `/${string}`;
+    return {
+        openapi: {
+            method: GET,
+            path: pathType,
+            tags: tags ?? ["Response"],
+            summary: "Check whether a user has responded to a form",
+            description: `
+### Overview
+
+Reports whether a given user has already submitted a response to a given form. Used to
+stop an authenticated respondent from filling the same form twice. Only live responses
+count — one that was soft-deleted (including via a cascading form delete) is treated as
+though it were never submitted.
+
+### Path / Query Parameters
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`userId\` | string (uuid) | Yes | Id of the user whose submission is being checked. |
+| \`formId\` | string (uuid) | Yes | Id of the form to check against. |
+
+### Flow
+
+1. A single response is looked up matching both \`userId\` and \`formId\`, excluding
+   soft-deleted rows.
+2. Only the response id is selected, and the lookup stops at the first match.
+
+### Response
+
+Returns \`{ hasSubmitted }\` — \`true\` when a live response by that user exists for that
+form, \`false\` otherwise.
+
+### Notes
+
+- A response counts regardless of its status, so a \`partial\` submission also yields
+  \`hasSubmitted: true\`.
+- Anonymous submissions carry no \`userId\` and are therefore never matched by this check.
+
+### Errors
+
+- **Validation** — \`userId\` or \`formId\` is missing or is not a valid uuid.
+`,
+        },
+    };
+};
+
+export { listResponsesMeta, responsesStatsMeta, isUserGaveResponseForFormMeta };
