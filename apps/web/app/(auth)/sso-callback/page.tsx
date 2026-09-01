@@ -12,9 +12,14 @@ import { signupFlow } from "../constants";
 export default async function SSOCallbackPage({
   searchParams,
 }: {
-  searchParams: Promise<{ flow?: string }>;
+  searchParams: Promise<{ flow?: string; redirect_url?: string }>;
 }) {
-  const { flow } = await searchParams;
+  const { flow, redirect_url } = await searchParams;
+
+  const fallbackRedirectUrl =
+    redirect_url?.startsWith("/") && !redirect_url.startsWith("//")
+      ? redirect_url
+      : "/dashboard";
 
   const message =
     flow === signupFlow
@@ -29,8 +34,8 @@ export default async function SSOCallbackPage({
       </div>
 
       <AuthenticateWithRedirectCallback
-        signInFallbackRedirectUrl="/"
-        signUpFallbackRedirectUrl="/"
+        signInFallbackRedirectUrl={fallbackRedirectUrl}
+        signUpFallbackRedirectUrl={fallbackRedirectUrl}
       />
     </>
   );

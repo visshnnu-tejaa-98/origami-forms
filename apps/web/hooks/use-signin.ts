@@ -139,12 +139,13 @@ export function useSignInOrUp() {
 
     const signInWithGoogle = async (flow: LoginFlow = signInFlow) => {
         setFormError("")
+        const redirectUrl = searchParams.get('redirect_url') ?? "/dashboard"
 
         try {
             await clerk.client.signIn.authenticateWithRedirect({
                 strategy: 'oauth_google',
-                redirectUrl: `/sso-callback?flow=${flow}`,
-                redirectUrlComplete: '/dashboard',
+                redirectUrl: `/sso-callback?flow=${flow}&redirect_url=${encodeURIComponent(redirectUrl)}`,
+                redirectUrlComplete: redirectUrl,
             })
         } catch (error) {
             console.error(JSON.stringify(error, null, 2))
