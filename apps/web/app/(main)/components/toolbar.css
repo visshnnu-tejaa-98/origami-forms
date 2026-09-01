@@ -72,3 +72,69 @@
   color: var(--ink-1);
   box-shadow: var(--shadow-paper-1);
 }
+
+.db-shell .refresh-btn {
+  border: 1px solid transparent;
+  background: var(--bg-sunken);
+  cursor: pointer;
+  color: var(--ink-3);
+  padding: 8px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.db-shell .refresh-btn:hover:not(:disabled) {
+  background: var(--surface-card);
+  border-color: var(--rule-line);
+  color: var(--ink-1);
+  box-shadow: var(--shadow-paper-1);
+}
+
+.db-shell .refresh-btn:disabled {
+  cursor: default;
+}
+
+/* one full turn per click — the spin the eye actually sees */
+.db-shell .refresh-btn.spun svg {
+  color: var(--accent-deep);
+  animation: toolbar-refresh-spin 0.6s cubic-bezier(0.4, 0, 0.2, 1) 1;
+}
+
+/* a refetch still in flight keeps turning until it lands */
+.db-shell .refresh-btn.refreshing svg {
+  color: var(--accent-deep);
+  animation: toolbar-refresh-spin 0.9s linear infinite;
+}
+
+.db-shell .refresh-btn svg {
+  transform-origin: center;
+}
+
+@keyframes toolbar-refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* a still, brief dim stands in for the turn — it keeps running as an animation so
+     the button's animationend still clears the spun state */
+  .db-shell .refresh-btn.spun svg {
+    animation: toolbar-refresh-dim 0.6s ease 1;
+  }
+
+  .db-shell .refresh-btn.refreshing svg {
+    animation: toolbar-refresh-dim 0.9s ease infinite;
+  }
+}
+
+@keyframes toolbar-refresh-dim {
+  50% {
+    opacity: 0.45;
+  }
+}

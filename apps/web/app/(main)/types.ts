@@ -56,6 +56,7 @@ export type ToolbarProps<
     setView: (settings: Partial<UserSettingsType>) => void
     view: View;
     sort: TSort;
+    onRefresh?: () => void;
 };
 
 

@@ -55,6 +55,7 @@ export type IconName =
     | 'save'
     | 'publish'
     | 'info'
+    | 'refresh'
 
 const paths: Record<IconName, React.ReactNode> = {
     plus: <path d="M12 5v14M5 12h14" />,
@@ -187,7 +188,6 @@ const paths: Record<IconName, React.ReactNode> = {
     x: <path d="M6 6l12 12M18 6L6 18" />,
     "arrow-down": <path d="M12 5v13M6.5 12.5 12 18l5.5-5.5" />,
     "arrow-up": <path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" />,
-    /* an unfolded, empty paper box — lids open, nothing inside */
     "empty-box": (
         <>
             <path d="M3.5 9.5 12 13.5l8.5-4L12 5.5z" />
@@ -195,7 +195,6 @@ const paths: Record<IconName, React.ReactNode> = {
             <path d="M7.5 7.4 4 3.9M16.5 7.4 20 3.9" />
         </>
     ),
-    /* a torn sheet of paper — the fold that didn't hold */
     error: (
         <>
             <path d="M13 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V9z" />
@@ -204,9 +203,7 @@ const paths: Record<IconName, React.ReactNode> = {
         </>
     ),
     'arrow-left': <path d="M19 12H5M11.5 5.5 5 12l6.5 6.5" />,
-    /* a door left open and the way out through it */
     'sign-out': <path d="M10 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4M16 16l4-4-4-4M20 12H10" />,
-    /* ====== field-type glyphs (form builder palette) ====== */
     text: <path d="M5 4h14M12 4v16M9 20h6" />,
     align: <path d="M4 6h16M4 12h11M4 18h16" />,
     hash: <path d="M4 9h16M4 15h16M10 3l-2 18M16 3l-2 18" />,
@@ -240,7 +237,6 @@ const paths: Record<IconName, React.ReactNode> = {
             <circle cx="16.5" cy="12" r="2.6" fill="currentColor" stroke="none" />
         </>
     ),
-    /* a floppy — the shutter up top, the label below; no arrow, so it can't read as download */
     save: (
         <>
             <path d="M6 4.5h8.5L19.5 9.5V18a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 18V6A1.5 1.5 0 0 1 6 4.5z" />
@@ -255,11 +251,17 @@ const paths: Record<IconName, React.ReactNode> = {
             <path d="M12 7.75h.01" />
         </>
     ),
-    /* the paper plane, launched — folded and sent on its way */
     publish: (
         <>
             <path d="M20.5 3.5 11 13M20.5 3.5 14.5 20.5l-3.5-7.5-7.5-3.5z" />
             <path d="M3 17.5 5 19M6.5 20.5 7.5 21.5" />
+        </>
+    ),
+    refresh: (
+        <>
+            <path d="M20 11.5a8 8 0 0 0-13.7-5.2L3.5 9" />
+            <path d="M4 12.5a8 8 0 0 0 13.7 5.2l2.8-2.7" />
+            <path d="M3.5 4.5V9H8M20.5 19.5V15H16" />
         </>
     ),
 }

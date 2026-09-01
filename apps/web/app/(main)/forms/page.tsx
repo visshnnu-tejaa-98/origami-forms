@@ -63,8 +63,6 @@ const Forms = () => {
 
   const loading = !isUserLoaded || listFormsIsPending;
 
-  /* only the very first load gets skeleton chrome — on later fetches (a tab, a sort, a search)
-     the real header and toolbar stay put, since they are what triggered the fetch */
   const firstLoad = loading && !formsData;
 
   const totalResponses = forms.reduce((s, f) => s + f.responses, 0);
@@ -80,7 +78,7 @@ const Forms = () => {
       ) : (
         <>
           <FormsHeader query={query} setQuery={setQuery} totalResponses={totalResponses} />
-          <Toolbar {...toolbarProps} />
+          <Toolbar {...toolbarProps} onRefresh={refetchForms} />
         </>
       )}
       <FormsContent

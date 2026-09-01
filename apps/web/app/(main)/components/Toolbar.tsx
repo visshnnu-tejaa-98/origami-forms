@@ -18,21 +18,18 @@ export type ToolbarSort<TSort extends string> = {
 };
 
 export type ToolbarClassNames = {
-    /** wrapper — e.g. "forms-toolbar", "rsp-toolbar" */
     toolbar?: string;
-    /** tab row — e.g. "forms-tabs", "rsp-tabs" */
     tabs?: string;
-    /** single tab — e.g. "forms-tab", "rsp-tab" */
     tab?: string;
 };
 
 type Props<TTab extends string, TSort extends string> = ToolbarProps<TTab, TSort> & {
     tabs: readonly ToolbarTab<TTab>[];
     sorts: readonly ToolbarSort<TSort>[];
-    /** hide the grid/list switch on lists that only render one way */
     showViewToggle?: boolean;
+    onRefresh?: () => void;
+    refreshing?: boolean;
     classNames?: ToolbarClassNames;
-    /** what the toolbar filters, for screen readers: "forms", "responses" */
     itemsLabel?: string;
 };
 
@@ -47,9 +44,13 @@ const Toolbar = <TTab extends string = Status | SelectionAll, TSort extends stri
     tabs,
     sorts,
     showViewToggle = true,
+    onRefresh,
+    refreshing = false,
     classNames,
     itemsLabel = "items",
 }: Props<TTab, TSort>) => {
+    const [spun, setSpun] = React.useState(false);
+
     const cls = {
         toolbar: classNames?.toolbar ?? "forms-toolbar",
         tabs: classNames?.tabs ?? "forms-tabs",
@@ -74,6 +75,22 @@ const Toolbar = <TTab extends string = Status | SelectionAll, TSort extends stri
             </div>
 
             <span className="spacer" />
+
+            {onRefresh && (
+                <button
+                    className={`refresh-btn${refreshing ? " refreshing" : ""}${spun ? " spun" : ""}`}
+                    onClick={() => {
+                        setSpun(true);
+                        onRefresh();
+                    }}
+                    onAnimationEnd={() => setSpun(false)}
+                    disabled={refreshing}
+                    aria-label={`Refresh ${itemsLabel}`}
+                    title={`Refresh ${itemsLabel}`}
+                >
+                    <Icon name="refresh" size={18} />
+                </button>
+            )}
 
             <div className="sort-group" role="group" aria-label={`Sort ${itemsLabel}`}>
                 {sorts.map((s) => {

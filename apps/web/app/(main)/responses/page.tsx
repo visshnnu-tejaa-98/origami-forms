@@ -157,6 +157,7 @@ const Responses = () => {
           showViewToggle={false}
           classNames={{ toolbar: "rsp-toolbar", tabs: "rsp-tabs", tab: "rsp-tab" }}
           itemsLabel="responses"
+          onRefresh={refetchResponses}
         />
 
         <ActionsBar checked={checked} setChecked={setChecked} />

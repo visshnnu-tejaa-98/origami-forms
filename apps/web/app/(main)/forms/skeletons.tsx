@@ -122,11 +122,13 @@ export const ToolbarSkeleton = ({
   tabWidths = [78, 86, 98, 116],
   sortWidth = "250px",
   showViewToggle = true,
+  showRefresh = false,
 }: {
   classNames?: { toolbar?: string; tabs?: string };
   tabWidths?: number[];
   sortWidth?: number | string;
   showViewToggle?: boolean;
+  showRefresh?: boolean;
 }) => (
   <div className={classNames?.toolbar ?? "forms-toolbar"} aria-hidden>
     <div className={classNames?.tabs ?? "forms-tabs"}>
@@ -137,6 +139,7 @@ export const ToolbarSkeleton = ({
 
     <span className="spacer" />
 
+    {showRefresh && <Slab w={36} h={36} r={999} />}
     <Slab w={sortWidth} h={34} />
     {showViewToggle && <Slab w={78} h={34} r={8} />}
   </div>
