@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useParams, usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import "../../../(main)/builder/preview.css";
@@ -26,19 +26,14 @@ const PublicFormPage = () => {
     const needsSignIn =
         publicForm?.visibility === "authenticated" && authLoaded && !isSignedIn
 
-    useEffect(() => {
-        if (needsSignIn) {
-            router.replace(`/sign-in?redirect_url=${encodeURIComponent(pathname)}`)
-        }
-    }, [needsSignIn, pathname, router])
+    const submissionCheckEnabled = authLoaded && !!isSignedIn
 
-
-    const { isUserGaveResponseForFormData } = useIsUserGaveResponseForForm(
-        { formId },
-        { enabled: authLoaded && !!isSignedIn },
-    );
+    const { isUserGaveResponseForFormData, isUserGaveResponseForFormIsPending } =
+        useIsUserGaveResponseForForm({ formId }, { enabled: submissionCheckEnabled });
 
     const isUserAlreadyFilledForm = isUserGaveResponseForFormData?.hasSubmitted === true
+    const submissionCheckPending = submissionCheckEnabled && isUserGaveResponseForFormIsPending
+    const isSettling = !authLoaded || publicFormIsPending || submissionCheckPending
 
     const shell = (children: React.ReactNode) => (
         <div className="db-shell db-shell--public o-scope">
@@ -51,7 +46,7 @@ const PublicFormPage = () => {
         </div>
     );
 
-    if (publicFormIsPending || needsSignIn) {
+    if (isSettling) {
         return shell(
             <PublicFormState
                 icon="crane"
@@ -61,12 +56,18 @@ const PublicFormPage = () => {
         );
     }
 
-    if (isUserAlreadyFilledForm) {
+    if (needsSignIn) {
+        const label = !authLoaded ? "Signing In..." : "Sign In";
+        const onClick = () => router.push(`/sign-in?redirect_url=${encodeURIComponent(pathname)}`);
         return shell(
             <PublicFormState
-                icon="clip"
-                title="You have already submitted this form."
-                description="You cannot submit the form more than once."
+                icon="crane"
+                title="Please Sign in."
+                description="You need to sign in to access this form."
+                action={{
+                    label,
+                    onClick,
+                }}
             />,
         );
     }
@@ -81,6 +82,16 @@ const PublicFormPage = () => {
                     "The link may be mistyped, or the form may have been unpublished."
                 }
                 action={{ label: "Try again", onClick: () => void refetchPublicForm() }}
+            />,
+        );
+    }
+
+    if (isUserAlreadyFilledForm) {
+        return shell(
+            <PublicFormState
+                icon="clip"
+                title="You have already submitted this form."
+                description="You cannot submit the form more than once."
             />,
         );
     }
