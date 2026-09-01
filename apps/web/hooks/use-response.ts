@@ -54,7 +54,10 @@ export function useResponsesStats(props: Omit<FormResponsesStatsInputType, "requ
     };
 }
 
-export function useIsUserGaveResponseForForm(props: Omit<IsUserGaveResponseForFormInputType, "requesterId">) {
+export function useIsUserGaveResponseForForm(
+    props: Omit<IsUserGaveResponseForFormInputType, "requesterId">,
+    options?: { enabled?: boolean },
+) {
     const {
         data: isUserGaveResponseForFormData,
         error: isUserGaveResponseForFormError,
@@ -65,7 +68,9 @@ export function useIsUserGaveResponseForForm(props: Omit<IsUserGaveResponseForFo
         isPending: isUserGaveResponseForFormIsPending,
         isFetching: isUserGaveResponseForFormIsFetching,
         refetch: refetchIsUserGaveResponseForForm,
-    } = trpc.responses.isUserGaveResponseForForm.useQuery(props)
+    } = trpc.responses.isUserGaveResponseForForm.useQuery(props, {
+        enabled: options?.enabled ?? true,
+    })
     return {
         isUserGaveResponseForFormData,
         isUserGaveResponseForFormError,

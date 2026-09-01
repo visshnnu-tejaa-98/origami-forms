@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import "../../../(main)/builder/preview.css";
@@ -14,7 +14,6 @@ import { useIsUserGaveResponseForForm } from "~/hooks/use-response";
 
 const PublicFormPage = () => {
 
-    const [isUserAlreadyFilledForm, setIsUserAlreadyFilledForm] = useState(false)
     const { formId } = useParams<{ formId: string }>();
     const { publicForm, publicFormError, publicFormIsPending, refetchPublicForm } = usePublicForm({
         formId,
@@ -34,15 +33,12 @@ const PublicFormPage = () => {
     }, [needsSignIn, pathname, router])
 
 
-    const { isUserGaveResponseForFormData } = useIsUserGaveResponseForForm({
-        formId,
-    });
+    const { isUserGaveResponseForFormData } = useIsUserGaveResponseForForm(
+        { formId },
+        { enabled: authLoaded && !!isSignedIn },
+    );
 
-    useEffect(() => {
-        if (isUserGaveResponseForFormData) {
-            setIsUserAlreadyFilledForm(true)
-        }
-    }, [isUserGaveResponseForFormData])
+    const isUserAlreadyFilledForm = isUserGaveResponseForFormData?.hasSubmitted === true
 
     const shell = (children: React.ReactNode) => (
         <div className="db-shell db-shell--public o-scope">
