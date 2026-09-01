@@ -33,9 +33,9 @@ const PublicFormScreen = ({ form }: { form: PublicForm }) => {
 
     const flow = useFormFlow({ steps, mode: "live", onSubmit });
 
-    const ThankyouMessage = (titile?: string) => <div>
+    const ThankyouMessage = (titile?: string) => <>
         Your answers to <b>"{titile}"</b> have landed safely on the other desk.
-    </div>
+    </>
 
     const publicFormStateDescription = ThankyouMessage(form.title);
     if (sent) {
