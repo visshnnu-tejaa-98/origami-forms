@@ -505,6 +505,13 @@ export const getPublicFormOutputSchema = z.object({
 
 export type GetPublicFormOutputSchemaType = z.infer<typeof getPublicFormOutputSchema>;
 
+export const responseMetaDataSchema = z.object({
+    device: z.string().nullable().optional().describe("device used to submit the form"),
+    browser: z.string().nullable().optional().describe("browser used to submit the form"),
+    country: z.string().nullable().optional().describe("country of the respondent"),
+    city: z.string().nullable().optional().describe("city of the respondent"),
+}).describe("metadata of the respondent")
+
 export const submitPublicResponseInputSchema = z.object({
     formId: z.string().uuid().describe("id of the form being answered"),
     answers: z
@@ -523,6 +530,7 @@ export const submitPublicResponseInputSchema = z.object({
         .optional()
         .describe("how long the respondent spent on the form"),
     userId: z.string().nullish().describe("id of the logged in user"),
+    metadata: responseMetaDataSchema.nullish().describe("metadata of the respondent"),
 });
 
 export type SubmitPublicResponseProps = z.infer<typeof submitPublicResponseInputSchema>;

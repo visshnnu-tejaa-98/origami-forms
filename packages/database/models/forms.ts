@@ -13,7 +13,7 @@ import {
 import { users } from "./user";
 import { formFieldTypeEnum, formStatusEnum, formVisibilityEnum } from "./enum";
 import { relations } from "drizzle-orm";
-import { formResponses, responseAnswers } from "./response";
+import { formResponses } from "./response";
 
 export const forms = pgTable("forms", {
     id: uuid("id").primaryKey().defaultRandom(),

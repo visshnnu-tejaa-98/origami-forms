@@ -610,7 +610,7 @@ export default class FormService {
     }
 
     public async submitPublicResponse(payload: SubmitPublicResponseProps) {
-        const { formId, answers, completionTimeInSec, userId } = payload;
+        const { formId, answers, completionTimeInSec, userId, metadata } = payload;
 
         const form = await db.query.forms.findFirst({
             where: this.publicFormCondition(formId),
@@ -667,6 +667,7 @@ export default class FormService {
                     startedAt: completionTimeInSec ? new Date(now.getTime() - completionTimeInSec * 1000) : now,
                     submittedAt: now,
                     CompletionTimeInSec: completionTimeInSec,
+                    metaData: metadata ?? undefined,
                 })
                 .returning();
 

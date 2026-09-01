@@ -14,10 +14,10 @@ import { users } from "./user";
 
 
 export type FormMetadata = {
-    country?: string;
-    city?: string;
-    device?: string,
-    browser?: string,
+    country?: string | null;
+    city?: string | null;
+    device?: string | null,
+    browser?: string | null,
 };
 
 export const formResponses = pgTable("responses", {
