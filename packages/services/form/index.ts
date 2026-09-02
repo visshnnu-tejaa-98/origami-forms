@@ -6,11 +6,14 @@ import db, {
     formFields,
     formResponses,
     forms,
+    gt,
     ilike,
     inArray,
     InsertFormField,
     isNull,
+    lt,
     lte,
+    or,
     responseAnswers,
     sql,
 } from "@repo/database";
@@ -169,7 +172,35 @@ export default class FormService {
 
         if (search) conditions.push(ilike(forms.title, `%${search}%`));
 
-        if (status) conditions.push(eq(forms.status, status));
+        if (status) {
+            switch (status) {
+                case "published":
+                    conditions.push(
+                        and(
+                            eq(forms.status, "published"),
+                            or(isNull(forms.expiresAt), gt(forms.expiresAt, new Date()))
+                        )!
+                    );
+                    break;
+
+                case "expired":
+                    conditions.push(
+                        and(
+                            eq(forms.status, "published"),
+                            lt(forms.expiresAt, new Date())
+                        )!
+                    );
+                    break;
+
+                case "draft":
+                case "archived":
+                    conditions.push(eq(forms.status, status));
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         if (visibility) conditions.push(eq(forms.visibility, visibility));
 
@@ -533,19 +564,24 @@ export default class FormService {
         const [rows, totalItems] = await Promise.all([
             db.query.forms.findMany({
                 where: condition,
-                columns: { status: true },
+                columns: {
+                    status: true,
+                    expiresAt: true
+                },
             }),
             db.$count(forms, condition),
         ]);
 
-        const published = rows.filter((form) => form.status === PUBLISHED).length;
+        const published = rows.filter((form) => form.status === PUBLISHED && (form.expiresAt === null || form.expiresAt > new Date())).length;
         const draft = rows.filter((form) => form.status === DRAFT).length;
         const archived = rows.filter((form) => form.status === ARCHIVED).length;
+        const expired = rows.filter((form) => form.expiresAt && form.expiresAt < new Date() && form.status === PUBLISHED).length;
 
         return {
             published,
             draft,
             archived,
+            expired,
             total: totalItems,
         };
     }

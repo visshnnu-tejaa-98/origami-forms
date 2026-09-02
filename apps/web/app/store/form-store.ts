@@ -16,6 +16,7 @@ const formsInitialState = {
         published: 0,
         draft: 0,
         archived: 0,
+        expired: 0,
         total: 0,
     }
 }

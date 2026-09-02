@@ -7,8 +7,9 @@ export const USER_ROLES = [ADMIN, SUBSCRIBER, STARTER] as const;
 export const DRAFT = "draft";
 export const PUBLISHED = "published";
 export const ARCHIVED = "archived";
+export const EXPIRED = "expired"
 
-export const FORM_STATUS_OPTIONS = [DRAFT, PUBLISHED, ARCHIVED] as const
+export const FORM_STATUS_OPTIONS = [DRAFT, PUBLISHED, ARCHIVED, EXPIRED] as const
 
 export const PUBLIC = "public";
 export const UNLISTED = "unlisted";

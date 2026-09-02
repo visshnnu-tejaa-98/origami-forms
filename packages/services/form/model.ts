@@ -30,9 +30,9 @@ export const optionsSchema = z.object({
     value: z.string().min(1).max(255).describe("value for the option"),
 });
 
-export const isoDateSchema = z.date()
+export const isoDateSchema = z.coerce.date()
     .transform((val) => val.toISOString())
-    .pipe(z.iso.datetime());
+    .pipe(z.string().datetime());
 
 export const layoutField = {
     type: z.enum(LAYOUT_FIELD_TYPES),
@@ -442,6 +442,7 @@ export const formStatsListOutputSchema = z.object({
     published: z.number().int().nonnegative().describe("number of published forms"),
     draft: z.number().int().nonnegative().describe("number of draft forms"),
     archived: z.number().int().nonnegative().describe("number of archived forms"),
+    expired: z.number().int().nonnegative().describe("number of expired forms"),
     total: z.number().int().nonnegative().describe("total number of forms"),
     // TODO: Add the below stats after the responses api is ready
     // totalResponses: z.number().int().nonnegative().describe("total number of responses"),

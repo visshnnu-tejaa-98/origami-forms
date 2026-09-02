@@ -10,13 +10,15 @@ export const TINTS = ["k1", "k2", "k3", "k4", "k5", "k6"];
 export const DRAFT = "draft";
 export const PUBLISHED = "published";
 export const ARCHIVED = "archived";
-export const FORM_STATUS_OPTIONS = [DRAFT, PUBLISHED, ARCHIVED]
+export const EXPIRED = "expired"
+export const FORM_STATUS_OPTIONS = [DRAFT, PUBLISHED, ARCHIVED, EXPIRED]
 
 export const STATUS_TABS = [
     { key: "all", label: "All", icon: "forms", count: 0 },
     { key: PUBLISHED, label: "Live", icon: "eye", count: 0 },
     { key: DRAFT, label: "Drafts", icon: "edit", count: 0 },
     { key: ARCHIVED, label: "Archived", icon: "archive", count: 0 },
+    { key: EXPIRED, label: "Expired", icon: "archive", count: 0 },
 ];
 
 // Sorting
@@ -57,7 +59,7 @@ export const RESPONSE_SORTS: { key: ResponseSortField; label: string }[] = [
 
 export const RESPONSE_SORT_VALUES = [SUBMITTED_AT, COMPLETION_TIME] as const;
 
-export const FORM_TAB_VALUES = [ALL, DRAFT, PUBLISHED, ARCHIVED] as const;
+export const FORM_TAB_VALUES = [ALL, DRAFT, PUBLISHED, ARCHIVED, EXPIRED] as const;
 export const FORM_SORT_VALUES = [UPDATED_AT, TITLE_SORT, SUBMISSION_COUNT] as const;
 
 export const LIST = "list"
@@ -78,6 +80,10 @@ export const EMPTY_COPY: Record<Status | typeof ALL, { title: string; descriptio
     },
     archived: {
         title: "The archive is spotless.",
+        description: "Forms you retire will rest here, safe and out of the way.",
+    },
+    expired: {
+        title: "No forms expire",
         description: "Forms you retire will rest here, safe and out of the way.",
     },
 };

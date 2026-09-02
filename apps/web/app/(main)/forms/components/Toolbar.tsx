@@ -6,11 +6,11 @@ import { useFormStore } from '~/app/store/form-store';
 import GlobalToolar, { type ToolbarTab } from '../../components/Toolbar';
 
 const Toolbar = (props: ToolbarProps) => {
-    const { published, draft, archived, total } = useFormStore((state) => state.formsStats)
+    const { published, draft, archived, expired, total } = useFormStore((state) => state.formsStats)
 
     const tabs = useMemo<ToolbarTab<Status | SelectionAll>[]>(
         () => {
-            const counts: Record<string, number> = { published, draft, archived, all: total }
+            const counts: Record<string, number> = { published, draft, archived, expired, all: total }
             return STATUS_TABS.map((t) => ({
                 key: t.key as Status | SelectionAll,
                 label: t.label,

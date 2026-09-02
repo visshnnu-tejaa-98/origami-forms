@@ -6,6 +6,7 @@ import {
     ASC,
     DESC,
     DRAFT,
+    EXPIRED,
     GRID,
     LIST,
     PUBLISHED,
@@ -15,7 +16,7 @@ import {
 } from "./constants";
 import { UserSettingsType } from "../store/user-store";
 
-export type Status = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED;
+export type Status = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED | typeof EXPIRED
 
 export type Form = {
     id: string;
