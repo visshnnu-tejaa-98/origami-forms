@@ -19,8 +19,10 @@ const iconPath = (formId: string) => ({
 const draftKey = () => `draft-${Math.random().toString(36).slice(2, 10)}`;
 
 
-const versioned = (url: string, version?: string) =>
-    `${url}?v=${version ?? Date.now().toString(36)}`;
+const versioned = (url: string) => {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}updatedAt=${Date.now()}`;
+};
 
 const uploadMessage = (error: unknown) => {
     if (error instanceof ImageKitAbortError) return "";
@@ -91,7 +93,7 @@ const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
 
             if (!uploaded.url) throw new Error("Something went wrong while uploading image.");
 
-            setIcon(versioned(uploaded.url, uploaded.versionInfo?.id));
+            setIcon(versioned(uploaded.url));
             releasePrevious();
         } catch (uploadError) {
             console.error("Form icon upload failed:", uploadError);
@@ -148,7 +150,7 @@ const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
                                 y="1"
                                 width="62"
                                 height="62"
-                                rx="10"
+                                rx="6"
                                 pathLength={100}
                             />
                             <rect
@@ -157,7 +159,7 @@ const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
                                 y="1"
                                 width="62"
                                 height="62"
-                                rx="10"
+                                rx="6"
                                 pathLength={100}
                                 style={{ strokeDashoffset: 100 - progress }}
                             />
