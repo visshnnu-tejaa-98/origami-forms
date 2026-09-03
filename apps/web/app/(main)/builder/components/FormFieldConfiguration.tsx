@@ -16,6 +16,7 @@ const FormFieldConfiguration = (props: FormFieldConfigurationProps) => {
                     Question label <span className="req-star">*</span>
                 </label>
                 <textarea
+                    key={field.id}
                     id="insp-label"
                     className="insp-textarea"
                     placeholder={label}
