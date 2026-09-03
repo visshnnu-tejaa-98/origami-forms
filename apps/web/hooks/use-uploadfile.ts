@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useFileUploadCredentials } from "./use-file";
-import { ACCEPTED_ICON_TYPES, ICON_FOLDER, MAX_ICON_BYTES } from "~/app/(main)/builder/constants";
+import { ACCEPTED_ICON_TYPES, ICON_FOLDER } from "~/app/(main)/builder/constants";
 import {
     ImageKitAbortError,
     ImageKitInvalidRequestError,
@@ -8,9 +8,10 @@ import {
     ImageKitUploadNetworkError,
     upload,
 } from "@imagekit/next";
-import { useBuilder } from "./use-builder";
+import { UploadFileProps } from "~/app/(main)/builder/types";
 
 export function useUploadFile() {
+    const [uploadedImageUrl, setUploadedUrl] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const [error, setError] = useState("");
     const [progress, setProgress] = useState<number | null>(null);
@@ -21,21 +22,9 @@ export function useUploadFile() {
     useEffect(() => releasePrevious, []);
     const getCredentials = useFileUploadCredentials();
 
-
-
     const releasePrevious = () => {
         if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
         objectUrl.current = null;
-    };
-
-    const iconPath = (formId: string) => ({
-        folder: `${ICON_FOLDER}/${formId}`,
-        fileName: "logo",
-    });
-
-    const versioned = (url: string) => {
-        const separator = url.includes("?") ? "&" : "?";
-        return `${url}${separator}updatedAt=${Date.now()}`;
     };
 
     const pick = () => {
@@ -51,47 +40,49 @@ export function useUploadFile() {
         return "That image didn't upload. Try again.";
     };
 
-    const uploadFile = async (
-        formId: string | null,
-        file: File | null,
-        sessionKey: string,
-        setIcon: (url: string | null) => void,
-    ) => {
+    const uploadFile = async (props: UploadFileProps) => {
+        const { id, file, sessionKey, maxSizeAllowed, path, setIcon } = props;
         if (!file) return;
 
         if (!ACCEPTED_ICON_TYPES.includes(file.type)) {
             setError("accepts only PNG or JPG files.");
             return;
         }
-        if (file.size > MAX_ICON_BYTES) {
-            setError("over 2 MB. Try a smaller one.");
+        if (file.size > maxSizeAllowed) {
+            setError(`over ${maxSizeAllowed / 1024 / 1024} MB. Try a smaller one.`);
             return;
         }
 
         setError("");
         releasePrevious();
         objectUrl.current = URL.createObjectURL(file);
-        setIcon(objectUrl.current);
+        setIcon?.(objectUrl.current);
+        setUploadedUrl(objectUrl.current);
         setProgress(0);
 
         try {
             const { token, expire, signature, publicKey } = await getCredentials();
 
-            const uploaded = await upload({
+            const onProgress = ({ loaded, total }: { loaded: number; total: number }) =>
+                setProgress((loaded / total) * 100);
+
+            const options = {
                 token,
                 expire,
                 signature,
                 publicKey,
                 file,
-                ...iconPath(formId ?? sessionKey),
                 useUniqueFileName: false,
                 overwriteFile: true,
-                onProgress: ({ loaded, total }) => setProgress((loaded / total) * 100),
-            });
+                onProgress,
+                ...path(id || sessionKey),
+            };
+
+            const uploaded = await upload(options);
 
             if (!uploaded.url) throw new Error("Something went wrong while uploading image.");
 
-            setIcon(versioned(uploaded.url));
+            setIcon?.(uploaded.url);
             releasePrevious();
         } catch (uploadError) {
             console.error("Form icon upload failed:", uploadError);
@@ -99,7 +90,7 @@ export function useUploadFile() {
             if (message) {
                 setError(message);
                 releasePrevious();
-                setIcon(null);
+                setIcon?.(null);
             }
         } finally {
             setProgress(null);
@@ -117,6 +108,7 @@ export function useUploadFile() {
         progress,
         inputRef,
         uploading,
+        uploadedImageUrl,
         pick,
         uploadFile,
         removeFile,

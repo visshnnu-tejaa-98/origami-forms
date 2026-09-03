@@ -17,6 +17,8 @@ export const STATUS_BADGE: Record<Status, { cls: string; label: string }> = {
     published: { cls: "o-badge--matcha", label: "live" },
     draft: { cls: "o-badge--sakura", label: "draft" },
     archived: { cls: "o-badge--ghost", label: "archived" },
+    // TODO: Check this, the filter tabs in forms - shoving live tag in expired tab
+    expired: { cls: "o-badge--ghost", label: "expired" }
 };
 
 export const hash = (s: string) => {
@@ -198,6 +200,7 @@ export const toBuilderForm = (form: SavedForm): BuilderForm => ({
     visibility: form.visibility,
     maxSubmissions: form.maxSubmissions ?? undefined,
     expiresAt: form.expiresAt ?? null,
+    logoUrl: form.logoUrl ?? undefined,
     fields: form.fields.map(toBuilderField),
 });
 

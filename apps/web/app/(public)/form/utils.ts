@@ -1,5 +1,5 @@
 import { FlowStep } from "~/components/form-flow/types";
-import { OPTION_TYPES } from "../../(main)/builder/constants";
+import { FILE_UPLOAD_FOLDER, ICON_FOLDER, OPTION_TYPES } from "../../(main)/builder/constants";
 import type { FieldBlock } from "../../(main)/builder/types";
 import type { PublicForm, PublicFormField } from "./types";
 import { buildSteps } from "~/components/form-flow/flow";
@@ -32,3 +32,17 @@ export const toFieldBlock = (field: PublicFormField): FieldBlock => {
 };
 
 export const toSteps = (form: PublicForm): FlowStep[] => buildSteps(form.fields, toFieldBlock);
+
+export const fileUploadLimit = (mb: number) => {
+    return mb * 1024 * 1024;
+}
+
+export const formLogoPath = (id: string) => ({
+    folder: `${ICON_FOLDER}`,
+    fileName: `logo-${id}`,
+});
+
+export const formFilesPath = (id: string) => ({
+    folder: `${FILE_UPLOAD_FOLDER}`,
+    fileName: id,
+})

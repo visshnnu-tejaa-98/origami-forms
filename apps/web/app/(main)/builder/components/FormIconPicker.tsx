@@ -1,35 +1,46 @@
+import { fileUploadLimit, formLogoPath } from "~/app/(public)/form/utils";
 import { Icon } from "../../components/icons";
-import { ACCEPTED_ICON_TYPES } from "../constants";
+import { ACCEPTED_ICON_TYPES, draftFileName } from "../constants";
 import type { FormIconPickerProps } from "../types";
 import { useUploadFile } from "~/hooks/use-uploadfile";
 
-const DRAFT_SESSION_KEY = `draft-${Math.random().toString(36).slice(2, 10)}`;
 
-const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
+const FormIconPicker = ({ logoUrl, setIcon, formId }: FormIconPickerProps) => {
     const { inputRef, uploading, error, progress, pick, removeFile, uploadFile } = useUploadFile();
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const FILE_UPLOAD_LIMIT = fileUploadLimit(2);
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0] || null;
 
         if (!file) return;
 
-        uploadFile(formId ?? "", file, DRAFT_SESSION_KEY, setIcon);
+        const options = {
+            id: formId ?? "",
+            file,
+            sessionKey: draftFileName,
+            maxSizeAllowed: FILE_UPLOAD_LIMIT,
+            path: formLogoPath,
+            setIcon,
+        };
+
+        await uploadFile(options);
     };
 
     return (
         <div className="form-icon">
             <button
                 type="button"
-                className={`form-icon-box${iconUrl ? " is-set" : ""}${uploading ? " is-busy" : ""}`}
+                className={`form-icon-box${logoUrl ? " is-set" : ""}${uploading ? " is-busy" : ""}`}
                 onClick={pick}
                 disabled={uploading}
                 aria-busy={uploading}
-                aria-label={iconUrl ? "Replace form icon" : "Add a form icon"}
-                title={iconUrl ? "Replace form icon" : "Add a form icon"}
+                aria-label={logoUrl ? "Replace form icon" : "Add a form icon"}
+                title={logoUrl ? "Replace form icon" : "Add a form icon"}
             >
-                {iconUrl ? (
+                {logoUrl ? (
                     <>
-                        <img src={iconUrl} alt="" className="form-icon-img" />
+                        <img src={logoUrl} alt="" className="form-icon-img" />
                         <span className="form-icon-overlay">
                             <Icon name="upload" size={14} />
                         </span>
@@ -68,7 +79,7 @@ const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
                 ) : null}
             </button>
 
-            {iconUrl && !uploading ? (
+            {logoUrl && !uploading ? (
                 <button type="button" className="form-icon-clear" onClick={() => removeFile(setIcon)}>
                     <Icon name="x" size={10} /> remove
                 </button>

@@ -80,6 +80,7 @@ export const ACCEPTED_ICON_TYPES = [
   "image/jpeg",
 ];
 
-export const MAX_ICON_BYTES = 2 * 1024 * 1024;
+export const draftFileName = `draft-${Math.random().toString(36).slice(2, 10)}`;
 
-export const ICON_FOLDER = "/forms";
+export const ICON_FOLDER = "/forms/logos";
+export const FILE_UPLOAD_FOLDER = "/forms/uploads";

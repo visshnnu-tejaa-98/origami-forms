@@ -15,7 +15,6 @@ import type {
   FormSettingsPatch,
   MutationPayloadShape,
 } from "~/app/(main)/builder/types";
-import type { CreateFormInputModel } from "@repo/services/form/model";
 import { blankField, uid } from "~/app/(main)/utils";
 import { toast } from "~/components/origami/toast";
 import { useCreateForm, useUpdateForm } from "./use-form";
@@ -52,7 +51,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   );
 
   const setIcon = useCallback(
-    (iconUrl: string | null) => setForm((f) => ({ ...f, iconUrl })),
+    (logoUrl: string | null) => setForm((f: any) => ({ ...f, logoUrl })),
     []
   );
 
@@ -152,6 +151,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
       visibility: form.visibility,
       maxSubmissions: form.maxSubmissions ?? null,
       expiresAt: form.expiresAt ?? null,
+      logoUrl: form.logoUrl ?? null,
       fields: form.fields.map(({ id, ...field }) =>
         SAVED_ID.test(id) ? { ...field, id } : field
       ),

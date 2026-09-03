@@ -27,7 +27,7 @@ const FormCanvas = (props: FormCanvasProps) => {
         <span className="o-eyebrow">Form cover</span>
 
         <div className="cover-row">
-          <FormIconPicker iconUrl={form.iconUrl} setIcon={setIcon} formId={formId} />
+          <FormIconPicker logoUrl={form.logoUrl} setIcon={setIcon} formId={formId} />
           <div className="cover-text">
             <input
               className="form-title-ipt"

@@ -15,7 +15,6 @@ import { Icon } from "../../components/icons";
 import type { BuilderForm } from "../types";
 
 const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) => {
-  const router = useRouter();
 
   const {
     form,

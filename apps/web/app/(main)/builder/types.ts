@@ -59,7 +59,7 @@ export type MutationPayloadShape = Omit<CreateFormInputModel, "expiresAt"> & {
 export type BuilderForm = Omit<CreateFormInputModel, "fields"> & {
   fields: BuilderField[];
   expiresAt?: string | null;
-  iconUrl?: string | null;
+  logoUrl?: string | null;
 };
 
 export type FormSettings = Pick<BuilderForm, "visibility" | "maxSubmissions" | "expiresAt">;
@@ -86,8 +86,8 @@ export type FieldPaletteProps = {
 };
 
 export type FormIconPickerProps = {
-  iconUrl?: string | null;
-  setIcon: (iconUrl: string | null) => void;
+  logoUrl?: string | null;
+  setIcon: (logoUrl: string | null) => void;
   formId?: string;
 };
 
@@ -95,7 +95,7 @@ export type FormCanvasProps = {
   form: BuilderForm;
   setTitle: (title: string) => void;
   setDescription: (description: string) => void;
-  setIcon: (iconUrl: string | null) => void;
+  setIcon: (logoUrl: string | null) => void;
   formId?: string;
   selectedId: string | null;
   selectField: (id: string) => void;
@@ -183,4 +183,13 @@ export type PreviewSideRailProps = {
   questions: FlowQuestion[]
   onClose: () => void,
   go: (i: number) => void,
+}
+
+export type UploadFileProps = {
+  id: string,
+  file: File | null,
+  sessionKey: string,
+  maxSizeAllowed: number,
+  path: (id: string) => { folder: string; fileName: string },
+  setIcon?: (url: string | null) => void,
 }
