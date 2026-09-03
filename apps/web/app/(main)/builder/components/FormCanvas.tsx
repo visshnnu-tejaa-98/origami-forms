@@ -2,13 +2,16 @@ import React from "react";
 import { LAYOUT_TYPES, PAGE_BREAK, isFieldBlock } from "../constants";
 import { FormCanvasProps } from "../types";
 import QuestionBlock from "./QuestionBlock";
+import FormIconPicker from "./FormIconPicker";
 
 const FormCanvas = (props: FormCanvasProps) => {
   const {
     form,
+    formId,
+    selectedId,
     setTitle,
     setDescription,
-    selectedId,
+    setIcon,
     selectField,
     addField,
     removeField,
@@ -22,21 +25,27 @@ const FormCanvas = (props: FormCanvasProps) => {
     <div className="form-canvas">
       <div className="canvas-cover">
         <span className="o-eyebrow">Form cover</span>
-        <input
-          className="form-title-ipt"
-          value={form.title}
-          onChange={(e) => setTitle(e.target.value)}
-          aria-label="Form cover title"
-          placeholder="Name this form"
-        />
-        <textarea
-          className="form-desc"
-          rows={2}
-          value={form.description}
-          onChange={(e) => setDescription(e.target.value)}
-          aria-label="Form description"
-          placeholder="A line or two about what you're collecting…"
-        />
+
+        <div className="cover-row">
+          <FormIconPicker iconUrl={form.iconUrl} setIcon={setIcon} formId={formId} />
+          <div className="cover-text">
+            <input
+              className="form-title-ipt"
+              value={form.title}
+              onChange={(e) => setTitle(e.target.value)}
+              aria-label="Form cover title"
+              placeholder="Name this form"
+            />
+            <textarea
+              className="form-desc"
+              rows={2}
+              value={form.description}
+              onChange={(e) => setDescription(e.target.value)}
+              aria-label="Form description"
+              placeholder="A line or two about what you're collecting…"
+            />
+          </div>
+        </div>
       </div>
 
       {form.fields.map((field) => {

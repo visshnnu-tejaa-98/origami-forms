@@ -463,6 +463,34 @@
   margin-bottom: 14px;
 }
 
+.db-shell .canvas-cover .cover-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.db-shell .canvas-cover .cover-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* the picker sits beside the title; its own .form-icon-* rules carry the looks.
+   stacked so "remove" tucks under the square instead of shoving the title across */
+.db-shell .canvas-cover .form-icon {
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 84px;
+  margin-top: 6px;
+}
+
+.db-shell .canvas-cover .form-icon-box {
+  width: 84px;
+  height: 84px;
+}
+
 .db-shell .canvas-cover .form-title-ipt {
   width: 100%;
   padding: 4px 6px;
@@ -1272,6 +1300,179 @@
 
 @media (prefers-reduced-motion: reduce) {
   .db-shell .b-top .save-state .dot {
+    animation: none;
+  }
+}
+/* ----- form icon picker (inspector › Icon) ----- */
+.db-shell .form-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.db-shell .form-icon-box {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px dashed var(--rule-line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-3);
+  transition: background 200ms, border-color 200ms, color 200ms;
+}
+
+.db-shell .form-icon-box:hover {
+  background: var(--bg-elevated);
+  border-color: var(--ink-3);
+  color: var(--ink-2);
+}
+
+.db-shell .form-icon-box.is-set {
+  border-style: solid;
+}
+
+.db-shell .form-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* replace affordance, revealed over an icon that's already set */
+.db-shell .form-icon-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgba(31, 27, 23, 0.55);
+  opacity: 0;
+  transition: opacity 200ms;
+}
+
+.db-shell .form-icon-box:hover .form-icon-overlay,
+.db-shell .form-icon-box:focus-visible .form-icon-overlay {
+  opacity: 1;
+}
+
+/* ----- upload progress -----
+   the picker's own frame is the progress bar: a rounded rect stroke that draws itself
+   clockwise as bytes land, with the preview dimmed behind it. `pathLength="100"` on the
+   rect normalises the perimeter so the dash offset is literally the percentage. */
+.db-shell .form-icon-box.is-busy {
+  cursor: progress;
+  border-color: transparent;
+}
+
+.db-shell .form-icon-box.is-busy .form-icon-img {
+  filter: saturate(0.35);
+  opacity: 0.45;
+  transform: scale(1.03);
+  transition: filter 300ms, opacity 300ms, transform 300ms;
+}
+
+.db-shell .form-icon-box.is-busy .form-icon-overlay {
+  opacity: 0;
+}
+
+.db-shell .form-icon-progress {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.db-shell .form-icon-progress svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* start the sweep at 12 o'clock rather than the rect's native corner origin */
+  transform: rotate(-90deg) scaleX(-1);
+  overflow: visible;
+}
+
+.db-shell .form-icon-progress rect {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.db-shell .form-icon-progress .ring-track {
+  stroke: var(--rule-line);
+}
+
+.db-shell .form-icon-progress .ring-fill {
+  stroke: var(--accent);
+  stroke-dasharray: 100;
+  transition: stroke-dashoffset 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.db-shell .form-icon-pct {
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-1);
+  /* a soft plate so the number stays legible over any image */
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  animation: form-icon-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes form-icon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.62;
+  }
+}
+
+.db-shell .form-icon-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 0.78rem;
+}
+
+.db-shell .form-icon-clear:hover {
+  color: var(--danger);
+}
+
+.db-shell .form-icon-input {
+  display: none;
+}
+
+.db-shell .form-icon-error {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .form-icon-box,
+  .db-shell .form-icon-overlay,
+  .db-shell .form-icon-progress .ring-fill {
+    transition: none;
+  }
+
+  .db-shell .form-icon-pct {
     animation: none;
   }
 }

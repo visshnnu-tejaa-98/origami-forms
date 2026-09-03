@@ -59,6 +59,7 @@ export type MutationPayloadShape = Omit<CreateFormInputModel, "expiresAt"> & {
 export type BuilderForm = Omit<CreateFormInputModel, "fields"> & {
   fields: BuilderField[];
   expiresAt?: string | null;
+  iconUrl?: string | null;
 };
 
 export type FormSettings = Pick<BuilderForm, "visibility" | "maxSubmissions" | "expiresAt">;
@@ -84,10 +85,18 @@ export type FieldPaletteProps = {
   settingsOpen: boolean;
 };
 
+export type FormIconPickerProps = {
+  iconUrl?: string | null;
+  setIcon: (iconUrl: string | null) => void;
+  formId?: string;
+};
+
 export type FormCanvasProps = {
   form: BuilderForm;
   setTitle: (title: string) => void;
   setDescription: (description: string) => void;
+  setIcon: (iconUrl: string | null) => void;
+  formId?: string;
   selectedId: string | null;
   selectField: (id: string) => void;
   addField: (type: BlockType) => void;

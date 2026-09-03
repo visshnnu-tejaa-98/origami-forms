@@ -51,6 +51,11 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     []
   );
 
+  const setIcon = useCallback(
+    (iconUrl: string | null) => setForm((f) => ({ ...f, iconUrl })),
+    []
+  );
+
   const selectField = useCallback((id: string | null) => {
     setSettingsOpen(false);
     setSelectedId(id);
@@ -221,6 +226,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     openSettings,
     setTitle,
     setDescription,
+    setIcon,
     updateSettings,
     addField,
     updateField,
