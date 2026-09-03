@@ -23,6 +23,7 @@ const BuilderPage = () => {
     selectField,
     setTitle,
     setDescription,
+    setIcon,
     updateSettings,
     openSettings,
     addField,
@@ -59,6 +60,7 @@ const BuilderPage = () => {
             form={form}
             setTitle={setTitle}
             setDescription={setDescription}
+            setIcon={setIcon}
             selectedId={selectedId}
             selectField={selectField}
             addField={addField}

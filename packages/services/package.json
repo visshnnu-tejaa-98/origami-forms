@@ -9,6 +9,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@imagekit/nodejs": "^7.11.0",
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
     "google-auth-library": "^10.5.0",

@@ -27,6 +27,7 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
     selectField,
     setTitle,
     setDescription,
+    setIcon,
     updateSettings,
     openSettings,
     addField,
@@ -65,6 +66,8 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
             form={form}
             setTitle={setTitle}
             setDescription={setDescription}
+            setIcon={setIcon}
+            formId={formId}
             selectedId={selectedId}
             selectField={selectField}
             addField={addField}

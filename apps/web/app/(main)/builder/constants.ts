@@ -74,3 +74,12 @@ export const SEED_FORM: BuilderForm = {
   visibility: "unlisted",
   fields: [],
 };
+
+export const ACCEPTED_ICON_TYPES = [
+  "image/png",
+  "image/jpeg",
+];
+
+export const MAX_ICON_BYTES = 2 * 1024 * 1024;
+
+export const ICON_FOLDER = "/forms";
