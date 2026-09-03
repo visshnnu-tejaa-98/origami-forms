@@ -1,117 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-    ImageKitAbortError,
-    ImageKitInvalidRequestError,
-    ImageKitServerError,
-    ImageKitUploadNetworkError,
-    upload,
-} from "@imagekit/next";
 import { Icon } from "../../components/icons";
-import { ACCEPTED_ICON_TYPES, ICON_FOLDER, MAX_ICON_BYTES } from "../constants";
+import { ACCEPTED_ICON_TYPES } from "../constants";
 import type { FormIconPickerProps } from "../types";
-import { useFileUploadCredentials } from "~/hooks/use-file";
+import { useUploadFile } from "~/hooks/use-uploadfile";
 
-const iconPath = (formId: string) => ({
-    folder: `${ICON_FOLDER}/${formId}`,
-    fileName: "logo",
-});
-
-const draftKey = () => `draft-${Math.random().toString(36).slice(2, 10)}`;
-
-
-const versioned = (url: string) => {
-    const separator = url.includes("?") ? "&" : "?";
-    return `${url}${separator}updatedAt=${Date.now()}`;
-};
-
-const uploadMessage = (error: unknown) => {
-    if (error instanceof ImageKitAbortError) return "";
-    if (error instanceof ImageKitUploadNetworkError)
-        return "The upload lost its connection. Try again.";
-    if (error instanceof ImageKitInvalidRequestError || error instanceof ImageKitServerError)
-        return "ImageKit rejected that image. Try a different one.";
-    return "That image didn't upload. Try again.";
-};
+const DRAFT_SESSION_KEY = `draft-${Math.random().toString(36).slice(2, 10)}`;
 
 const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const [error, setError] = useState("");
-    const [progress, setProgress] = useState<number | null>(null);
-    const uploading = progress !== null;
+    const { inputRef, uploading, error, progress, pick, removeFile, uploadFile } = useUploadFile();
 
-    const objectUrl = useRef<string | null>(null);
-    const releasePrevious = () => {
-        if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
-        objectUrl.current = null;
-    };
-
-    const sessionKey = useRef(draftKey());
-    const getCredentials = useFileUploadCredentials();
-
-    useEffect(() => releasePrevious, []);
-
-    const pick = () => {
-        if (!uploading) inputRef.current?.click();
-    };
-
-    const onFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-
-        event.target.value = "";
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0] || null;
 
         if (!file) return;
 
-        if (!ACCEPTED_ICON_TYPES.includes(file.type)) {
-            setError("accepts only PNG or JPG files.");
-            return;
-        }
-        if (file.size > MAX_ICON_BYTES) {
-            setError("over 2 MB. Try a smaller one.");
-            return;
-        }
-
-        setError("");
-        releasePrevious();
-        objectUrl.current = URL.createObjectURL(file);
-        setIcon(objectUrl.current);
-        setProgress(0);
-
-        try {
-            const { token, expire, signature, publicKey } = await getCredentials();
-
-            const uploaded = await upload({
-                token,
-                expire,
-                signature,
-                publicKey,
-                file,
-                ...iconPath(formId ?? sessionKey.current),
-                useUniqueFileName: false,
-                overwriteFile: true,
-                onProgress: ({ loaded, total }) => setProgress((loaded / total) * 100),
-            });
-
-            if (!uploaded.url) throw new Error("Something went wrong while uploading image.");
-
-            setIcon(versioned(uploaded.url));
-            releasePrevious();
-        } catch (uploadError) {
-            console.error("Form icon upload failed:", uploadError);
-            const message = uploadMessage(uploadError);
-            if (message) {
-                setError(message);
-                releasePrevious();
-                setIcon(null);
-            }
-        } finally {
-            setProgress(null);
-        }
-    };
-
-    const clear = () => {
-        setError("");
-        releasePrevious();
-        setIcon(null);
+        uploadFile(formId ?? "", file, DRAFT_SESSION_KEY, setIcon);
     };
 
     return (
@@ -127,8 +29,6 @@ const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
             >
                 {iconUrl ? (
                     <>
-                        {/* the preview may be a local blob url, so next/image buys us nothing here */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={iconUrl} alt="" className="form-icon-img" />
                         <span className="form-icon-overlay">
                             <Icon name="upload" size={14} />
@@ -142,7 +42,6 @@ const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
 
                 {uploading ? (
                     <span className="form-icon-progress">
-                        {/* the frame itself fills as the bytes land */}
                         <svg viewBox="0 0 64 64" aria-hidden="true">
                             <rect
                                 className="ring-track"
@@ -161,16 +60,16 @@ const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
                                 height="62"
                                 rx="6"
                                 pathLength={100}
-                                style={{ strokeDashoffset: 100 - progress }}
+                                style={{ strokeDashoffset: 100 - progress! }}
                             />
                         </svg>
-                        <span className="form-icon-pct">{Math.round(progress)}</span>
+                        <span className="form-icon-pct">{Math.round(progress!)}</span>
                     </span>
                 ) : null}
             </button>
 
             {iconUrl && !uploading ? (
-                <button type="button" className="form-icon-clear" onClick={clear}>
+                <button type="button" className="form-icon-clear" onClick={() => removeFile(setIcon)}>
                     <Icon name="x" size={10} /> remove
                 </button>
             ) : null}
@@ -180,7 +79,7 @@ const FormIconPicker = ({ iconUrl, setIcon, formId }: FormIconPickerProps) => {
                 type="file"
                 accept={ACCEPTED_ICON_TYPES.join(",")}
                 className="form-icon-input"
-                onChange={onFileUpload}
+                onChange={handleFileChange}
                 tabIndex={-1}
                 aria-hidden="true"
             />
