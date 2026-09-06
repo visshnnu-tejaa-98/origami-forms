@@ -233,7 +233,6 @@ const FileUploadPreview = ({
               const active = item.status === "uploading";
               const pct = active ? Math.round(progress ?? 0) : 100;
               const isImage = item.type ? item.type.startsWith("image/") : isImageUrl(item.url ?? "");
-              console.log({ shown })
               return (
                 <div
                   key={item.key}

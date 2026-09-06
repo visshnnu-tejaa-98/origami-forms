@@ -5,8 +5,8 @@ import { BLOCK_META } from "~/app/(main)/builder/constants";
 import HelpTip from "~/app/(main)/builder/components/HelpTip";
 import { ScribbleArrow } from "../origami/deco";
 import PreviewInput from "~/app/(main)/builder/[formId]/preview/components/PreviewInput";
-import { HeadingTypeProps, InputFieldTypeProps, PageBreakTypeProps, ReviewTypeProps, CoverTypeProps, FlowQuestion } from "./types";
-import { useRouter, useSearchParams } from "next/navigation";
+import { HeadingTypeProps, InputFieldTypeProps, PageBreakTypeProps, ReviewTypeProps, CoverTypeProps } from "./types";
+
 
 const CoverType = (props: CoverTypeProps) => {
     const { title, description, estimatedTime, questions, next } = props;
@@ -128,7 +128,7 @@ const InputFieldType = (props: InputFieldTypeProps) => {
 const ReviewType = (props: ReviewTypeProps) => {
     const { answered, questions, answers, error, isPreview, submitting, setVisitedReviewPage, goToQuestion, submit } =
         props;
-    const NOT_SUMMARISED = ["long_text", "file_upload"];
+    const NOT_SUMMARISED = ["long_text",];
 
 
     useEffect(() => {
@@ -151,6 +151,7 @@ const ReviewType = (props: ReviewTypeProps) => {
                     .map((question) => {
                         const value = answers[question.id];
                         const shown = Array.isArray(value) ? value.join(", ") : value;
+                        const shownValue = question.field.type === "file_upload" ? Array.isArray(value) ? value.length + " file(s) selected" : value : shown
                         return (
                             <button
                                 type="button"
@@ -159,7 +160,7 @@ const ReviewType = (props: ReviewTypeProps) => {
                                 onClick={() => goToQuestion(question)}
                             >
                                 <span className="q">{question.field.label || "Untitled"}</span>
-                                <span className="a">{shown || "—"}</span>
+                                <span className="a">{shownValue || "—"}</span>
                             </button>
                         );
                     })}
