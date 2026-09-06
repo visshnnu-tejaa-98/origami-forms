@@ -88,6 +88,7 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                         </button>
                     </div>
                 </header>
+                <p className="form-title">{selected.formTitle}</p>
 
                 <div className="rsp-detail-body">
                     <div className="rsp-meta">

@@ -272,6 +272,29 @@
 .db-shell .rsp-detail-head .actions button:hover { background: var(--bg-elevated); color: var(--ink-1); border-color: var(--rule-strong); }
 .db-shell .rsp-detail-head .actions button.on { color: var(--highlighter-deep); border-color: var(--highlighter); }
 
+/* the form this response belongs to — the heading of the sheet the answers sit on */
+.db-shell .rsp-detail-pane .form-title {
+  margin: 0;
+  padding: 14px 18px 12px;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--rule-line);
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--ink-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* a marker underline, drawn short so it reads as hand-drawn rather than a rule */
+.db-shell .rsp-detail-pane .form-title::after {
+  content: "";
+  display: block;
+  width: 34px;
+  height: 3px;
+  margin-top: 6px;
+  border-radius: var(--r-pill);
+  background: var(--highlighter);
+}
+
 .db-shell .rsp-detail-body { padding: 16px 18px 24px; }
 
 /* meta grid */
