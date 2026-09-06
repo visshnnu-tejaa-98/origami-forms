@@ -1099,10 +1099,18 @@
 }
 
 /* drop zone */
+.db-shell .pv-file {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .db-shell .pv-drop {
   display: block;
-  padding: 32px 24px;
+  width: 100%;
+  padding: 30px 24px;
   text-align: center;
+  font: inherit;
   background: var(--bg-elevated);
   border: 2px dashed var(--rule-strong);
   border-radius: 18px;
@@ -1111,10 +1119,243 @@
   transition: all var(--transition-snap);
 }
 
-.db-shell .pv-drop:hover {
+.db-shell .pv-drop:hover,
+.db-shell .pv-drop.is-dragging {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent-deep);
+}
+
+.db-shell .pv-drop.is-dragging {
+  transform: scale(1.01);
+  box-shadow: var(--shadow-paper-2);
+}
+
+.db-shell .pv-drop__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  transition: transform var(--transition-snap);
+}
+
+.db-shell .pv-drop:hover .pv-drop__glyph {
+  transform: translateY(-2px);
+  background: var(--bg-elevated);
+}
+
+.db-shell .pv-drop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* the second and later trips to the picker sit under the list, so they stay out of the way */
+.db-shell .pv-drop--compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-width: 1.5px;
+  border-radius: 14px;
+}
+
+.db-shell .pv-drop--compact .pv-drop__glyph {
+  width: 30px;
+  height: 30px;
+}
+
+.db-shell .pv-drop__line {
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.db-shell .pv-filelist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.db-shell .pv-file__count {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+
+/* chosen file — pending, error and uploaded all share this card */
+.db-shell .pv-filecard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--rule-line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-paper-1);
+  transition: all var(--transition-snap);
+}
+
+.db-shell .pv-filecard.is-done {
+  border-color: var(--matcha);
+}
+
+.db-shell .pv-filecard.is-error {
+  border-color: var(--coral);
+  background: var(--coral-soft);
+}
+
+.db-shell .pv-filecard__thumb {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  background: var(--bg-sunken);
+  border-radius: 12px;
+  color: var(--ink-3);
+}
+
+.db-shell .pv-filecard.is-error .pv-filecard__thumb {
+  color: var(--coral-deep);
+}
+
+.db-shell .pv-filecard__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.db-shell .pv-filecard__veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.45);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.db-shell .pv-filecard__body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.db-shell .pv-filecard__name {
+  overflow: hidden;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-1);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.db-shell .pv-filecard__note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+
+.db-shell .pv-filecard__note--done {
+  color: var(--matcha-deep);
+}
+
+.db-shell .pv-filecard__note--error {
+  color: var(--coral-deep);
+}
+
+.db-shell .pv-filecard__track {
+  height: 4px;
+  margin-top: 2px;
+  overflow: hidden;
+  background: var(--rule-line);
+  border-radius: var(--r-pill);
+}
+
+.db-shell .pv-filecard__bar {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 180ms ease;
+}
+
+.db-shell .pv-filecard.is-done .pv-filecard__bar {
+  background: var(--matcha);
+}
+
+.db-shell .pv-filecard.is-error .pv-filecard__bar {
+  background: var(--coral);
+}
+
+.db-shell .pv-filecard__actions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+.db-shell .pv-filecard__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--rule-line);
+  border-radius: 10px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all var(--transition-snap);
+}
+
+.db-shell .pv-filecard__btn:hover:not(:disabled) {
+  border-color: var(--coral);
+  color: var(--coral-deep);
+  background: var(--coral-soft);
+}
+
+.db-shell .pv-filecard__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.db-shell .pv-file__error {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--coral-deep);
+}
+
+.db-shell .pv-file__swap {
+  align-self: flex-start;
+  padding: 0;
+  background: none;
+  border: none;
+  border-bottom: 1px dashed var(--rule-strong);
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.db-shell .pv-file__swap:hover {
+  color: var(--accent-deep);
+  border-color: var(--accent);
 }
 
 .db-shell .pv-drop h4 {

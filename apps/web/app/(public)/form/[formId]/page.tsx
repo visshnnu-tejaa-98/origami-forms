@@ -31,7 +31,7 @@ const PublicFormPage = () => {
     const { isUserGaveResponseForFormData, isUserGaveResponseForFormIsPending } =
         useIsUserGaveResponseForForm({ formId }, { enabled: submissionCheckEnabled });
 
-    const isUserAlreadyFilledForm = isUserGaveResponseForFormData?.hasSubmitted === true
+    const isUserAlreadyFilledForm = isUserGaveResponseForFormData?.hasSubmitted === true && publicForm?.visibility === "authenticated"
     const submissionCheckPending = submissionCheckEnabled && isUserGaveResponseForFormIsPending
     const isSettling = !authLoaded || publicFormIsPending || submissionCheckPending
 
@@ -86,16 +86,6 @@ const PublicFormPage = () => {
         );
     }
 
-    if (isUserAlreadyFilledForm) {
-        return shell(
-            <PublicFormState
-                icon="clip"
-                title="You have already submitted this form."
-                description="You cannot submit the form more than once."
-            />,
-        );
-    }
-
     if (!publicForm.accepting) {
         const closed =
             publicForm.closedReason === "limit_reached"
@@ -113,6 +103,16 @@ const PublicFormPage = () => {
                 icon="lock"
                 title={closed.title}
                 description={closed.description}
+            />,
+        );
+    }
+
+    if (isUserAlreadyFilledForm) {
+        return shell(
+            <PublicFormState
+                icon="clip"
+                title="You have already submitted this form."
+                description="You cannot submit the form more than once."
             />,
         );
     }

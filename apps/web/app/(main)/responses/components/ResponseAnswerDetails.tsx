@@ -3,7 +3,7 @@ import { ResponseAnswerDetailsProps } from "../types";
 import { Icon } from "../../components/icons";
 import { TINTS } from "../../constants";
 import { hash } from "../../utils";
-import { formatCompletionTime } from "~/app/utils";
+import { fileDownloadUrl, fileNameFromUrl, formatCompletionTime, isImageUrl } from "~/app/utils";
 import { exportResponsesToCsv } from "../utils";
 
 const PLAIN_TEXT_FIELD_TYPES = [
@@ -158,6 +158,62 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                                         ))}
                                         <span className="stars-label">{value}</span>
                                     </span>
+                                );
+                            }
+
+                            if (fieldType === "file_upload") {
+                                const urls = value
+                                    .split(",")
+                                    .map((entry) => entry.trim())
+                                    .filter(Boolean);
+
+                                return (
+                                    <div className="a-files">
+                                        {urls.map((url) => {
+                                            const name = fileNameFromUrl(url);
+                                            const image = isImageUrl(url);
+
+                                            return (
+                                                <div
+                                                    key={url}
+                                                    className={`a-file${image ? " a-file--image" : ""}`}
+                                                >
+                                                    {image && (
+                                                        <a
+                                                            className="a-file__shot"
+                                                            href={url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            title="Open full size"
+                                                        >
+                                                            <img
+                                                                src={url}
+                                                                alt={answer.fieldLabel || name}
+                                                                loading="lazy"
+                                                            />
+                                                        </a>
+                                                    )}
+                                                    <div className="a-file__row">
+                                                        <span className="a-file__icon">
+                                                            <Icon name="clip" size={14} />
+                                                        </span>
+                                                        <span className="a-file__name" title={name}>
+                                                            {name}
+                                                        </span>
+                                                        <a
+                                                            className="o-btn o-btn--sm a-file__get"
+                                                            href={fileDownloadUrl(url)}
+                                                            download={name}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                        >
+                                                            <Icon name="download" size={13} /> Download
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 );
                             }
 

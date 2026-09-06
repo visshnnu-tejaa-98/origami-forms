@@ -1,10 +1,308 @@
 import React from "react";
 import { Icon } from "../../../../components/icons";
-import { hasOptions } from "../../../constants";
-import { PreviewInputProps } from "../../../types";
+import { ACCEPTED_ICON_TYPES, draftFileName, hasOptions } from "../../../constants";
+import { AnswerValue, FieldBlock, PreviewInputProps } from "../../../types";
 import { previewNumberNote } from "~/app/(main)/utils";
+import { describeAccepted, fileNameFromUrl, isImageUrl } from "~/app/utils";
+import { fileUploadLimit, formFilesPath } from "~/app/(public)/form/utils";
+import { useUploadFile } from "~/hooks/use-uploadfile";
 
 const OPTION_KEYS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+
+const prettySize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+};
+
+type UploadItem = {
+  key: string;
+  name: string;
+  size: number;
+  type: string;
+  preview: string | null;
+  url: string | null;
+  status: "uploading" | "done" | "error";
+  error: string;
+};
+
+const MIME_BY_EXTENSION: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  webp: "image/webp",
+  svg: "image/svg+xml",
+  pdf: "application/pdf",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+};
+
+const acceptedMimeTypes = (extensions?: string[]) => {
+  const types = (extensions ?? [])
+    .map((extension) => MIME_BY_EXTENSION[extension.replace(/^\./, "").toLowerCase()])
+    .filter((type): type is string => Boolean(type));
+
+  return types.length > 0 ? Array.from(new Set(types)) : ACCEPTED_ICON_TYPES;
+};
+
+const asList = (value: string | string[]) =>
+  (Array.isArray(value) ? value : value === "" ? [] : [value]).filter(Boolean);
+
+const FileUploadPreview = ({
+  field,
+  onChange,
+  value,
+}: {
+  field: FieldBlock;
+  onChange: (value: AnswerValue) => void;
+  value: AnswerValue | undefined;
+}) => {
+  const { inputRef, uploading, error, progress, pick, uploadFile } = useUploadFile();
+  const [items, setItems] = React.useState<UploadItem[]>([]);
+  const [dragging, setDragging] = React.useState(false);
+  const [pickError, setPickError] = React.useState("");
+  const track = React.useRef<UploadItem[]>([]);
+
+  // answers restored from an earlier step come back as urls with no local file behind them
+  const restored = React.useMemo(() => asList(value ?? []), [value]);
+
+  if (field.type !== "file_upload") return null;
+
+  const maxMb = field.validation?.maxSizeMb ?? 5;
+  const maxFiles = Math.max(1, field.validation?.maxFiles ?? 1);
+  const multiple = maxFiles > 1;
+  const accepted = acceptedMimeTypes(field.validation?.allowedFileTypes);
+
+  const shown: UploadItem[] =
+    items.length > 0
+      ? items
+      : restored.map((url) => ({
+        key: url,
+        name: fileNameFromUrl(url),
+        size: 0,
+        type: "",
+        preview: url,
+        url,
+        status: "done" as const,
+        error: "",
+      }));
+
+  const landed = shown.filter((item) => item.status === "done");
+  const roomLeft = maxFiles - shown.filter((item) => item.status !== "error").length;
+
+  track.current = shown;
+
+  const commit = (next: UploadItem[], publish: boolean) => {
+    track.current = next;
+    setItems(next);
+    if (!publish) return;
+    const urls = next.flatMap((item) => (item.url ? [item.url] : []));
+    onChange(multiple ? urls : (urls[0] ?? ""));
+  };
+
+  const patch = (key: string, change: Partial<UploadItem>) =>
+    commit(
+      track.current.map((item) => (item.key === key ? { ...item, ...change } : item)),
+      "url" in change,
+    );
+
+  const start = async (files: FileList | File[] | null | undefined) => {
+    const chosen = Array.from(files ?? []);
+    if (chosen.length === 0 || uploading) return;
+
+    setPickError("");
+    const room = maxFiles - shown.filter((item) => item.status !== "error").length;
+
+    if (room <= 0) {
+      return setPickError(`That's the limit — ${maxFiles} file${maxFiles > 1 ? "s" : ""}.`);
+    }
+    if (chosen.length > room) {
+      setPickError(`Only ${room} more file${room > 1 ? "s" : ""} fit — the rest were left out.`);
+    }
+
+    const queued: UploadItem[] = chosen.slice(0, room).map((file) => ({
+      key: `${file.name}-${crypto.randomUUID()}`,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      preview: null,
+      url: null,
+      status: "uploading",
+      error: "",
+    }));
+
+    // seed the list with what is already answered so a restored url is not dropped
+    commit([...track.current, ...queued], false);
+
+    // one at a time: the hook tracks a single upload's progress and error
+    for (const [index, file] of chosen.slice(0, room).entries()) {
+      const item = queued[index]!;
+      const { uploadedImageUrl, error: uploadError } = await uploadFile({
+        id: `${field.id ?? draftFileName}-${item.key}`,
+        file,
+        sessionKey: draftFileName,
+        maxSizeAllowed: fileUploadLimit(maxMb),
+        path: formFilesPath,
+        acceptedTypes: accepted,
+        setIcon: (url) => patch(item.key, { preview: url }),
+      });
+
+      patch(item.key, {
+        url: uploadedImageUrl,
+        status: uploadedImageUrl ? "done" : "error",
+        error: uploadedImageUrl ? "" : uploadError || "That file didn't upload.",
+      });
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    void start(event.target.files);
+    event.target.value = "";
+  };
+
+  const remove = (key: string) => {
+    setPickError("");
+    commit(
+      track.current.filter((item) => item.key !== key),
+      true,
+    );
+  };
+
+  const hiddenInput = (
+    <input
+      ref={inputRef}
+      type="file"
+      accept={accepted.join(",")}
+      multiple={multiple}
+      hidden
+      onChange={handleFileChange}
+    />
+  );
+
+  const dropZone = (compact: boolean) => (
+    <button
+      type="button"
+      className={`pv-drop${compact ? " pv-drop--compact" : ""}${dragging ? " is-dragging" : ""}`}
+      onClick={pick}
+      disabled={uploading || roomLeft <= 0}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragging(false);
+        void start(e.dataTransfer.files);
+      }}
+    >
+      <span className="pv-drop__glyph">
+        <Icon name="upload" size={compact ? 18 : 26} />
+      </span>
+      {compact ? (
+        <span className="pv-drop__line">
+          Add {multiple ? `another — ${roomLeft} left` : "a different file"}
+        </span>
+      ) : (
+        <>
+          <h4>{multiple ? "Drop your papers here" : "Drop a paper here"}</h4>
+          <p>
+            or click to browse — {describeAccepted(accepted)}, max {maxMb}MB
+            {multiple ? ` · up to ${maxFiles} files` : ""}
+          </p>
+        </>
+      )}
+    </button>
+  );
+
+  const notice = pickError || (items.length === 0 ? error : "");
+
+  return (
+    <div className="pv-file">
+      {hiddenInput}
+
+      {shown.length === 0 ? (
+        dropZone(false)
+      ) : (
+        <>
+          <div className="pv-filelist">
+            {shown.map((item) => {
+              const active = item.status === "uploading";
+              const pct = active ? Math.round(progress ?? 0) : 100;
+              const isImage = item.type ? item.type.startsWith("image/") : isImageUrl(item.url ?? "");
+              console.log({ shown })
+              return (
+                <div
+                  key={item.key}
+                  className={`pv-filecard${item.status === "error" ? " is-error" : item.status === "done" ? " is-done" : " is-busy"
+                    }`}
+                >
+                  <div className="pv-filecard__thumb">
+                    {item.preview && isImage && item.status !== "error" ? (
+                      <img src={item.preview} alt={item.name} />
+                    ) : (
+                      <Icon name={item.status === "error" ? "error" : "clip"} size={22} />
+                    )}
+                    {active && <span className="pv-filecard__veil">{pct}%</span>}
+                  </div>
+
+                  <div className="pv-filecard__body">
+                    <span className="pv-filecard__name" title={item.name}>
+                      {item.name}
+                    </span>
+
+                    {item.status === "error" ? (
+                      <span className="pv-filecard__note pv-filecard__note--error">{item.error}</span>
+                    ) : active ? (
+                      <span className="pv-filecard__note">Uploading… {pct}%</span>
+                    ) : (
+                      <span className="pv-filecard__note pv-filecard__note--done">
+                        <Icon name="check" size={12} /> Uploaded
+                        {item.size > 0 ? ` · ${prettySize(item.size)}` : ""}
+                      </span>
+                    )}
+
+                    <span className="pv-filecard__track">
+                      <span className="pv-filecard__bar" style={{ width: `${pct}%` }} />
+                    </span>
+                  </div>
+
+                  <div className="pv-filecard__actions">
+                    <button
+                      type="button"
+                      className="pv-filecard__btn"
+                      onClick={() => remove(item.key)}
+                      disabled={active}
+                      aria-label={`Remove ${item.name}`}
+                    >
+                      <Icon name="trash" size={15} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {roomLeft > 0 && !uploading && dropZone(true)}
+          {multiple && (
+            <p className="pv-file__count">
+              {landed.length} of {maxFiles} attached
+            </p>
+          )}
+        </>
+      )}
+
+      {notice && (
+        <p className="pv-file__error" role="alert">
+          <Icon name="error" size={14} /> {notice}
+        </p>
+      )}
+    </div>
+  );
+};
 
 const PreviewInput = ({ field, value, onChange }: PreviewInputProps) => {
   const text = typeof value === "string" ? value : "";
@@ -121,14 +419,7 @@ const PreviewInput = ({ field, value, onChange }: PreviewInputProps) => {
       );
 
     case "file_upload":
-      return (
-        <label className="pv-drop">
-          <input type="file" hidden onChange={(e) => onChange(e.target.files?.[0]?.name ?? "")} />
-          <Icon name="upload" size={30} />
-          <h4>Drop a paper here</h4>
-          <p>{text !== "" ? text : `or browse — max ${field.validation?.maxSizeMb ?? 10}MB`}</p>
-        </label>
-      );
+      return <FileUploadPreview field={field} onChange={onChange} value={value} />;
 
     case "url":
       return (

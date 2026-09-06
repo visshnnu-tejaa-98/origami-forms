@@ -62,6 +62,15 @@ export const validateAnswer = (field: FieldBlock, value: AnswerValue | undefined
         case "url":
             return text.includes(" ") ? "A web address can't contain spaces." : null;
 
+        case "file_upload": {
+            const files = Array.isArray(value) ? value : [text];
+            const maxFiles = rules.maxFiles as number | undefined;
+            if (maxFiles !== undefined && files.length > maxFiles) {
+                return `Attach no more than ${maxFiles} file${maxFiles === 1 ? "" : "s"}.`;
+            }
+            return null;
+        }
+
         case "number":
         case "rating": {
             const num = Number(text);

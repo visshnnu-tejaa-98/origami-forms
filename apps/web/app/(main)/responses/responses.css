@@ -349,6 +349,34 @@
   color: var(--ink-2); line-height: 1.55; margin: 0;
 }
 
+/* an uploaded file: shown as a plate when it is an image, a row otherwise */
+.db-shell .rsp-ans .a-files { display: flex; flex-direction: column; gap: 8px; }
+.db-shell .rsp-ans .a-file {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 8px; border: 1px solid var(--rule-line); border-radius: 14px;
+  background: var(--bg-elevated);
+}
+.db-shell .rsp-ans .a-file__shot {
+  display: block; overflow: hidden; border-radius: 10px;
+  background: var(--bg-sunken); line-height: 0;
+}
+.db-shell .rsp-ans .a-file__shot img {
+  width: 100%; max-height: 260px; object-fit: cover;
+  transition: transform var(--transition-snap);
+}
+.db-shell .rsp-ans .a-file__shot:hover img { transform: scale(1.03); }
+.db-shell .rsp-ans .a-file__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.db-shell .rsp-ans .a-file__icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; flex: none; border-radius: 8px;
+  background: var(--accent-soft); color: var(--accent-deep);
+}
+.db-shell .rsp-ans .a-file__name {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 0.82rem; color: var(--ink-2);
+}
+.db-shell .rsp-ans .a-file__get { flex: none; }
+
 /* sticky reminder + footer actions */
 .db-shell .rsp-detail-body .rsp-sticky { font-size: 1rem; transform: rotate(-1deg); }
 .db-shell .rsp-detail-foot { display: flex; gap: 8px; margin-top: 16px; }

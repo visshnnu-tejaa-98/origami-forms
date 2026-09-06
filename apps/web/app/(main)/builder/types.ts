@@ -192,4 +192,5 @@ export type UploadFileProps = {
   maxSizeAllowed: number,
   path: (id: string) => { folder: string; fileName: string },
   setIcon?: (url: string | null) => void,
+  acceptedTypes?: string[],
 }

@@ -82,3 +82,26 @@ export const formatItemCount = (count: number) => {
     const thousands = Math.floor(count / 1000);
     return `${thousands}k+`;
 };
+
+const IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|svg|bmp)$/i;
+
+const pathOf = (url: string) => {
+    try {
+        return new URL(url).pathname;
+    } catch {
+        return url.split("?")[0] ?? url;
+    }
+};
+
+export const isImageUrl = (url: string) => IMAGE_EXTENSIONS.test(pathOf(url));
+
+export const fileNameFromUrl = (url: string) =>
+    decodeURIComponent(pathOf(url).split("/").pop() || "attachment");
+
+export const fileDownloadUrl = (url: string) =>
+    url.includes("?") ? `${url}&ik-attachment=true` : `${url}?ik-attachment=true`;
+
+export const describeAccepted = (types: string[]) =>
+    Array.from(new Set(types.map((type) => (type.split("/")[1] ?? type).split("+")[0]!.toUpperCase()))).join(
+        ", ",
+    );

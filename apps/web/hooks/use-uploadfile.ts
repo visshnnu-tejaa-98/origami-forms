@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useFileUploadCredentials } from "./use-file";
-import { ACCEPTED_ICON_TYPES, ICON_FOLDER } from "~/app/(main)/builder/constants";
+import { ACCEPTED_ICON_TYPES } from "~/app/(main)/builder/constants";
 import {
     ImageKitAbortError,
     ImageKitInvalidRequestError,
@@ -9,6 +9,9 @@ import {
     upload,
 } from "@imagekit/next";
 import { UploadFileProps } from "~/app/(main)/builder/types";
+import { describeAccepted } from "~/app/utils";
+
+type UploadFileResult = { uploadedImageUrl: string | null; error: string };
 
 export function useUploadFile() {
     const [uploadedImageUrl, setUploadedUrl] = useState<string | null>(null);
@@ -40,24 +43,29 @@ export function useUploadFile() {
         return "That image didn't upload. Try again.";
     };
 
-    const uploadFile = async (props: UploadFileProps) => {
+    const uploadFile = async (props: UploadFileProps): Promise<UploadFileResult> => {
         const { id, file, sessionKey, maxSizeAllowed, path, setIcon } = props;
-        if (!file) return;
+        const accepted = props.acceptedTypes ?? ACCEPTED_ICON_TYPES;
 
-        if (!ACCEPTED_ICON_TYPES.includes(file.type)) {
-            setError("accepts only PNG or JPG files.");
-            return;
+        const reject = (message: string) => {
+            setError(message);
+            return { uploadedImageUrl: null, error: message };
+        };
+
+        if (!file) return { uploadedImageUrl: null, error: "" };
+
+        if (!accepted.includes(file.type)) {
+            return reject(`accepts only ${describeAccepted(accepted)} files.`);
         }
         if (file.size > maxSizeAllowed) {
-            setError(`over ${maxSizeAllowed / 1024 / 1024} MB. Try a smaller one.`);
-            return;
+            return reject(`over ${maxSizeAllowed / 1024 / 1024} MB. Try a smaller one.`);
         }
 
         setError("");
         releasePrevious();
         objectUrl.current = URL.createObjectURL(file);
-        setIcon?.(objectUrl.current);
         setUploadedUrl(objectUrl.current);
+        setIcon?.(objectUrl.current);
         setProgress(0);
 
         try {
@@ -84,6 +92,8 @@ export function useUploadFile() {
 
             setIcon?.(uploaded.url);
             releasePrevious();
+            setUploadedUrl(uploaded.url);
+            return { uploadedImageUrl: uploaded.url, error: "" };
         } catch (uploadError) {
             console.error("Form icon upload failed:", uploadError);
             const message = uploadMessage(uploadError);
@@ -91,7 +101,9 @@ export function useUploadFile() {
                 setError(message);
                 releasePrevious();
                 setIcon?.(null);
+                setUploadedUrl(null);
             }
+            return { uploadedImageUrl: null, error: message };
         } finally {
             setProgress(null);
         }
@@ -100,6 +112,7 @@ export function useUploadFile() {
     function removeFile(setIcon: (url: string | null) => void) {
         setError("");
         releasePrevious();
+        setUploadedUrl(null);
         setIcon(null);
     }
 
