@@ -88,7 +88,14 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                         </button>
                     </div>
                 </header>
-                <p className="form-title">{selected.formTitle}</p>
+                <div className="rsp-form-strip">
+                    {selected.logoUrl && (
+                        <span className="logo">
+                            <img src={selected.logoUrl} alt="" loading="lazy" />
+                        </span>
+                    )}
+                    <p className="form-title">{selected.formTitle}</p>
+                </div>
 
                 <div className="rsp-detail-body">
                     <div className="rsp-meta">

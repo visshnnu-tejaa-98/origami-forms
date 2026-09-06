@@ -272,25 +272,51 @@
 .db-shell .rsp-detail-head .actions button:hover { background: var(--bg-elevated); color: var(--ink-1); border-color: var(--rule-strong); }
 .db-shell .rsp-detail-head .actions button.on { color: var(--highlighter-deep); border-color: var(--highlighter); }
 
-/* the form this response belongs to — the heading of the sheet the answers sit on */
-.db-shell .rsp-detail-pane .form-title {
-  margin: 0;
-  padding: 14px 18px 12px;
+.db-shell .rsp-form-strip {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 18px;
   background: var(--surface-card);
   border-bottom: 1px solid var(--rule-line);
+}
+
+.db-shell .rsp-form-strip .logo {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  box-shadow: inset 0 0 0 1px var(--rule-line);
+}
+
+.db-shell .rsp-form-strip .logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.db-shell .rsp-detail-pane .form-title {
+  margin: 0;
+  min-width: 0;
   font-family: var(--font-hand);
   font-size: 1.25rem;
   line-height: 1.2;
   color: var(--ink-1);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
 /* a marker underline, drawn short so it reads as hand-drawn rather than a rule */
 .db-shell .rsp-detail-pane .form-title::after {
   content: "";
   display: block;
   width: 34px;
   height: 3px;
-  margin-top: 6px;
+  margin-top: 5px;
   border-radius: var(--r-pill);
   background: var(--highlighter);
 }
