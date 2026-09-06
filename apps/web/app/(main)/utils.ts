@@ -49,6 +49,7 @@ export const toUiForm = (f: ApiForm) => ({
     editedRank: f.updatedAt ? -new Date(f.updatedAt).getTime() : 0,
     pinned: false,
     description: f.description ?? "",
+    logoUrl: f.logoUrl ?? ""
 });
 
 export const updatePageOptions = (props: PageOptions) => {

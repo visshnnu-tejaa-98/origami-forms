@@ -31,6 +31,7 @@ export type Form = {
     editedRank: number; // for sorting (lower = more recent)
     pinned: boolean;
     description: string;
+    logoUrl: string
 };
 
 export type PageOptions = {

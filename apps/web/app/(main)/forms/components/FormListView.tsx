@@ -5,7 +5,7 @@ import { STATUS_BADGE } from "../../utils";
 import { Form } from "../../types";
 import { useDeleteForm } from "~/hooks/use-form";
 import ConfirmDialog from "../../components/ConfirmDialog";
-
+import { CardIcon } from "./FormsContent";
 
 const FromListView = ({ forms }: { forms: Form[] }) => {
     const { deleteFormAsync } = useDeleteForm()
@@ -33,10 +33,12 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                     const badge = STATUS_BADGE[f.status];
                     const isDraft = f.status === "draft";
                     const isLive = f.status === "published";
+                    const isLogoExists = !!f.logoUrl;
 
                     const builderLink = `/builder/${f.id}?from=list`
                     const previewLink = `/builder/${f.id}/preview?from=list`
                     const publicLink = `/form/${f.id}`
+
                     return (
                         <div
                             key={f.id}
@@ -44,9 +46,7 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                             role="row"
                         >
                             <div className="c-form">
-                                <span className="ic tint-ic">
-                                    <Icon name={f.icon} size={20} />
-                                </span>
+                                <CardIcon logoUrl={f.logoUrl} icon={f.icon} isLogoExists={isLogoExists} />
                                 <div className="txt">
                                     <span className="title" title={f.title}>
                                         {f.title}

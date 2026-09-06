@@ -8,6 +8,23 @@ import { useRouter } from "next/navigation";
 import FromListView from "./FormListView";
 import FormGridView from "./FormGridView";
 import Pagination from "../../components/Pagination";
+import { Icon, IconName } from "../../components/icons";
+
+export const CardIcon = ({ logoUrl, icon, isLogoExists }: { logoUrl: string, icon: IconName, isLogoExists: boolean }) => {
+    if (isLogoExists) {
+        return (
+            <span className="ic ic--logo">
+                <img src={logoUrl} alt="" loading="lazy" />
+            </span>
+        );
+    }
+    return (
+        <span className="ic tint-ic">
+            <Icon name={icon} size={22} />
+        </span>
+    );
+}
+
 
 const FormsContent = (props: FormsContentProps) => {
     const { loading, selectedTab, forms, view, listFormsError, refetchForms, pagination } = props;

@@ -5,6 +5,7 @@ import { Icon } from "../../components/icons";
 import { Form } from "../../types";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import { useDeleteForm } from "~/hooks/use-form";
+import { CardIcon } from "./FormsContent";
 
 const FormGridView = ({ forms }: { forms: Form[] }) => {
     const [pendingDelete, setPendingDelete] = useState<Form | null>(null);
@@ -23,10 +24,12 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
                     const badge = STATUS_BADGE[f.status];
                     const isDraft = f.status === "draft";
                     const isLive = f.status === "published";
+                    const isLogoExists = !!f.logoUrl;
 
                     const builderLink = `/builder/${f.id}?from=list`;
                     const previewLink = `/builder/${f.id}/preview?from=list`;
                     const publicLink = `/form/${f.id}`;
+
                     return (
                         <article key={f.id} className={`form-card ${f.tint}${isDraft ? " is-draft" : ""}`}>
                             {/* washi tape holding the sheet + a folded dog-ear corner */}
@@ -35,9 +38,7 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
 
                             {/* identity */}
                             <div className="card-top">
-                                <span className="ic tint-ic">
-                                    <Icon name={f.icon} size={22} />
-                                </span>
+                                <CardIcon logoUrl={f.logoUrl} icon={f.icon} isLogoExists={isLogoExists} />
                                 <div className="ct-txt">
                                     <div className="title-row">
                                         <span className="title" title={f.title}>
