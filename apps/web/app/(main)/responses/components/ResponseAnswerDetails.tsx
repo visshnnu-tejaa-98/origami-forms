@@ -3,7 +3,7 @@ import { ResponseAnswerDetailsProps } from "../types";
 import { Icon } from "../../components/icons";
 import { TINTS } from "../../constants";
 import { hash } from "../../utils";
-import { fileDownloadUrl, fileNameFromUrl, formatCompletionTime, isImageUrl } from "~/app/utils";
+import { fileDownloadUrl, fileNameFromUrl, formatCompletionTime, formatIsoDate, isImageUrl } from "~/app/utils";
 import { exportResponsesToCsv } from "../utils";
 
 const PLAIN_TEXT_FIELD_TYPES = [
@@ -69,6 +69,12 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
         </span>
     );
 
+    const timeOptions = { railwayTime: true }
+    const formatTimeProps = {
+        isoString: time,
+        options: timeOptions
+    }
+
     return (
         <aside className="rsp-detail-pane">
             <>
@@ -100,7 +106,7 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                 <div className="rsp-detail-body">
                     <div className="rsp-meta">
                         <div className="item">
-                            <b>{time}</b>Submitted
+                            <b>{formatIsoDate(formatTimeProps)}</b>Submitted
                         </div>
                         {duration && (
                             <div className="item">

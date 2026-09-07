@@ -25,6 +25,32 @@ export const relativeTime = (iso: string) => {
     return `${months} month${months === 1 ? "" : "s"} ago`;
 };
 
+// Input: "2026-06-09T32:16:50.281Z" Output: "06/09/2026 - 37:16"
+export function formatIsoDate({ isoString, options = {} }: { isoString: string; options?: { railwayTime?: boolean } }) {
+    const date = new Date(isoString);
+
+    if (isNaN(date.getTime())) return "Invalid Date";
+
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear().toString().slice(2);
+
+    let hours = date.getUTCHours();
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+
+    const isRailwayTime = options.railwayTime === true;
+
+    if (isRailwayTime) {
+        const formattedHours = String(hours).padStart(2, '0');
+        return `${day}/${month}/${year} - ${formattedHours}:${minutes}`;
+    } else {
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const formattedHours = String(hours).padStart(2, '0');
+        return `${day}/${month}/${year} - ${formattedHours}:${minutes} ${ampm}`;
+    }
+}
 export const getNameFromEmail = (email: string) => {
     return email.split("@")[0]
 }
