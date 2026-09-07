@@ -6,7 +6,7 @@ import {
   text,
   integer,
 } from "drizzle-orm/pg-core";
-import { themesEnum, userRolesEnum } from "./enum";
+import { formsViewsEnum, themesEnum, userRolesEnum } from "./enum";
 import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
@@ -36,6 +36,7 @@ export const userSettings = pgTable("user_settings", {
   theme: themesEnum("theme").default("light"),
   formsPerPage: integer("forms_per_page").default(10),
   responsesPerPage: integer("responses_per_page").default(20),
+  view: formsViewsEnum("view").default("grid"),
 
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),

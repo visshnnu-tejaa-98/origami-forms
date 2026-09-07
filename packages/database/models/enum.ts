@@ -7,11 +7,14 @@ import {
     FORM_FIELD_TYPES,
     RESPONSE_STATUS,
     ANALYTICS_EVENT_TYPES,
+    FORMS_VIEWS,
 } from "../constants";
 
 export const userRolesEnum = pgEnum("user_roles", USER_ROLES);
 
 export const themesEnum = pgEnum("themes", THEMES)
+
+export const formsViewsEnum = pgEnum("forms_views", FORMS_VIEWS)
 
 export const formStatusEnum = pgEnum("form_status", FORM_STATUS_OPTIONS);
 

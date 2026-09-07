@@ -9,6 +9,11 @@ export const DARK = "dark";
 
 export const THEMES = [LIGHT, DARK] as const;
 
+export const GRID = "grid";
+export const LIST = "list";
+
+export const FORMS_VIEWS = [GRID, LIST] as const;
+
 export const DRAFT = "draft";
 export const PUBLISHED = "published";
 export const ARCHIVED = "archived";

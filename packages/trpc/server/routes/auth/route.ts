@@ -1,5 +1,5 @@
-import { createUserInputSchema, createUserOutputSchema, updateUserSettingsInputSchema, updateUserSettingsOutputSchema } from "@repo/services/user/model";
-import { createUserMeta, updateUserSettingsMeta } from "@repo/services/user/meta";
+import { createUserInputSchema, createUserOutputSchema, getUserSettingsByUserIdInputProps, getUserSettingsByUserOutputSchema, updateUserSettingsInputSchema, updateUserSettingsOutputSchema } from "@repo/services/user/model";
+import { createUserMeta, getUserSettingsByUserIdMeta, updateUserSettingsMeta } from "@repo/services/user/meta";
 import { userService } from "../../services";
 import { protectedProcedure, publicProcedure, router } from "../../trpc";
 
@@ -36,14 +36,15 @@ export const authRouter = router({
     }),
   updateUserSettings: protectedProcedure
     .meta(updateUserSettingsMeta({ getPathFn: () => "/auth/settings", tags: TAGS }))
-    .input(updateUserSettingsInputSchema)
+    .input(updateUserSettingsInputSchema.omit({ id: true, requesterId: true }))
     .output(updateUserSettingsOutputSchema)
     .mutation(async ({ input, ctx }) => {
-      const { theme, formsPerPage, responsesPerPage } = input
+      const { view, theme, formsPerPage, responsesPerPage } = input
 
       const result = await userService.updateUserSettings({
         id: ctx.userId,
         requesterId: ctx.userId,
+        view,
         theme,
         formsPerPage,
         responsesPerPage
@@ -55,5 +56,19 @@ export const authRouter = router({
         success: result.success,
         message: result.message,
       }
+    }),
+  getUserSettings: protectedProcedure
+    .meta(getUserSettingsByUserIdMeta({ getPathFn: () => "/auth/settings", tags: TAGS }))
+    .input(getUserSettingsByUserIdInputProps.omit({ requesterId: true }))
+    .output(getUserSettingsByUserOutputSchema)
+    .query(async ({ ctx }) => {
+
+      const result = await userService.getUserSettingsByUserId({
+        requesterId: ctx.userId,
+      })
+
+      if (!result) throw Error("Something went wrong while getting user settings");
+
+      return result
     })
 });

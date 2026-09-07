@@ -1,6 +1,6 @@
 // Used for docs generation
 
-import { PATCH, POST } from "../constants";
+import { GET, PATCH, POST } from "../constants";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
 
@@ -142,4 +142,70 @@ distinguished, the settings row must be checked before the update is issued.
     };
 };
 
-export { createUserMeta, updateUserSettingsMeta };
+type getUserSettingsByUserIdMetaInputProps = {
+    getPathFn: () => string;
+    tags?: string[];
+};
+
+const getUserSettingsByUserIdMeta = ({
+    getPathFn,
+    tags,
+}: getUserSettingsByUserIdMetaInputProps): OpenApiMetaConfig => {
+    const generatePath = getPathFn();
+    const pathType = generatePath as `/${string}`;
+    return {
+        openapi: {
+            method: GET,
+            path: pathType,
+            tags: tags ?? ["User"],
+            summary: "Get the requester's settings",
+            description: `
+### Overview
+
+Reads the workspace preferences belonging to the calling user — colour theme and
+the page sizes used by the forms and responses lists. Clients call this on load to
+restore the user's chosen theme and pagination before the first screen is painted.
+
+This endpoint is **self-scoped**: it only ever returns the settings of the user
+identified by \`requesterId\`. There is no way to read another user's settings
+through it, including as an admin.
+
+### Request
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`requesterId\` | uuid | Yes | The user whose settings are read. Doubles as the subject and the caller. |
+
+### Flow
+
+1. The active \`userSettings\` row for \`requesterId\` is selected; rows with a
+   \`deletedAt\` timestamp are treated as absent.
+2. The first match is returned, or \`null\` when the user has no settings row.
+
+### Response
+
+Returns \`id\`, \`theme\`, \`formsPerPage\` and \`responsesPerPage\`. Values come from the
+stored row, whose column defaults are \`light\`, \`10\` and \`20\` respectively.
+
+Returns \`null\` when no active settings row exists — a user who has never saved
+settings, or whose row has been soft-deleted. This is not an error, so clients must
+handle the empty case and fall back to their own defaults.
+
+### Errors
+
+- **Validation** — \`requesterId\` is missing or is not a uuid.
+
+### Notes
+
+The service returns the settings row (or \`null\`) directly, while
+\`getUserSettingsByUserOutputSchema\` describes a wrapped
+\`{ success, message, userSettings }\` shape with \`userSettings\` required. A
+procedure wiring this method to that schema has to build the envelope itself and
+decide what to send when the row is absent, since \`null\` will not satisfy the
+schema as written.
+`,
+        },
+    };
+};
+
+export { createUserMeta, updateUserSettingsMeta, getUserSettingsByUserIdMeta };

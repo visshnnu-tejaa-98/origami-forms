@@ -1,6 +1,21 @@
-import db, { and, eq, formFields, forms, inArray, isNull, users, userSettings } from "@repo/database";
-import { createUserInputSchema } from "./model";
-import type { CreateUserInputProps, DeleteUserInputProps, UpdateUserInputProps, UpdateUserSettingsInputProps } from "./model";
+import db, {
+    and,
+    eq,
+    formFields,
+    forms,
+    inArray,
+    isNull,
+    users,
+    userSettings,
+} from "@repo/database";
+import { createUserInputSchema, getUserSettingsByUserOutputSchema } from "./model";
+import type {
+    CreateUserInputProps,
+    DeleteUserInputProps,
+    GetUserSettingsByUserInputPropsType,
+    UpdateUserInputProps,
+    UpdateUserSettingsInputProps,
+} from "./model";
 import { ADMIN, LIGHT } from "@repo/database/constants";
 
 export default class UserService {
@@ -39,8 +54,9 @@ export default class UserService {
                 role: existingUser.role,
             };
 
-        await db.transaction(async (tx) => {
-            const userFromDb = await tx.insert(users)
+        return await db.transaction(async (tx) => {
+            const userFromDb = await tx
+                .insert(users)
                 .values({
                     clerkUserId,
                     firstName: resolvedFirstName,
@@ -62,43 +78,17 @@ export default class UserService {
 
             if (!userFromDb) throw new Error("Failed to create user");
 
-
             const defaultUserSettings = {
                 theme: LIGHT,
                 formsPerPage: 10,
-                responsesPerPage: 10
-            } as const
+                responsesPerPage: 10,
+            } as const;
             await tx
                 .insert(userSettings)
-                .values({ userId: userFromDb.id, ...defaultUserSettings })
-                .returning({
-                    id: userSettings.id,
-                    theme: userSettings.theme,
-                    formsPerPage: userSettings.formsPerPage,
-                    responsesPerPage: userSettings.responsesPerPage,
-                });
-        })
+                .values({ userId: userFromDb.id, ...defaultUserSettings });
 
-        return await db
-            .insert(users)
-            .values({
-                clerkUserId,
-                firstName: resolvedFirstName,
-                lastName: lastName || null,
-                email,
-                avatarUrl: avatarUrl || null,
-                role,
-            })
-            .returning({
-                id: users.id,
-                clerkUserId: users.clerkUserId,
-                firstName: users.firstName,
-                lastName: users.lastName,
-                email: users.email,
-                avatarUrl: users.avatarUrl,
-                role: users.role,
-            })
-            .then((result) => result[0]);
+            return userFromDb;
+        });
     }
 
     public async getByClerkId(clerkUserId: string) {
@@ -200,17 +190,13 @@ export default class UserService {
                 userData: null,
             };
 
-        const [updatedUser] = await db
-            .update(users)
-            .set(updatedValues)
-            .where(condition)
-            .returning({
-                id: users.id,
-                firstName: users.firstName,
-                lastName: users.lastName,
-                avatarUrl: users.avatarUrl,
-                role: users.role,
-            });
+        const [updatedUser] = await db.update(users).set(updatedValues).where(condition).returning({
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            avatarUrl: users.avatarUrl,
+            role: users.role,
+        });
 
         if (!updatedUser) throw new Error("Not authorised to perform update operation");
 
@@ -222,40 +208,92 @@ export default class UserService {
     }
 
     public async updateUserSettings(payload: UpdateUserSettingsInputProps) {
-        const { id, requesterId, theme, formsPerPage, responsesPerPage } = payload;
+        const { id, requesterId, view, theme, formsPerPage, responsesPerPage } = payload;
 
         const user = await this.getUserById(id);
 
-        if (!user) return {
-            success: false,
-            message: "User not found!"
-        }
+        if (!user)
+            return {
+                success: false,
+                message: "User not found!",
+            };
 
         const isAdmin = await this.isAdmin(requesterId);
 
         const condition = !isAdmin
-            ? and(eq(userSettings.userId, id), eq(userSettings.userId, requesterId), isNull(userSettings.deletedAt))
+            ? and(
+                eq(userSettings.userId, id),
+                eq(userSettings.userId, requesterId),
+                isNull(userSettings.deletedAt),
+            )
             : and(eq(userSettings.userId, id), isNull(userSettings.deletedAt));
 
         const [updatedUser] = await db
             .update(userSettings)
-            .set({ theme, formsPerPage, responsesPerPage })
+            .set({ view, theme, formsPerPage, responsesPerPage })
             .where(condition)
             .returning({
                 id: userSettings.id,
+                view: userSettings.view,
                 theme: userSettings.theme,
                 formsPerPage: userSettings.formsPerPage,
                 responsesPerPage: userSettings.responsesPerPage,
             });
 
-        if (!updatedUser) return {
-            success: false,
-            message: "Not authorised to perform update operation"
-        }
+        if (!updatedUser)
+            return {
+                success: false,
+                message: "Not authorised to perform update operation",
+            };
 
         return {
             success: true,
             message: "User settings updated successfully",
         };
+    }
+
+    public async getUserSettingsByUserId(payload: GetUserSettingsByUserInputPropsType) {
+        const { requesterId } = payload;
+
+        const user = await this.getUserById(requesterId);
+
+        if (!user) {
+            return {
+                success: false,
+                message: "User not found!",
+            };
+        }
+
+        const whereCondition = and(
+            eq(userSettings.userId, requesterId),
+            isNull(userSettings.deletedAt),
+        );
+
+        const response = await db
+            .select({
+                id: userSettings.id,
+                view: userSettings.view,
+                theme: userSettings.theme,
+                formsPerPage: userSettings.formsPerPage,
+                responsesPerPage: userSettings.responsesPerPage,
+            })
+            .from(userSettings)
+            .where(whereCondition)
+            .then((result) => result[0] ?? null);
+
+        if (!response) {
+            return {
+                success: false,
+                message: "Not authorised to perform fetch operation"
+            }
+        }
+
+        const result = await getUserSettingsByUserOutputSchema.parseAsync({
+            success: true,
+            message: "User settings fetched successfully",
+            userSettings: response,
+        })
+
+        return result
     }
 }

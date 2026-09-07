@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { STARTER_USER_ROLE, USER_ROLES } from "../constants";
-import { LIGHT, THEMES } from "@repo/database/constants";
+import { FORMS_VIEWS, GRID, LIGHT, THEMES } from "@repo/database/constants";
 
 export const createUserInputSchema = z.object({
   firstName: z
@@ -88,6 +88,7 @@ export type UpdateUserOutputSchemaType = z.infer<typeof updateUserOutputSchema>
 export const updateUserSettingsInputSchema = z.object({
   id: z.string().uuid().describe("id of the user"),
   requesterId: z.string().uuid().describe("requester id of the user who is requesting"),
+  view: z.enum(FORMS_VIEWS).optional().default(GRID).describe("selected view to show forms"),
   theme: z.enum(THEMES).optional().default(LIGHT).describe("theme of the user"),
   formsPerPage: z.number().optional().default(10).describe("forms per page of the user"),
   responsesPerPage: z.number().optional().default(10).describe("responses per page of the user"),
@@ -101,3 +102,25 @@ export const updateUserSettingsOutputSchema = z.object({
 })
 
 export type UpdateUserSettingsOutputSchemaType = z.infer<typeof updateUserSettingsOutputSchema>
+
+export const getUserSettingsByUserIdInputProps = z.object({
+  requesterId: z.string().uuid().describe("requester id of the user who is requesting"),
+})
+
+export type GetUserSettingsByUserInputPropsType = z.infer<typeof getUserSettingsByUserIdInputProps>
+
+export const getUserSettingsByUserOutputSchema = z.object({
+  success: z.boolean().describe("true or false based on if the fetch was successful"),
+  message: z.string().describe("Success or error message"),
+  userSettings: z.object({
+    id: z.string().uuid().describe("id of the user"),
+    view: z.enum(FORMS_VIEWS).optional().default(GRID).describe("selected view to show forms"),
+    theme: z.enum(THEMES).describe("theme of the user"),
+    formsPerPage: z.number().describe("forms per page of the user"),
+    responsesPerPage: z.number().describe("responses per page of the user"),
+  }).nullish()
+
+})
+
+export type GetUserSettingsByUserOutputSchemaType = z.infer<typeof getUserSettingsByUserOutputSchema>
+
