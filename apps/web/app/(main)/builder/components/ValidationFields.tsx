@@ -14,6 +14,21 @@ const toStr = (raw: string) => (raw.trim() === "" ? undefined : raw);
 const toDateInput = (d?: Date) => (d ? new Date(d).toISOString().slice(0, 10) : "");
 const fromDateInput = (raw: string) => (raw === "" ? undefined : new Date(raw));
 
+/** stored as bare extensions — `acceptedMimeTypes` in the preview maps them to mime types,
+ *  and the responses view reads the same extensions off an uploaded url */
+const FILE_TYPE_CHOICES = [
+  { value: "png", label: "PNG" },
+  { value: "jpg", label: "JPG" },
+  { value: "gif", label: "GIF" },
+  { value: "webp", label: "WEBP" },
+  { value: "svg", label: "SVG" },
+  { value: "pdf", label: "PDF" },
+  { value: "doc", label: "DOC" },
+  { value: "docx", label: "DOCX" },
+  { value: "xls", label: "XLS" },
+  { value: "xlsx", label: "XLSX" },
+];
+
 type RowProps = {
   id: string;
   label: string;
@@ -204,6 +219,9 @@ const ValidationFields = ({ field, updateField }: ValidationFieldsProps) => {
       const patch = (next: Partial<NonNullable<typeof v>>) =>
         updateField(field.id, { validation: { maxSizeMb: 10, maxFiles: 1, ...v, ...next } });
 
+      const picked = v?.allowedFileTypes ?? [];
+      const toRule = (list: string[]) => (list.length > 0 ? list : undefined);
+
       return (
         <>
           <div className="insp-grid">
@@ -230,21 +248,43 @@ const ValidationFields = ({ field, updateField }: ValidationFieldsProps) => {
             </Row>
           </div>
 
-          <Row id="v-types" label="Accepted types" hint="comma separated">
-            <input
-              id="v-types"
-              className="insp-input"
-              placeholder="pdf, png, jpg"
-              value={v?.allowedFileTypes?.join(", ") ?? ""}
-              onChange={(e) => {
-                const list = e.target.value
-                  .split(",")
-                  .map((t) => t.trim())
-                  .filter(Boolean);
-                patch({ allowedFileTypes: list.length > 0 ? list : undefined });
-              }}
-            />
-          </Row>
+          <div className="insp-row">
+            <label>
+              Accepted types
+              <span className="row-hint">{picked.length > 0 ? "tap to unpick" : "any file"}</span>
+            </label>
+
+            <div className="insp-pills" role="group" aria-label="Accepted file types">
+              {FILE_TYPE_CHOICES.map((choice) => {
+                const on = picked.includes(choice.value);
+                return (
+                  <button
+                    key={choice.value}
+                    type="button"
+                    className={`insp-pill${on ? " on" : ""}`}
+                    aria-pressed={on}
+                    onClick={() =>
+                      patch({
+                        allowedFileTypes: toRule(
+                          on
+                            ? picked.filter((type) => type !== choice.value)
+                            : [...picked, choice.value],
+                        ),
+                      })
+                    }
+                  >
+                    {choice.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="insp-hint">
+              {picked.length > 0
+                ? `Only ${picked.map((type) => type.toUpperCase()).join(", ")} can be attached.`
+                : "Nothing picked — every type above is allowed."}
+            </p>
+          </div>
         </>
       );
     }

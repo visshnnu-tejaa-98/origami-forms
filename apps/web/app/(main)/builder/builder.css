@@ -248,6 +248,43 @@
   color: var(--ink-4);
 }
 
+/* a multi-pick set: every choice on show, tap to add or drop it */
+.db-shell .insp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.db-shell .insp-pill {
+  padding: 5px 11px;
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-pill);
+  background: var(--bg-elevated);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all var(--transition-snap);
+}
+
+.db-shell .insp-pill:hover {
+  border-color: var(--rule-strong);
+  color: var(--ink-1);
+}
+
+.db-shell .insp-pill.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-deep);
+}
+
+.db-shell .insp-pill:focus-visible {
+  outline: none;
+  box-shadow: var(--glow-focus);
+}
+
 .db-shell .insp-row .insp-clear {
   align-self: flex-start;
   display: inline-flex;
