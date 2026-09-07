@@ -1,7 +1,7 @@
-import db, { and, eq, formFields, forms, inArray, isNull, users } from "@repo/database";
+import db, { and, eq, formFields, forms, inArray, isNull, users, userSettings } from "@repo/database";
 import { createUserInputSchema } from "./model";
-import type { CreateUserInputProps, DeleteUserInputProps, UpdateUserInputProps } from "./model";
-import { ADMIN } from "@repo/database/constants";
+import type { CreateUserInputProps, DeleteUserInputProps, UpdateUserInputProps, UpdateUserSettingsInputProps } from "./model";
+import { ADMIN, LIGHT } from "@repo/database/constants";
 
 export default class UserService {
     private async getUserByEmail(email: string) {
@@ -38,6 +38,46 @@ export default class UserService {
                 avatarUrl: existingUser.avatarUrl,
                 role: existingUser.role,
             };
+
+        await db.transaction(async (tx) => {
+            const userFromDb = await tx.insert(users)
+                .values({
+                    clerkUserId,
+                    firstName: resolvedFirstName,
+                    lastName: lastName || null,
+                    email,
+                    avatarUrl: avatarUrl || null,
+                    role,
+                })
+                .returning({
+                    id: users.id,
+                    clerkUserId: users.clerkUserId,
+                    firstName: users.firstName,
+                    lastName: users.lastName,
+                    email: users.email,
+                    avatarUrl: users.avatarUrl,
+                    role: users.role,
+                })
+                .then((result) => result[0]);
+
+            if (!userFromDb) throw new Error("Failed to create user");
+
+
+            const defaultUserSettings = {
+                theme: LIGHT,
+                formsPerPage: 10,
+                responsesPerPage: 10
+            } as const
+            await tx
+                .insert(userSettings)
+                .values({ userId: userFromDb.id, ...defaultUserSettings })
+                .returning({
+                    id: userSettings.id,
+                    theme: userSettings.theme,
+                    formsPerPage: userSettings.formsPerPage,
+                    responsesPerPage: userSettings.responsesPerPage,
+                });
+        })
 
         return await db
             .insert(users)
@@ -178,6 +218,44 @@ export default class UserService {
             success: true,
             message: "User updated successfully",
             userData: updatedUser,
+        };
+    }
+
+    public async updateUserSettings(payload: UpdateUserSettingsInputProps) {
+        const { id, requesterId, theme, formsPerPage, responsesPerPage } = payload;
+
+        const user = await this.getUserById(id);
+
+        if (!user) return {
+            success: false,
+            message: "User not found!"
+        }
+
+        const isAdmin = await this.isAdmin(requesterId);
+
+        const condition = !isAdmin
+            ? and(eq(userSettings.userId, id), eq(userSettings.userId, requesterId), isNull(userSettings.deletedAt))
+            : and(eq(userSettings.userId, id), isNull(userSettings.deletedAt));
+
+        const [updatedUser] = await db
+            .update(userSettings)
+            .set({ theme, formsPerPage, responsesPerPage })
+            .where(condition)
+            .returning({
+                id: userSettings.id,
+                theme: userSettings.theme,
+                formsPerPage: userSettings.formsPerPage,
+                responsesPerPage: userSettings.responsesPerPage,
+            });
+
+        if (!updatedUser) return {
+            success: false,
+            message: "Not authorised to perform update operation"
+        }
+
+        return {
+            success: true,
+            message: "User settings updated successfully",
         };
     }
 }

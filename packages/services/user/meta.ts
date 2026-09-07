@@ -1,6 +1,6 @@
 // Used for docs generation
 
-import { POST } from "../constants";
+import { PATCH, POST } from "../constants";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
 
@@ -68,4 +68,78 @@ Returns the created user: \`id\`, \`firstName\`, \`lastName\`, \`email\`, \`cler
     }
 };
 
-export { createUserMeta };
+type updateUserSettingsMetaInputProps = {
+    getPathFn: () => string;
+    tags?: string[];
+};
+
+const updateUserSettingsMeta = ({
+    getPathFn,
+    tags,
+}: updateUserSettingsMetaInputProps): OpenApiMetaConfig => {
+    const generatePath = getPathFn();
+    const pathType = generatePath as `/${string}`;
+    return {
+        openapi: {
+            method: PATCH,
+            path: pathType,
+            tags: tags ?? ["User"],
+            summary: "Update a user's settings",
+            description: `
+### Overview
+
+Updates the workspace preferences held against a user — colour theme and the page
+sizes used by the forms and responses lists. Settings live in a \`userSettings\`
+record separate from the user's profile, so this endpoint changes how the app is
+presented to that person and never touches their identity, email or role.
+
+A user may update their own settings. An **admin** may additionally update the
+settings of any other user.
+
+### Request Body
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`id\` | uuid | Yes | The user whose settings are being updated. |
+| \`requesterId\` | uuid | Yes | The user performing the update. Must equal \`id\` unless the requester is an admin. |
+| \`theme\` | enum | No | One of \`light\`, \`dark\`. Defaults to \`light\`. |
+| \`formsPerPage\` | number | No | Rows per page on the My forms screen. Defaults to \`10\`. |
+| \`responsesPerPage\` | number | No | Rows per page on the Responses screen. Defaults to \`10\`. |
+
+### Flow
+
+1. The target user (\`id\`) is looked up; soft-deleted users are treated as absent.
+2. The requester's role is resolved to determine whether they are an admin.
+3. An update is issued against the target's active \`userSettings\` row. For a
+   non-admin the update is additionally constrained to a row belonging to the
+   requester, so a non-admin acting on somebody else matches no row and is
+   rejected rather than silently permitted.
+4. If a row was updated the change is confirmed; if none matched, the caller was
+   not authorised.
+
+### Response
+
+Returns \`success\` and a human-readable \`message\`. The updated values are not
+echoed back — re-read the user's settings if the client needs them.
+
+### Errors
+
+- **Validation** — a field fails its schema constraint (e.g. \`id\` is not a uuid,
+  \`theme\` is outside the allowed set).
+- **User not found** — no active user exists for \`id\`. Returns
+  \`success: false\` with \`"User not found!"\`.
+- **Not authorised** — no settings row matched, which happens when a non-admin
+  targets another user, or when the target has no active settings row. Returns
+  \`success: false\` with \`"Not authorised to perform update operation"\`.
+
+### Notes
+
+Because a missing settings row and an authorisation failure both produce zero
+updated rows, they are reported through the same message. If the two need to be
+distinguished, the settings row must be checked before the update is issued.
+`,
+        },
+    };
+};
+
+export { createUserMeta, updateUserSettingsMeta };

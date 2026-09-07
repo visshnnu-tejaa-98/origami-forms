@@ -4,6 +4,11 @@ export const STARTER = "starter";
 
 export const USER_ROLES = [ADMIN, SUBSCRIBER, STARTER] as const;
 
+export const LIGHT = "light";
+export const DARK = "dark";
+
+export const THEMES = [LIGHT, DARK] as const;
+
 export const DRAFT = "draft";
 export const PUBLISHED = "published";
 export const ARCHIVED = "archived";

@@ -1,7 +1,7 @@
-import { createUserInputSchema, createUserOutputSchema } from "@repo/services/user/model";
-import { createUserMeta } from "@repo/services/user/meta";
+import { createUserInputSchema, createUserOutputSchema, updateUserSettingsInputSchema, updateUserSettingsOutputSchema } from "@repo/services/user/model";
+import { createUserMeta, updateUserSettingsMeta } from "@repo/services/user/meta";
 import { userService } from "../../services";
-import { publicProcedure, router } from "../../trpc";
+import { protectedProcedure, publicProcedure, router } from "../../trpc";
 
 const TAGS = ["Authentication"];
 
@@ -34,4 +34,26 @@ export const authRouter = router({
         role: result.role ?? undefined,
       };
     }),
+  updateUserSettings: protectedProcedure
+    .meta(updateUserSettingsMeta({ getPathFn: () => "/auth/settings", tags: TAGS }))
+    .input(updateUserSettingsInputSchema)
+    .output(updateUserSettingsOutputSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { theme, formsPerPage, responsesPerPage } = input
+
+      const result = await userService.updateUserSettings({
+        id: ctx.userId,
+        requesterId: ctx.userId,
+        theme,
+        formsPerPage,
+        responsesPerPage
+      })
+
+      if (!result) throw Error("Something went wrong while updating user settings");
+
+      return {
+        success: result.success,
+        message: result.message,
+      }
+    })
 });

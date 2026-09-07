@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { STARTER_USER_ROLE, USER_ROLES } from "../constants";
+import { LIGHT, THEMES } from "@repo/database/constants";
 
 export const createUserInputSchema = z.object({
   firstName: z
@@ -82,3 +83,21 @@ export const updateUserOutputSchema = z.object({
 })
 
 export type UpdateUserOutputSchemaType = z.infer<typeof updateUserOutputSchema>
+
+
+export const updateUserSettingsInputSchema = z.object({
+  id: z.string().uuid().describe("id of the user"),
+  requesterId: z.string().uuid().describe("requester id of the user who is requesting"),
+  theme: z.enum(THEMES).optional().default(LIGHT).describe("theme of the user"),
+  formsPerPage: z.number().optional().default(10).describe("forms per page of the user"),
+  responsesPerPage: z.number().optional().default(10).describe("responses per page of the user"),
+})
+
+export type UpdateUserSettingsInputProps = z.infer<typeof updateUserSettingsInputSchema>
+
+export const updateUserSettingsOutputSchema = z.object({
+  success: z.boolean().describe("true or false based on if update was successful"),
+  message: z.string().describe("Success or error message"),
+})
+
+export type UpdateUserSettingsOutputSchemaType = z.infer<typeof updateUserSettingsOutputSchema>

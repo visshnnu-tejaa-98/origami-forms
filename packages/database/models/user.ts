@@ -4,8 +4,10 @@ import {
   varchar,
   timestamp,
   text,
+  integer,
 } from "drizzle-orm/pg-core";
-import { userRolesEnum } from "./enum";
+import { themesEnum, userRolesEnum } from "./enum";
+import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -25,3 +27,28 @@ export const users = pgTable("users", {
 
 export type SelectUser = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+
+export const userSettings = pgTable("user_settings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+
+  theme: themesEnum("theme").default("light"),
+  formsPerPage: integer("forms_per_page").default(10),
+  responsesPerPage: integer("responses_per_page").default(20),
+
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+  deletedAt: timestamp("deleted_at", { withTimezone: true })
+})
+
+export type SelectUserSettings = typeof userSettings.$inferSelect;
+export type InsertUserSettings = typeof userSettings.$inferInsert;
+
+
+export const userRelations = relations(users, ({ one }) => ({
+  settings: one(userSettings, {
+    fields: [users.id],
+    references: [userSettings.userId],
+  }),
+}));
