@@ -109,7 +109,7 @@ export const formatItemCount = (count: number) => {
     return `${thousands}k+`;
 };
 
-const IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|svg|bmp)$/i;
+const IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp)/i;
 
 const pathOf = (url: string) => {
     try {
@@ -128,6 +128,6 @@ export const fileDownloadUrl = (url: string) =>
     url.includes("?") ? `${url}&ik-attachment=true` : `${url}?ik-attachment=true`;
 
 export const describeAccepted = (types: string[]) =>
-    Array.from(new Set(types.map((type) => (type.split("/")[1] ?? type).split("+")[0]!.toUpperCase()))).join(
+    Array.from(new Set(types.map((type) => (type.split("/")[1] ?? type).split("+")[0]))).join(
         ", ",
     );

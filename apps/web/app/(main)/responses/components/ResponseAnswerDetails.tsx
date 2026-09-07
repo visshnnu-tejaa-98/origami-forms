@@ -132,7 +132,7 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
 
                         const renderAnswerValue = (fieldType: string, value: string | null) => {
                             if (!value || value.trim() === "") {
-                                return <span className="a">skipped</span>;
+                                return <span className="a skipped">skipped</span>;
                             }
 
                             if (PLAIN_TEXT_FIELD_TYPES.includes(fieldType)) {
@@ -186,42 +186,48 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                                         {urls.map((url) => {
                                             const name = fileNameFromUrl(url);
                                             const image = isImageUrl(url);
-
                                             return (
                                                 <div
                                                     key={url}
-                                                    className={`a-file${image ? " a-file--image" : ""}`}
+                                                    className={`a-file ${image ? "a-file--image" : "a-file--doc"}`}
                                                 >
-                                                    {image && (
+                                                    <span className="a-file__shot" aria-hidden="true">
+                                                        {image ? (
+                                                            <img
+                                                                src={url}
+                                                                alt=""
+                                                                loading="lazy"
+                                                            />
+                                                        ) : (
+                                                            <iframe
+                                                                src={`${url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                                                                title=""
+                                                                tabIndex={-1}
+                                                                loading="lazy"
+                                                            />
+                                                        )}
+                                                    </span>
+                                                    <div className="a-file__acts">
                                                         <a
-                                                            className="a-file__shot"
+                                                            className="a-file__act"
                                                             href={url}
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            title="Open full size"
+                                                            title="Preview"
+                                                            aria-label={`Preview ${name}`}
                                                         >
-                                                            <img
-                                                                src={url}
-                                                                alt={answer.fieldLabel || name}
-                                                                loading="lazy"
-                                                            />
+                                                            <Icon name="eye" size={14} />
                                                         </a>
-                                                    )}
-                                                    <div className="a-file__row">
-                                                        <span className="a-file__icon">
-                                                            <Icon name="clip" size={14} />
-                                                        </span>
-                                                        <span className="a-file__name" title={name}>
-                                                            {name}
-                                                        </span>
                                                         <a
-                                                            className="o-btn o-btn--sm a-file__get"
+                                                            className="a-file__act"
                                                             href={fileDownloadUrl(url)}
                                                             download={name}
                                                             target="_blank"
                                                             rel="noreferrer"
+                                                            title="Download"
+                                                            aria-label={`Download ${name}`}
                                                         >
-                                                            <Icon name="download" size={13} /> Download
+                                                            <Icon name="download" size={14} />
                                                         </a>
                                                     </div>
                                                 </div>

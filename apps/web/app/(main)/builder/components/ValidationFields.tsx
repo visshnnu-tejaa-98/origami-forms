@@ -18,15 +18,10 @@ const fromDateInput = (raw: string) => (raw === "" ? undefined : new Date(raw));
  *  and the responses view reads the same extensions off an uploaded url */
 const FILE_TYPE_CHOICES = [
   { value: "png", label: "PNG" },
-  { value: "jpg", label: "JPG" },
+  { value: "jpeg", label: "JPEG" },
   { value: "gif", label: "GIF" },
   { value: "webp", label: "WEBP" },
-  { value: "svg", label: "SVG" },
   { value: "pdf", label: "PDF" },
-  { value: "doc", label: "DOC" },
-  { value: "docx", label: "DOCX" },
-  { value: "xls", label: "XLS" },
-  { value: "xlsx", label: "XLSX" },
 ];
 
 type RowProps = {
