@@ -56,6 +56,29 @@ export function useGetUser() {
     };
 }
 
+export function useUpdateUser() {
+    const {
+        mutateAsync: updateUserAsync,
+        mutate: updateUser,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    } = trpc.auth.updateUser.useMutation()
+    return {
+        updateUserAsync,
+        updateUser,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    }
+}
+
 export function useUserSettings() {
     const {
         data: userSettingsData,

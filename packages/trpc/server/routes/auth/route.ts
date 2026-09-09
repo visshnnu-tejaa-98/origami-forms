@@ -1,5 +1,5 @@
-import { createUserInputSchema, createUserOutputSchema, getUserSettingsByUserIdInputProps, getUserSettingsByUserOutputSchema, updateUserSettingsInputSchema, updateUserSettingsOutputSchema } from "@repo/services/user/model";
-import { createUserMeta, getUserSettingsByUserIdMeta, updateUserSettingsMeta } from "@repo/services/user/meta";
+import { createUserInputSchema, createUserOutputSchema, getUserSettingsByUserIdInputProps, getUserSettingsByUserOutputSchema, updateUserInputSchema, updateUserOutputSchema, updateUserSettingsInputSchema, updateUserSettingsOutputSchema } from "@repo/services/user/model";
+import { createUserMeta, getUserSettingsByUserIdMeta, updateUserMeta, updateUserSettingsMeta } from "@repo/services/user/meta";
 import { userService } from "../../services";
 import { protectedProcedure, publicProcedure, router } from "../../trpc";
 
@@ -33,6 +33,25 @@ export const authRouter = router({
         avatarUrl: result.avatarUrl ?? undefined,
         role: result.role ?? undefined,
       };
+    }),
+  updateUser: protectedProcedure
+    .meta(updateUserMeta({ getPathFn: () => "/auth/user", tags: TAGS }))
+    .input(updateUserInputSchema.omit({ id: true, requesterId: true }))
+    .output(updateUserOutputSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { firstName, lastName, avatarUrl } = input;
+
+      const result = await userService.updateUser({
+        id: ctx.userId,
+        requesterId: ctx.userId,
+        firstName,
+        lastName,
+        avatarUrl,
+      });
+
+      if (!result) throw Error("Something wnet wrong while updating an user");
+
+      return result
     }),
   updateUserSettings: protectedProcedure
     .meta(updateUserSettingsMeta({ getPathFn: () => "/auth/settings", tags: TAGS }))

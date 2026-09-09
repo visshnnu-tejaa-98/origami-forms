@@ -1,17 +1,53 @@
 import React from "react";
 import { Icon } from "../../components/icons";
-import { ROLE_COPY } from "../constants";
-import { ProfilePanelProps } from "../types";
+import { DEFAULT_ROLE_COPY, ROLE_COPY } from "../constants";
+import { ProfilePanelProps, Role } from "../types";
+import { useUploadFile } from "~/hooks/use-uploadfile";
+import { fileUploadLimit, userAvatarPath } from "~/app/(public)/form/utils";
+import { useUserStore } from "~/app/store/user-store";
 
-const ProfilePanel = ({ section, draft, email, role, onChange }: ProfilePanelProps) => {
-    const fileRef = React.useRef<HTMLInputElement>(null);
+const ACCEPTED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp"];
+const AVATAR_SIZE_LIMIT_MB = 2;
+
+const ProfilePanel = ({ section, profile, updateUserProfile }: ProfilePanelProps) => {
+    const { inputRef, uploading, error, progress, pick, uploadFile } = useUploadFile();
+    const userId = useUserStore((state) => state.user?.id ?? "");
+    const [dragging, setDragging] = React.useState(false);
+
     const initial =
-        draft.firstName.trim()[0]?.toUpperCase() ??
-        email.trim()[0]?.toUpperCase() ??
-        "A";
-    const roleCopy = ROLE_COPY[role];
+        profile.firstName.trim()[0]?.toUpperCase() ??
+        profile.email.trim()[0]?.toUpperCase()
+
+    const roleCopy = ROLE_COPY[profile.role as Role] || DEFAULT_ROLE_COPY
+    const showRoleBadge = profile.role !== "starter" && profile.role !== ""
 
     if (section !== "profile") return null
+
+    const onRemoveProfileImage = () => {
+        updateUserProfile({ ...profile, avatarUrl: "" })
+    }
+
+    const handleFile = async (file: File | null) => {
+        if (!file) return;
+
+        const { uploadedImageUrl } = await uploadFile({
+            id: userId,
+            file,
+            sessionKey: userId || "avatar",
+            maxSizeAllowed: fileUploadLimit(AVATAR_SIZE_LIMIT_MB),
+            path: userAvatarPath,
+            acceptedTypes: ACCEPTED_AVATAR_TYPES,
+            setIcon: (url) => updateUserProfile({ ...profile, avatarUrl: url ?? "" }),
+        });
+
+        return uploadedImageUrl;
+    };
+
+    const onDrop = (event: React.DragEvent) => {
+        event.preventDefault();
+        setDragging(false);
+        if (!uploading) void handleFile(event.dataTransfer.files?.[0] ?? null);
+    };
 
     return (
         <section className="set-panel" id="profile">
@@ -19,55 +55,96 @@ const ProfilePanel = ({ section, draft, email, role, onChange }: ProfilePanelPro
             <div className="set-panel__head">
                 <h3>Profile</h3>
                 <span className="sub">how you appear across your forms</span>
-                <span className={`o-badge ${roleCopy.badge} set-role`} title={roleCopy.blurb}>
-                    <Icon name="lock" size={11} /> {roleCopy.label}
-                </span>
+                {showRoleBadge && (
+                    <span className={`o-badge ${roleCopy.badge} set-role`} title={roleCopy.blurb}>
+                        <Icon name="lock" size={11} /> {roleCopy.label}
+                    </span>)}
             </div>
 
             <div className="set-row">
                 <div className="label">
                     Photo
-                    <span className="lhelp">a square image reads best — PNG or JPG, up to 2 MB</span>
+                    <span className="lhelp">a square image reads best — PNG, JPG or WEBP, up to {AVATAR_SIZE_LIMIT_MB} MB</span>
                 </div>
                 <div className="control">
-                    <div className="set-av-row">
-                        <span className="set-av">
-                            {draft.avatarUrl ? (
-                                <img src={draft.avatarUrl} alt="" />
-                            ) : (
-                                initial
+                    <div
+                        className={`set-drop${dragging ? " is-dragging" : ""}${uploading ? " is-busy" : ""}`}
+                        onDragOver={(e) => { e.preventDefault(); if (!uploading) setDragging(true); }}
+                        onDragLeave={() => setDragging(false)}
+                        onDrop={onDrop}
+                    >
+                        <button
+                            type="button"
+                            className="set-av"
+                            onClick={pick}
+                            disabled={uploading}
+                            aria-busy={uploading}
+                            aria-label={profile.avatarUrl ? "Replace photo" : "Upload a photo"}
+                            title={profile.avatarUrl ? "Replace photo" : "Upload a photo"}
+                        >
+                            {profile.avatarUrl
+                                ? <img src={profile.avatarUrl} alt="" />
+                                : <span className="set-av__initial">{initial}</span>}
+
+                            <span className="set-av__veil" aria-hidden="true">
+                                <Icon name="upload" size={16} />
+                            </span>
+
+                            {uploading && (
+                                <span className="set-av__ring" aria-hidden="true">
+                                    <span
+                                        className="set-av__ring-fill"
+                                        style={{ ["--pct" as string]: `${Math.round(progress ?? 0)}%` }}
+                                    />
+                                </span>
                             )}
-                        </span>
-                        <div className="set-av-actions">
-                            <button
-                                type="button"
-                                className="o-btn o-btn--sm"
-                                onClick={() => fileRef.current?.click()}
-                            >
-                                <Icon name="upload" size={13} /> Upload photo
-                            </button>
-                            {draft.avatarUrl !== "" && (
+                        </button>
+
+                        <div className="set-drop__body">
+                            <p className="set-drop__lead">
+                                <button type="button" className="set-drop__link" onClick={pick} disabled={uploading}>
+                                    Choose a file
+                                </button>
+                                {" "}or drag one here
+                            </p>
+
+                            {uploading ? (
+                                <div className="set-drop__progress" role="progressbar" aria-valuenow={Math.round(progress ?? 0)} aria-valuemin={0} aria-valuemax={100}>
+                                    <span style={{ width: `${progress ?? 0}%` }} />
+                                    <em>{Math.round(progress ?? 0)}%</em>
+                                </div>
+                            ) : (
+                                <p className="set-drop__hint">square images look best</p>
+                            )}
+
+                            {profile.avatarUrl !== "" && !uploading && (
                                 <button
                                     type="button"
-                                    className="o-btn o-btn--sm o-btn--ghost set-btn--danger"
-                                    onClick={() => onChange({ avatarUrl: "" })}
+                                    className="set-drop__remove"
+                                    onClick={onRemoveProfileImage}
                                 >
-                                    Remove
+                                    <Icon name="trash" size={12} /> Remove photo
                                 </button>
                             )}
-                            <input
-                                ref={fileRef}
-                                type="file"
-                                accept="image/png,image/jpeg,image/webp"
-                                hidden
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    // preview only — nothing is uploaded yet
-                                    if (file) onChange({ avatarUrl: URL.createObjectURL(file) });
-                                }}
-                            />
                         </div>
+
+                        <input
+                            ref={inputRef}
+                            type="file"
+                            accept={ACCEPTED_AVATAR_TYPES.join(",")}
+                            hidden
+                            onChange={(e) => {
+                                void handleFile(e.target.files?.[0] ?? null);
+                                e.target.value = ""; // so re-picking the same file still fires
+                            }}
+                        />
                     </div>
+
+                    {error !== "" && (
+                        <p className="set-drop__error" role="alert">
+                            <Icon name="error" size={13} /> {error}
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -81,18 +158,18 @@ const ProfilePanel = ({ section, draft, email, role, onChange }: ProfilePanelPro
                         <span className="o-field-label">First name</span>
                         <input
                             className="o-input"
-                            value={draft.firstName}
+                            value={profile.firstName}
                             placeholder="First name"
-                            onChange={(e) => onChange({ firstName: e.target.value })}
+                            onChange={(e) => updateUserProfile({ ...profile, firstName: e.target.value })}
                         />
                     </label>
                     <label className="o-field">
                         <span className="o-field-label">Last name</span>
                         <input
                             className="o-input"
-                            value={draft.lastName}
+                            value={profile.lastName}
                             placeholder="Last name"
-                            onChange={(e) => onChange({ lastName: e.target.value })}
+                            onChange={(e) => updateUserProfile({ ...profile, lastName: e.target.value })}
                         />
                     </label>
                 </div>
@@ -104,7 +181,7 @@ const ProfilePanel = ({ section, draft, email, role, onChange }: ProfilePanelPro
                     <span className="lhelp">managed by your sign-in provider</span>
                 </div>
                 <div className="control">
-                    <input className="o-input" value={email} readOnly disabled />
+                    <input className="o-input" value={profile.email} readOnly disabled />
                 </div>
             </div>
         </section>

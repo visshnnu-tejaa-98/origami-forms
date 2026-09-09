@@ -131,3 +131,25 @@ export const describeAccepted = (types: string[]) =>
     Array.from(new Set(types.map((type) => (type.split("/")[1] ?? type).split("+")[0]))).join(
         ", ",
     );
+export function getGreeting() {
+    const hour = new Date().getHours();
+
+    if (hour < 12) {
+        return "Good morning";
+    }
+
+    if (hour < 17) {
+        return "Good afternoon";
+    }
+
+    return "Good evening";
+}
+
+// returns "month day, year": Sept 29, 2026
+export function formatDate(date = new Date()) {
+    const day = date.getDate();
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const year = date.getFullYear();
+
+    return `${month} ${day} ${year}`;
+}

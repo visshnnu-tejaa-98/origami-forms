@@ -84,3 +84,4 @@ export const draftFileName = `draft-${Math.random().toString(36).slice(2, 10)}`;
 
 export const ICON_FOLDER = "/forms/logos";
 export const FILE_UPLOAD_FOLDER = "/forms/uploads";
+export const AVATAR_FOLDER = "/users/avatars";

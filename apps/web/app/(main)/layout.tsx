@@ -42,9 +42,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         firstName: user.firstName!,
         lastName: user.lastName!,
         imageUrl: user.avatarUrl!,
+        role: user.role!,
       });
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, isSignedIn, user?.id]);
 
   return (

@@ -158,17 +158,109 @@
 .db-shell .set-btn--danger { color: var(--coral-deep); border-color: var(--coral); }
 .db-shell .set-btn--danger:hover { background: var(--coral-soft); }
 
-/* ====== AVATAR ====== */
-.db-shell .set-av-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.db-shell .set-av {
-  width: 76px; height: 76px; border-radius: 50%; overflow: hidden;
-  display: grid; place-items: center; flex: none;
-  background: var(--sakura-soft); color: var(--sakura-deep);
-  font-family: var(--font-hand); font-size: 2.2rem; font-weight: 600;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+/* ====== AVATAR DROP ZONE ====== */
+.db-shell .set-drop {
+  display: flex; align-items: center; gap: 18px;
+  padding: 16px;
+  background: var(--bg-elevated);
+  border: 1.5px dashed var(--rule-strong);
+  border-radius: 16px;
+  transition: border-color 160ms, background 160ms, box-shadow 160ms;
 }
-.db-shell .set-av img { width: 100%; height: 100%; object-fit: cover; }
-.db-shell .set-av-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.db-shell .set-drop.is-dragging {
+  border-color: var(--accent);
+  border-style: solid;
+  background: var(--accent-soft);
+  box-shadow: var(--glow-focus);
+}
+.db-shell .set-drop.is-busy { border-style: solid; }
+
+/* the avatar is the picker */
+.db-shell .set-av {
+  position: relative; flex: none;
+  width: 84px; height: 84px; padding: 0;
+  border: 0; border-radius: 50%; overflow: hidden;
+  background: var(--sakura-soft); color: var(--sakura-deep);
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.14);
+  transition: transform 160ms, box-shadow 160ms;
+}
+.db-shell .set-av:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.2);
+}
+.db-shell .set-av:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 3px; }
+.db-shell .set-av:disabled { cursor: default; }
+.db-shell .set-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.db-shell .set-av__initial {
+  display: grid; place-items: center; width: 100%; height: 100%;
+  font-family: var(--font-hand); font-size: 2.4rem; font-weight: 600;
+}
+
+/* hover veil — the affordance that the avatar is clickable */
+.db-shell .set-av__veil {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: rgb(18 16 22 / 0.55);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 160ms;
+}
+.db-shell .set-av:hover:not(:disabled) .set-av__veil,
+.db-shell .set-av:focus-visible .set-av__veil,
+.db-shell .set-drop.is-dragging .set-av__veil { opacity: 1; }
+
+/* progress ring drawn straight from the percentage */
+.db-shell .set-av__ring { position: absolute; inset: 0; }
+.db-shell .set-av__ring-fill {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(var(--accent) var(--pct), rgb(18 16 22 / 0.55) 0);
+  -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%);
+  mask: radial-gradient(circle, transparent 60%, #000 61%);
+}
+
+.db-shell .set-drop__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.db-shell .set-drop__lead { margin: 0; font-size: 0.9rem; color: var(--ink-2); }
+.db-shell .set-drop__link {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-weight: 600; color: var(--accent-deep);
+  text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+}
+.db-shell .set-drop__link:hover { color: var(--ink-1); }
+.db-shell .set-drop__link:disabled { opacity: 0.5; cursor: default; }
+.db-shell .set-drop__hint { margin: 0; font-size: 0.78rem; font-style: italic; color: var(--ink-3); }
+
+.db-shell .set-drop__progress {
+  position: relative; display: flex; align-items: center; gap: 8px;
+  height: 6px; border-radius: 999px; background: var(--bg-sunken);
+}
+.db-shell .set-drop__progress > span {
+  height: 100%; border-radius: 999px; background: var(--accent);
+  transition: width 140ms linear;
+}
+.db-shell .set-drop__progress > em {
+  position: absolute; right: 0; top: 10px;
+  font-style: normal; font-size: 0.72rem; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.db-shell .set-drop__remove {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 2px; padding: 0; border: 0; background: none;
+  font-size: 0.78rem; color: var(--ink-3); cursor: pointer;
+}
+.db-shell .set-drop__remove:hover { color: var(--coral-deep); }
+
+.db-shell .set-drop__error {
+  display: flex; align-items: center; gap: 6px;
+  margin: 8px 0 0; font-size: 0.8rem; color: var(--coral-deep);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .set-av:hover:not(:disabled) { transform: none; }
+}
 
 /* ====== THEME PICKER ====== */
 .db-shell .set-themes { display: flex; gap: 12px; flex-wrap: wrap; }

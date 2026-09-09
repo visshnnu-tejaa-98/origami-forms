@@ -47,6 +47,8 @@ export const ROLE_COPY: Record<Role, { label: string; badge: string; blurb: stri
     },
 };
 
+export const DEFAULT_ROLE_COPY = ROLE_COPY["starter"]
+
 export const STATUS_BADGE: Record<ManagedUser["status"], string> = {
     active: "o-badge--matcha",
     invited: "o-badge--lavender",

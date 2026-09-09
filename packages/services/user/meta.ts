@@ -68,6 +68,86 @@ Returns the created user: \`id\`, \`firstName\`, \`lastName\`, \`email\`, \`cler
     }
 };
 
+type updateUserMetaInputProps = {
+    getPathFn: () => string;
+    tags?: string[];
+};
+
+const updateUserMeta = ({ getPathFn, tags }: updateUserMetaInputProps): OpenApiMetaConfig => {
+    const generatePath = getPathFn();
+    const pathType = generatePath as `/${string}`;
+    return {
+        openapi: {
+            method: PATCH,
+            path: pathType,
+            tags: tags ?? ["User"],
+            summary: "Update a user's profile",
+            description: `
+### Overview
+
+Updates the editable parts of a user's profile — display name and avatar. Email,
+\`clerkUserId\` and \`role\` are deliberately not editable here: the first two are
+owned by the sign-in provider, and changing a role is a separate, privileged
+concern.
+
+A user may update their own profile. An **admin** may additionally update the
+profile of any other user.
+
+### Request Body
+
+Every profile field is optional. An omitted field is left untouched, so a client
+may send only what it is changing.
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`id\` | uuid | Yes | The user being updated. |
+| \`requesterId\` | uuid | Yes | The user performing the update. Must equal \`id\` unless the requester is an admin. |
+| \`firstName\` | string | No | 2–50 characters, trimmed. |
+| \`lastName\` | string \\| null | No | 2–50 characters, trimmed. Send \`null\` to clear it. |
+| \`avatarUrl\` | string \\| null | No | A valid URL. Send \`null\` to clear it. |
+
+Note the difference between omitting a field and sending \`null\`: omitting means
+"leave this alone", while \`null\` clears the stored value. \`firstName\` cannot be
+cleared, since a user must always have one.
+
+### Flow
+
+1. The target user (\`id\`) is looked up; soft-deleted users are treated as absent.
+2. The requester's role is resolved to determine whether they are an admin.
+3. The provided fields are collected into an update set. If none were provided,
+   the request returns early without touching the database.
+4. The update runs against the target's active row. For a non-admin it is
+   additionally constrained to a row belonging to the requester, so a non-admin
+   acting on somebody else matches no row and is rejected rather than silently
+   permitted.
+
+### Response
+
+Returns \`success\`, a human-readable \`message\`, and \`userData\` containing the
+updated \`id\`, \`firstName\`, \`lastName\`, \`avatarUrl\` and \`role\`.
+
+When no updatable field was supplied, returns \`success: false\` with
+\`"No changes to update"\` and \`userData: null\`.
+
+### Errors
+
+- **Validation** — a field fails its schema constraint (e.g. \`id\` is not a uuid,
+  a name is shorter than two characters, \`avatarUrl\` is not a URL).
+- **User not found** — no active user exists for \`id\`. **Throws**, rather than
+  returning a \`success: false\` body.
+- **Not authorised** — no row matched, which happens when a non-admin targets
+  another user. **Throws** with \`"Not authorised to perform update operation"\`.
+
+### Notes
+
+Unlike the settings endpoints, the two failure cases above are thrown rather than
+returned, so callers surface them as errors rather than as \`success: false\`
+responses. The one soft failure is the no-op case, which comes back in the body.
+`,
+        },
+    };
+};
+
 type updateUserSettingsMetaInputProps = {
     getPathFn: () => string;
     tags?: string[];
@@ -208,4 +288,9 @@ schema as written.
     };
 };
 
-export { createUserMeta, updateUserSettingsMeta, getUserSettingsByUserIdMeta };
+export {
+    createUserMeta,
+    updateUserMeta,
+    updateUserSettingsMeta,
+    getUserSettingsByUserIdMeta,
+};

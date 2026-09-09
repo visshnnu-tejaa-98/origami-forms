@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./settings.css";
 import { Icon } from "../components/icons";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -13,39 +13,32 @@ import DangerPanel from "./components/DangerPanel";
 import { PreferencesDraft, ProfileDraft, Role, SettingsSection, ThemeChoice, ViewChoice } from "./types";
 import { useSettings } from "~/hooks/use-usersettings";
 import { useUserStore } from "~/app/store/user-store";
-import { useUpdateUserSettings } from "~/hooks/use-user";
+import { useUpdateUser, useUpdateUserSettings } from "~/hooks/use-user";
 import { useTheme } from "next-themes";
 
-const VIEWER = {
-    email: "aiko@origami.dev",
-    role: "admin" as Role,
-};
-
 const Settings = () => {
-    const { userSettings, updateUserSettings } = useSettings();
+    const { userProfile, userSettings, updateUserProfile, updateUserSettings } = useSettings();
     const commitSettings = useUserStore((state) => state.updateSettings);
     const userSettingsFromRedux = useUserStore(state => state.settings)
+    const { updateUser } = useUpdateUser()
     const { updateUserSettings: saveUserSettings } = useUpdateUserSettings();
     const { setTheme } = useTheme();
+    const { theme, view } = userSettings;
 
     const [section, setSection] = useState<SettingsSection>("profile");
     const [dirty, setDirty] = useState(false);
-
-    const [profile, setProfile] = useState<ProfileDraft>({
-        firstName: "Aiko",
-        lastName: "Tanaka",
-        avatarUrl: "",
-    });
-
-    const { theme, view } = userSettings;
     const [prefs, setPrefs] = useState<PreferencesDraft>({
         formsPerPage: userSettingsFromRedux?.formsPerPage || 10,
         responsesPerPage: userSettingsFromRedux?.responsesPerPage || 10,
     });
-
     const [deleteAccount, setDeleteAccount] = useState(false);
 
-    const isAdmin = VIEWER.role === "admin";
+    const isAdmin = userProfile.role === "admin"
+
+    const handleUpdateUserDetails = (profile: ProfileDraft) => {
+        updateUserProfile(profile)
+        setDirty(true)
+    }
 
     const handlePreferenceChange =
         <T extends PreferencesDraft>(setter: React.Dispatch<React.SetStateAction<T>>) =>
@@ -76,6 +69,11 @@ const Settings = () => {
         const { view, theme, formsPerPage, responsesPerPage } = userSettings;
         saveUserSettings({ view, theme, formsPerPage, responsesPerPage });
         commitSettings({ view, theme, formsPerPage, responsesPerPage });
+        updateUser({
+            firstName: userProfile.firstName,
+            lastName: userProfile.lastName,
+            avatarUrl: userProfile.avatarUrl,
+        });
         setTheme(theme);
         setDirty(false);
     };
@@ -125,11 +123,8 @@ const Settings = () => {
                     {/* Renders if section is 'profile' */}
                     <ProfilePanel
                         section={section}
-                        draft={profile}
-                        email={VIEWER.email}
-                        role={VIEWER.role}
-                        // onChange={touch(setProfile)}
-                        onChange={() => { }}
+                        profile={userProfile}
+                        updateUserProfile={handleUpdateUserDetails}
                     />
 
                     {/* Renders if section is 'appearance' */}

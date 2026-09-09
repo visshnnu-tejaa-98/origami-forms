@@ -36,6 +36,8 @@ export type ManagedUser = {
 };
 
 export type ProfileDraft = {
+    role: string,
+    email: string,
     firstName: string;
     lastName: string;
     avatarUrl: string;
@@ -48,10 +50,8 @@ export type PreferencesDraft = {
 
 export type ProfilePanelProps = {
     section: SettingsSection;
-    draft: ProfileDraft;
-    email: string;
-    role: Role;
-    onChange: (patch: Partial<ProfileDraft>) => void;
+    profile: ProfileDraft;
+    updateUserProfile: (profile: ProfileDraft) => void;
 };
 
 export type SizeRowProps = {

@@ -10,6 +10,7 @@ type User = {
     lastName: string;
     emailAddress: string;
     imageUrl: string;
+    role: string;
 }
 
 export type UserSettingsType = {
