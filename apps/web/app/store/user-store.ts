@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { combine, createJSONStorage, devtools, persist } from "zustand/middleware";
+import { LIGHT, THEMES } from "@repo/database/constants";
 import { GRID, LIST } from "../(main)/constants";
 
 type User = {
@@ -13,6 +14,9 @@ type User = {
 
 export type UserSettingsType = {
     view: typeof LIST | typeof GRID
+    theme: (typeof THEMES)[number]
+    formsPerPage: number
+    responsesPerPage: number
 }
 
 type UserInitialState = {
@@ -37,7 +41,12 @@ const userInitialState: UserInitialState = {
     loading: false,
     error: false,
     errorMessage: "",
-    settings: { view: GRID }
+    settings: {
+        view: GRID,
+        theme: LIGHT,
+        formsPerPage: 10,
+        responsesPerPage: 10
+    }
 }
 
 export const useUserStore = create(
@@ -58,7 +67,7 @@ export const useUserStore = create(
             {
                 name: "user",
                 storage: createJSONStorage(() => localStorage),
-                partialize: (state) => ({ user: state.user }),
+                partialize: (state) => ({ user: state.user, settings: state.settings }),
             },
         ),
         {

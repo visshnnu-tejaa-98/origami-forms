@@ -10,6 +10,7 @@ import { useUserStore } from "~/app/store/user-store";
 import { getNameFromEmail } from "~/app/utils";
 import { useFormStore } from "~/app/store/form-store";
 import { useFormsStats } from "~/hooks/use-form";
+import ThemeToggle from "./ThemeToggle";
 
 type NavItem = {
   href: string;
@@ -27,7 +28,6 @@ const workspace: NavItem[] = [
 
 const library: NavItem[] = [
   { href: "/templates", icon: "templates", label: "Templates" },
-  { href: "/themes", icon: "themes", label: "Themes" },
   { href: "/design-system", icon: "sparkles", label: "Design system" },
 ];
 
@@ -108,6 +108,12 @@ const Sidebar = () => {
       <Link className={`sb-item${isActive("/auth/signout") ? " active" : ""}`} href="" onClick={handleSignOutUser} title="Sign out">
         <Icon name="sign-out" size={17} /><span>Sign out</span>
       </Link>
+
+      <div className="sb-theme-row">
+        <Icon name="themes" size={17} />
+        <span>Theme</span>
+        <ThemeToggle />
+      </div>
 
       <div className="sb-user">
         <span className="o-avatar o-avatar--sm" style={{ background: "var(--sakura-soft)", color: "var(--sakura-deep)" }}>{initial}</span>

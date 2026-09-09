@@ -414,6 +414,14 @@
   border-color: var(--accent-soft);
   box-shadow: 0 6px 16px rgb(0 0 0 / 0.24), 0 0 0 1px rgb(0 0 0 / 0.08);
 }
+/* on dark paper a black ring disappears — separate the tile with light instead */
+[data-theme="dark"] .db-shell .rsp-ans .a-file {
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+[data-theme="dark"] .db-shell .rsp-ans .a-file:hover,
+[data-theme="dark"] .db-shell .rsp-ans .a-file:focus-within {
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.12);
+}
 
 /* the preview fills the tile and is decorative — the actions carry the semantics */
 .db-shell .rsp-ans .a-file__shot {
@@ -432,11 +440,15 @@
 }
 .db-shell .rsp-ans .a-file:hover .a-file__shot img { transform: scale(1.05); }
 
-/* actions sit on a scrim that lifts in on hover; always visible on touch */
+/* Actions sit on a scrim that lifts in on hover; always visible on touch.
+   The scrim is dark in BOTH themes — it covers arbitrary user images, not the
+   page — so these colours are deliberately fixed rather than tokenised. Using
+   --ink-1 here would flip to near-white in dark mode and vanish on the chips. */
 .db-shell .rsp-ans .a-file__acts {
   position: absolute; inset: 0; z-index: 1;
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  background: rgb(0 0 0 / 0.45);
+  background: rgb(18 16 22 / 0.55);
+  backdrop-filter: blur(2px);
   opacity: 0;
   transition: opacity var(--transition-snap);
 }
@@ -444,24 +456,29 @@
 .db-shell .rsp-ans .a-file__acts:focus-within { opacity: 1; }
 
 .db-shell .rsp-ans .a-file__act {
-  width: 30px; height: 30px; display: grid; place-items: center;
-  background: rgb(255 255 255 / 0.92);
-  border: 1px solid rgb(255 255 255 / 0.6); border-radius: 8px;
-  color: var(--ink-1); cursor: pointer;
+  width: 32px; height: 32px; display: grid; place-items: center;
+  background: rgb(252 250 245 / 0.96);
+  border: 1px solid rgb(255 255 255 / 0.75); border-radius: 9px;
+  color: #211d19; /* fixed dark ink — the chip is always light */
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
   transition: color 140ms, background 140ms, border-color 140ms, transform 140ms;
 }
 .db-shell .rsp-ans .a-file__act:hover {
-  background: #fff; border-color: #fff; transform: translateY(-1px);
+  background: #fff; border-color: #fff;
+  color: var(--accent-deep);
+  transform: translateY(-1px);
 }
 .db-shell .rsp-ans .a-file__act:focus-visible {
-  outline: 2px solid var(--accent-deep); outline-offset: 2px;
+  outline: 2px solid #fff; outline-offset: 2px;
 }
 
 @media (hover: none) {
   .db-shell .rsp-ans .a-file__acts {
     opacity: 1;
-    top: auto; height: 38px;
-    background: linear-gradient(to top, rgb(0 0 0 / 0.6), transparent);
+    top: auto; height: 40px;
+    backdrop-filter: none;
+    background: linear-gradient(to top, rgb(18 16 22 / 0.72), transparent);
   }
 }
 

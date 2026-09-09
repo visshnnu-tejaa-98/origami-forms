@@ -17,7 +17,6 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="light"
       data-palette="coral"
       data-heading-font="caveat"
       data-texture="med"

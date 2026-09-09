@@ -228,9 +228,21 @@ export default class UserService {
             )
             : and(eq(userSettings.userId, id), isNull(userSettings.deletedAt));
 
+        const updatedValues: Partial<typeof userSettings.$inferInsert> = {};
+        if (view !== undefined) updatedValues.view = view;
+        if (theme !== undefined) updatedValues.theme = theme;
+        if (formsPerPage !== undefined) updatedValues.formsPerPage = formsPerPage;
+        if (responsesPerPage !== undefined) updatedValues.responsesPerPage = responsesPerPage;
+
+        if (Object.keys(updatedValues).length === 0)
+            return {
+                success: false,
+                message: "No changes to update",
+            };
+
         const [updatedUser] = await db
             .update(userSettings)
-            .set({ view, theme, formsPerPage, responsesPerPage })
+            .set(updatedValues)
             .where(condition)
             .returning({
                 id: userSettings.id,

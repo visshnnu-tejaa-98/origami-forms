@@ -1,0 +1,445 @@
+/* ============================================================
+   SETTINGS · the paper desk
+   Renders inside the (main) shell layout (shell.css).
+   Built on the Origami design-system tokens (origami.css).
+   ============================================================ */
+
+.db-shell .set-page { position: relative; padding-bottom: 60px; }
+
+/* everything real sits above the floating paper layer */
+.db-shell .set-page > :not(.set-deco) { position: relative; z-index: 1; }
+
+/* ====== FLOATING PAPER DECO ====== */
+.db-shell .set-deco {
+  position: absolute; inset: 0;
+  overflow: hidden; pointer-events: none; z-index: 0;
+}
+.db-shell .set-deco .sd { position: absolute; }
+.db-shell .set-deco .sd-crane {
+  top: 38px; right: 22px; color: var(--accent); opacity: 0.14;
+  transform: rotate(-12deg);
+  animation: paperFloat 7s ease-in-out infinite;
+}
+.db-shell .set-deco .sd-plane {
+  top: 52%; left: -6px; color: var(--indigo-deep); opacity: 0.1;
+  transform: rotate(14deg);
+  animation: paperFloat 8s 0.6s ease-in-out infinite;
+}
+.db-shell .set-deco .sd-sakura {
+  bottom: 84px; right: 11%; color: var(--sakura-deep); opacity: 0.15;
+  animation: paperFloat 9s 0.3s ease-in-out infinite;
+}
+.db-shell .set-deco .sd-sakura2 {
+  top: 30%; right: 33%; color: var(--sakura); opacity: 0.09;
+}
+.db-shell .set-deco .sd-star {
+  bottom: 34%; left: 12%; color: var(--peach-deep); opacity: 0.1;
+  transform: rotate(-8deg);
+  animation: paperFloat 10s 1.2s ease-in-out infinite;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ====== PAGE HEAD ====== */
+.db-shell .set-head {
+  display: flex; align-items: flex-end; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 22px;
+}
+.db-shell .set-head h1 {
+  font-family: var(--font-hand); font-size: 2.6rem; line-height: 1;
+  margin: 0; color: var(--ink-1);
+}
+.db-shell .set-head .sub {
+  color: var(--ink-3); font-size: 0.92rem; font-style: italic; margin-top: 6px;
+}
+.db-shell .set-head .head-actions {
+  margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.db-shell .set-dirty {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.82rem; color: var(--ink-3); font-style: italic;
+}
+
+/* ====== LAYOUT: tab rail + panels ====== */
+.db-shell .set-grid {
+  display: grid; grid-template-columns: 216px 1fr;
+  gap: 24px; align-items: flex-start;
+}
+.db-shell .set-tabs {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-1);
+  padding: 8px; position: sticky; top: 18px;
+}
+/* punched-hole margin, like a page torn from a notebook */
+.db-shell .set-tabs::before {
+  content: ""; position: absolute; left: -1px; top: 14px; bottom: 14px; width: 10px;
+  background-image: radial-gradient(circle at 5px 12px, var(--ink-5) 2px, transparent 2.4px);
+  background-size: 10px 20px; background-repeat: repeat-y;
+  opacity: 0.4; pointer-events: none;
+}
+.db-shell .set-tab {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border: 0; border-radius: 9px;
+  background: transparent; text-align: left; width: 100%;
+  font-family: var(--font-body); font-size: 0.92rem; font-weight: 500;
+  color: var(--ink-2); cursor: pointer;
+  transition: background 140ms, color 140ms;
+}
+.db-shell .set-tab:hover { background: var(--bg-elevated); color: var(--ink-1); }
+.db-shell .set-tab.active {
+  background: var(--accent-soft); color: var(--accent-deep); font-weight: 600;
+}
+.db-shell .set-tab--danger { color: var(--coral-deep); }
+.db-shell .set-tab--danger.active { background: var(--coral-soft); color: var(--coral-deep); }
+.db-shell .set-tab .ic { display: grid; place-items: center; width: 22px; height: 22px; }
+.db-shell .set-tab:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+
+/* ====== PANELS ====== */
+.db-shell .set-panel {
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-2);
+  padding: 30px 26px 24px; margin-bottom: 26px;
+}
+
+/* a folded dog-ear on the bottom-right of every panel */
+.db-shell .set-panel::after {
+  content: ""; position: absolute; right: 0; bottom: 0;
+  width: 26px; height: 26px; pointer-events: none;
+  background: linear-gradient(135deg, transparent 50%, var(--bg-sunken) 50%);
+  border-left: 1px solid var(--rule-line);
+  border-top: 1px solid var(--rule-line);
+  border-bottom-right-radius: var(--r-paper);
+}
+
+/* washi tape variants — the base .o-tape lives in origami.css */
+.db-shell .set-panel .o-tape { z-index: 2; }
+.db-shell .tape-pink { background-color: rgba(237, 157, 174, 0.82); }
+.db-shell .tape-matcha { background-color: rgba(162, 193, 129, 0.8); }
+.db-shell .tape-yellow { background-color: rgba(245, 226, 122, 0.85); }
+.db-shell .tape-lav { background-color: rgba(183, 167, 215, 0.8); }
+.db-shell .tape-coral { background-color: rgba(230, 136, 114, 0.8); }
+.db-shell .set-panel__head {
+  display: flex; align-items: baseline; gap: 12px;
+  flex-wrap: wrap; margin-bottom: 14px;
+}
+.db-shell .set-panel__head h3 {
+  font-family: var(--font-hand); font-size: 1.7rem; line-height: 1; margin: 0; color: var(--ink-1);
+}
+.db-shell .set-panel__head .sub { color: var(--ink-3); font-size: 0.86rem; font-style: italic; }
+.db-shell .set-panel__head .right { margin-left: auto; display: flex; gap: 6px; }
+.db-shell .set-role { display: inline-flex; align-items: center; gap: 4px; }
+
+/* ====== FORM ROWS ====== */
+.db-shell .set-row {
+  display: grid; grid-template-columns: 210px 1fr;
+  gap: 24px; padding: 16px 0;
+  border-top: 1px dashed var(--rule-line); align-items: flex-start;
+}
+.db-shell .set-row:first-of-type { border-top: 0; padding-top: 4px; }
+.db-shell .set-row .label {
+  font-family: var(--font-body); font-weight: 600; color: var(--ink-1); font-size: 0.94rem;
+}
+.db-shell .set-row .label .lhelp {
+  display: block; margin-top: 4px; font-weight: 400; font-style: italic;
+  color: var(--ink-3); font-size: 0.82rem; line-height: 1.45;
+}
+.db-shell .set-row .control { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.db-shell .set-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.db-shell .set-help { font-size: 0.78rem; color: var(--ink-3); font-style: italic; }
+.db-shell .set-btn--danger { color: var(--coral-deep); border-color: var(--coral); }
+.db-shell .set-btn--danger:hover { background: var(--coral-soft); }
+
+/* ====== AVATAR ====== */
+.db-shell .set-av-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.db-shell .set-av {
+  width: 76px; height: 76px; border-radius: 50%; overflow: hidden;
+  display: grid; place-items: center; flex: none;
+  background: var(--sakura-soft); color: var(--sakura-deep);
+  font-family: var(--font-hand); font-size: 2.2rem; font-weight: 600;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+}
+.db-shell .set-av img { width: 100%; height: 100%; object-fit: cover; }
+.db-shell .set-av-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ====== THEME PICKER ====== */
+.db-shell .set-themes { display: flex; gap: 12px; flex-wrap: wrap; }
+.db-shell .set-theme {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 12px; width: 168px; text-align: left; cursor: pointer;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--rule-line); border-radius: 14px;
+  transition: border-color 140ms, box-shadow 140ms, transform 140ms;
+}
+.db-shell .set-theme:hover { transform: translateY(-2px); box-shadow: var(--shadow-paper-2); }
+.db-shell .set-theme.active { border-color: var(--accent); box-shadow: var(--glow-focus); }
+.db-shell .set-theme:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+.db-shell .set-theme .swatch {
+  height: 62px; border-radius: 10px; padding: 10px;
+  display: flex; flex-direction: column; gap: 6px; justify-content: center;
+  border: 1px solid var(--rule-line);
+}
+.db-shell .set-theme .swatch .bar { height: 7px; border-radius: 4px; }
+.db-shell .set-theme .swatch .bar.short { width: 55%; }
+/* the swatches are literal previews, so they hold their own colors in both themes */
+.db-shell .set-theme--light .swatch { background: #fbf7ee; }
+.db-shell .set-theme--light .swatch .bar { background: #d9c8a8; }
+.db-shell .set-theme--dark .swatch { background: #1a181f; border-color: #2e2b36; }
+.db-shell .set-theme--dark .swatch .bar { background: #4a4553; }
+.db-shell .set-theme--system .swatch {
+  background: linear-gradient(110deg, #fbf7ee 0 50%, #1a181f 50% 100%);
+}
+.db-shell .set-theme--system .swatch .bar {
+  background: linear-gradient(110deg, #d9c8a8 0 50%, #4a4553 50% 100%);
+}
+.db-shell .set-theme .meta { display: flex; flex-direction: column; gap: 2px; }
+.db-shell .set-theme .nm {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 600; font-size: 0.92rem; color: var(--ink-1);
+}
+.db-shell .set-theme.active .nm { color: var(--accent-deep); }
+.db-shell .set-theme .hint { font-size: 0.76rem; color: var(--ink-3); font-style: italic; }
+
+/* ====== FORMS VIEW PICKER (grid / list) ====== */
+.db-shell .set-views { display: flex; gap: 12px; flex-wrap: wrap; }
+.db-shell .set-view {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 12px; width: 168px; text-align: left; cursor: pointer;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--rule-line); border-radius: 14px;
+  transition: border-color 140ms, box-shadow 140ms, transform 140ms;
+}
+.db-shell .set-view:hover { transform: translateY(-2px); box-shadow: var(--shadow-paper-2); }
+.db-shell .set-view.active { border-color: var(--accent); box-shadow: var(--glow-focus); }
+.db-shell .set-view:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+
+/* a miniature of the layout each option produces */
+.db-shell .set-view__art {
+  height: 62px; padding: 8px; display: grid; gap: 5px;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line); border-radius: 10px;
+}
+.db-shell .set-view__art span {
+  background: var(--rule-strong); border-radius: 3px; display: block;
+}
+.db-shell .set-view__art--grid { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.db-shell .set-view__art--list { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+.db-shell .set-view.active .set-view__art { border-color: var(--accent-soft); }
+.db-shell .set-view.active .set-view__art span { background: var(--accent); opacity: 0.55; }
+
+.db-shell .set-view .meta { display: flex; flex-direction: column; gap: 2px; }
+.db-shell .set-view .nm {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 600; font-size: 0.92rem; color: var(--ink-1);
+}
+.db-shell .set-view.active .nm { color: var(--accent-deep); }
+.db-shell .set-view .hint { font-size: 0.76rem; color: var(--ink-3); font-style: italic; }
+
+/* ====== PILL PICKER (page sizes, role filter) ====== */
+.db-shell .set-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.db-shell .set-pill {
+  padding: 6px 14px; border-radius: 999px; cursor: pointer;
+  background: var(--bg-elevated); border: 1px solid var(--rule-line);
+  font-family: var(--font-body); font-size: 0.84rem; font-weight: 500; color: var(--ink-2);
+  transition: background 140ms, color 140ms, border-color 140ms;
+}
+.db-shell .set-pill:hover { border-color: var(--rule-strong); color: var(--ink-1); }
+.db-shell .set-pill.active {
+  background: var(--accent-soft); border-color: var(--accent); color: var(--accent-deep); font-weight: 600;
+}
+.db-shell .set-pill:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+
+/* ====== PEOPLE TABLE ====== */
+.db-shell .set-people-bar {
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap; margin-bottom: 14px;
+}
+.db-shell .set-search {
+  display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--bg-elevated); border: 1px solid var(--rule-line); color: var(--ink-3);
+}
+.db-shell .set-search:focus-within { border-color: var(--accent); box-shadow: var(--glow-focus); }
+.db-shell .set-search input {
+  flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
+  font-family: var(--font-body); font-size: 0.88rem; color: var(--ink-1);
+}
+.db-shell .set-search button {
+  display: grid; place-items: center; border: 0; background: transparent;
+  color: var(--ink-3); cursor: pointer; padding: 2px;
+}
+.db-shell .set-search button:hover { color: var(--ink-1); }
+
+.db-shell .set-table-wrap { overflow-x: auto; }
+.db-shell .set-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.db-shell .set-table th,
+.db-shell .set-table td {
+  text-align: left; padding: 12px 10px; font-size: 0.86rem; color: var(--ink-2);
+  border-bottom: 1px dashed var(--rule-line); vertical-align: middle;
+}
+.db-shell .set-table thead th {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-4); border-bottom: 1px solid var(--rule-strong);
+}
+.db-shell .set-table tbody tr:hover { background: var(--bg-elevated); }
+.db-shell .set-table tbody tr:last-child th,
+.db-shell .set-table tbody tr:last-child td { border-bottom: 0; }
+.db-shell .set-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.db-shell .set-table .muted { color: var(--ink-3); }
+
+.db-shell .set-person { display: flex; align-items: center; gap: 10px; }
+.db-shell .set-person .av {
+  width: 32px; height: 32px; flex: none; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--lavender-soft); color: var(--lavender-deep);
+  font-family: var(--font-hand); font-size: 1.1rem; font-weight: 600;
+}
+.db-shell .set-person .who { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.db-shell .set-person .nm {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 600; color: var(--ink-1); font-size: 0.9rem;
+}
+.db-shell .set-person .nm .o-badge { font-size: 0.6rem; padding: 1px 6px; }
+.db-shell .set-person .em { font-size: 0.76rem; color: var(--ink-3); }
+
+.db-shell .set-select {
+  padding: 5px 10px; border-radius: 8px; cursor: pointer;
+  background: var(--bg-elevated); border: 1px solid var(--rule-line);
+  font-family: var(--font-body); font-size: 0.82rem; color: var(--ink-1);
+}
+.db-shell .set-select:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 1px; }
+
+.db-shell .set-row-acts { display: flex; gap: 4px; justify-content: flex-end; }
+.db-shell .set-row-acts button {
+  width: 30px; height: 30px; display: grid; place-items: center;
+  background: transparent; border: 1px solid var(--rule-line); border-radius: 8px;
+  color: var(--ink-3); cursor: pointer;
+  transition: color 140ms, background 140ms, border-color 140ms;
+}
+.db-shell .set-row-acts button:hover {
+  background: var(--bg-elevated); color: var(--ink-1); border-color: var(--rule-strong);
+}
+.db-shell .set-row-acts button.danger:hover {
+  background: var(--coral-soft); color: var(--coral-deep); border-color: var(--coral);
+}
+.db-shell .set-row-acts button:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+
+.db-shell .set-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 32px 0; color: var(--ink-4); font-style: italic; font-size: 0.88rem;
+}
+
+/* ====== EDITOR DRAWER ====== */
+.db-shell .set-drawer-scrim {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgb(0 0 0 / 0.35);
+  display: flex; justify-content: flex-end;
+  animation: fadeIn 160ms ease-out;
+}
+.db-shell .set-drawer {
+  width: min(420px, 100%); height: 100%;
+  display: flex; flex-direction: column;
+  background: var(--surface-card);
+  border-left: 1px solid var(--rule-line);
+  box-shadow: var(--shadow-paper-4);
+  animation: slideIn 200ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.db-shell .set-drawer__head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px; border-bottom: 1px solid var(--rule-line);
+}
+.db-shell .set-drawer__head h3 {
+  flex: 1; margin: 0; font-family: var(--font-hand); font-size: 1.5rem; line-height: 1; color: var(--ink-1);
+}
+.db-shell .set-drawer__head button {
+  width: 30px; height: 30px; display: grid; place-items: center;
+  background: transparent; border: 1px solid var(--rule-line); border-radius: 8px;
+  color: var(--ink-3); cursor: pointer;
+  transition: color 140ms, background 140ms, border-color 140ms;
+}
+.db-shell .set-drawer__head button:hover {
+  background: var(--bg-elevated); color: var(--ink-1); border-color: var(--rule-strong);
+}
+.db-shell .set-drawer__body {
+  flex: 1; overflow-y: auto; padding: 18px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.db-shell .set-drawer__foot {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding: 14px 18px; border-top: 1px solid var(--rule-line); background: var(--bg-elevated);
+}
+
+.db-shell .set-role-picker { display: flex; flex-direction: column; gap: 8px; }
+.db-shell .set-role-opt {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px; text-align: left; cursor: pointer;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--rule-line); border-radius: 12px;
+  transition: border-color 140ms, background 140ms;
+}
+.db-shell .set-role-opt:hover { border-color: var(--rule-strong); }
+.db-shell .set-role-opt.active { border-color: var(--accent); background: var(--accent-soft); }
+.db-shell .set-role-opt:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 2px; }
+.db-shell .set-role-opt .nm {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 600; font-size: 0.9rem; color: var(--ink-1);
+}
+.db-shell .set-role-opt.active .nm { color: var(--accent-deep); }
+.db-shell .set-role-opt .hint { font-size: 0.78rem; color: var(--ink-3); font-style: italic; }
+
+/* ====== DANGER ZONE ====== */
+.db-shell .set-panel--danger { border: 1.5px solid var(--coral); background: var(--coral-soft); }
+.db-shell .set-panel--danger .set-panel__head h3 { color: var(--coral-deep); }
+.db-shell .set-panel--danger .set-panel__head .sub { color: var(--coral-deep); }
+.db-shell .set-danger-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 18px; padding: 4px 0; flex-wrap: wrap;
+}
+.db-shell .set-danger-row .body { flex: 1; min-width: 220px; }
+.db-shell .set-danger-row .ttl { font-weight: 600; color: var(--ink-1); font-size: 0.94rem; }
+.db-shell .set-danger-row .desc {
+  margin-top: 2px; font-size: 0.82rem; color: var(--ink-2); line-height: 1.45;
+}
+.db-shell .set-panel--danger .set-btn--danger { background: var(--paper-0); }
+
+/* ====== STICKY-NOTE FOOTNOTE ====== */
+.db-shell .set-footnote { display: flex; justify-content: center; margin-top: 30px; }
+.db-shell .set-footnote .o-note {
+  max-width: 420px; text-align: center; font-size: 1rem;
+  transform: rotate(-2deg);
+}
+.db-shell .set-footnote .o-note b { font-weight: 700; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1080px) {
+  .db-shell .set-grid { grid-template-columns: 1fr; }
+  .db-shell .set-tabs { position: static; flex-direction: row; flex-wrap: wrap; }
+  .db-shell .set-tab { width: auto; flex: 1 0 calc(33% - 8px); justify-content: center; }
+}
+@media (max-width: 720px) {
+  .db-shell .set-row { grid-template-columns: 1fr; gap: 10px; }
+  .db-shell .set-row-2 { grid-template-columns: 1fr; }
+  .db-shell .set-panel { padding: 18px 16px; }
+  .db-shell .set-theme,
+  .db-shell .set-view { width: 100%; }
+  .db-shell .set-tab { flex: 1 0 calc(50% - 8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .set-theme:hover,
+  .db-shell .set-view:hover { transform: none; }
+  .db-shell .set-deco .sd { animation: none; }
+  .db-shell .set-drawer,
+  .db-shell .set-drawer-scrim { animation: none; }
+}

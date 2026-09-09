@@ -177,7 +177,8 @@
   border-radius: 10px;
 }
 .db-shell .sb-user {
-  margin-top: auto;
+  /* the theme row above already claims the free space */
+  margin-top: 0;
   padding: 12px;
   display: flex;
   align-items: center;
@@ -254,6 +255,7 @@
 .db-shell:not(.db-shell--rail) .sb-item .count,
 .db-shell:not(.db-shell--rail) .sb-item .o-badge,
 .db-shell:not(.db-shell--rail) .sb-user div,
+.db-shell:not(.db-shell--rail) .sb-theme-row > span,
 .db-shell:not(.db-shell--rail) .sb-new span:nth-child(2) {
   animation: sbLabelIn 110ms ease-out backwards;
   animation-delay: 50ms;
@@ -284,6 +286,8 @@
 .db-shell--rail .sb-item .count,
 .db-shell--rail .sb-item .o-badge,
 .db-shell--rail .sb-user div,
+.db-shell--rail .sb-theme-row > svg,
+.db-shell--rail .sb-theme-row > span,
 .db-shell--rail .sb-new span:nth-child(2) {
   display: none;
 }
@@ -425,4 +429,101 @@
   margin: 0 auto 20px;
   max-width: 34ch;
   line-height: 1.55;
+}
+
+/* ====== THEME SWITCH · a folded paper tab on the Themes row ====== */
+
+/* its own row above the user block. Not a link: no hover-to-navigate cue and
+   no active state — the switch is the only interactive thing in it. */
+.db-shell .sb-theme-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  margin: auto 0 2px;   /* absorbs the free space, pinning this and the user block low */
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  border-top: 1px dashed var(--rule-line);
+}
+.db-shell .sb-theme-row > svg { flex: 0 0 auto; }
+.db-shell .sb-theme-row > span {
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.db-shell .sb-theme {
+  flex: 0 0 auto;
+  padding: 0; border: 0; background: transparent;
+  cursor: pointer; line-height: 0;
+  border-radius: 999px;
+}
+.db-shell .sb-theme:focus-visible { outline: 2px solid var(--accent-deep); outline-offset: 3px; }
+
+/* the track is a torn strip of paper — uneven corners, a soft inked edge */
+.db-shell .sb-theme__track {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: space-between;
+  width: 46px; height: 24px; padding: 0 5px;
+  background: var(--bg-sunken);
+  border: 1.5px solid var(--rule-strong);
+  /* asymmetric radii: the hand-cut look the design system uses on paper edges */
+  border-radius: 13px 11px 12px 14px / 12px 14px 11px 13px;
+  box-shadow: inset 0 1px 2px rgba(31, 27, 23, 0.1);
+  transition: background 200ms, border-color 200ms;
+}
+.db-shell .sb-theme:hover .sb-theme__track { border-color: var(--accent); }
+.db-shell .sb-theme.on .sb-theme__track { background: var(--indigo-soft); }
+
+/* sun and moon sit under the knob and fade as it slides across */
+.db-shell .sb-theme__side {
+  display: grid; place-items: center;
+  width: 13px; height: 13px;
+  transition: opacity 200ms, transform 200ms;
+}
+.db-shell .sb-theme__mark {
+  width: 13px; height: 13px;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+.db-shell .sb-theme__side--sun { color: var(--peach-deep); }
+.db-shell .sb-theme__side--moon { color: var(--indigo-deep); }
+.db-shell .sb-theme.on .sb-theme__side--sun { opacity: 0.25; transform: scale(0.85); }
+.db-shell .sb-theme:not(.on) .sb-theme__side--moon { opacity: 0.25; transform: scale(0.85); }
+
+/* the knob is a small folded square — square-ish, tilted, with a dog-ear */
+.db-shell .sb-theme__knob {
+  position: absolute; top: 50%; left: 2px;
+  width: 18px; height: 18px; margin-top: -9px;
+  background: var(--paper-0);
+  border: 1.5px solid var(--ink-1);
+  border-radius: 6px 5px 7px 5px / 5px 7px 5px 6px;
+  box-shadow: 0 1px 3px rgba(31, 27, 23, 0.25);
+  transform: rotate(-6deg);
+  transition: left 220ms cubic-bezier(0.2, 0.7, 0.2, 1), transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+/* the crease of the fold */
+.db-shell .sb-theme__knob::after {
+  content: ""; position: absolute; right: -1px; bottom: -1px;
+  width: 7px; height: 7px;
+  background: linear-gradient(135deg, transparent 46%, var(--ink-1) 47%, var(--ink-1) 52%, var(--bg-sunken) 53%);
+  border-bottom-right-radius: 5px;
+}
+.db-shell .sb-theme.on .sb-theme__knob {
+  left: 24px;
+  transform: rotate(6deg);
+  background: var(--paper-1);
+}
+.db-shell .sb-theme:active .sb-theme__knob { transform: rotate(0deg) scale(0.94); }
+
+/* collapsed rail: the row stacks so the switch stays reachable under the icon */
+.db-shell--rail .sb-theme-row { justify-content: center; padding: 0; }
+.db-shell--rail .sb-theme__track { width: 38px; }
+.db-shell--rail .sb-theme.on .sb-theme__knob { left: 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .sb-theme__knob,
+  .db-shell .sb-theme__side { transition: none; }
 }

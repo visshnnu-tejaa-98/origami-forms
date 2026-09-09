@@ -36,12 +36,13 @@ const TRPCProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 };
 
 export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+
   return (
     <QueryClientProvider client={queryClient}>
       <NextThemesProvider
-        attribute="class"
+        attribute="data-theme"
         defaultTheme="light"
-        enableSystem
+        enableSystem={false}
         disableTransitionOnChange
       >
         <ClerkProvider>

@@ -88,10 +88,10 @@ export type UpdateUserOutputSchemaType = z.infer<typeof updateUserOutputSchema>
 export const updateUserSettingsInputSchema = z.object({
   id: z.string().uuid().describe("id of the user"),
   requesterId: z.string().uuid().describe("requester id of the user who is requesting"),
-  view: z.enum(FORMS_VIEWS).optional().default(GRID).describe("selected view to show forms"),
-  theme: z.enum(THEMES).optional().default(LIGHT).describe("theme of the user"),
-  formsPerPage: z.number().optional().default(10).describe("forms per page of the user"),
-  responsesPerPage: z.number().optional().default(10).describe("responses per page of the user"),
+  view: z.enum(FORMS_VIEWS).optional().describe("selected view to show forms"),
+  theme: z.enum(THEMES).optional().describe("theme of the user"),
+  formsPerPage: z.number().optional().describe("forms per page of the user"),
+  responsesPerPage: z.number().optional().describe("responses per page of the user"),
 })
 
 export type UpdateUserSettingsInputProps = z.infer<typeof updateUserSettingsInputSchema>
