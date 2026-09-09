@@ -95,6 +95,7 @@ const ResponsesList = (props: ResponsesListProps) => {
                 const status = response.status === "completed" ? "Completed" : "Partial";
                 const timeTaken = response.completionTimeInSec ? formatCompletionTime(response.completionTimeInSec) : "--";
                 const submittedAt = response.submittedAt ? relativeTime(response.submittedAt) : "--";
+                const avatarUrl = response.logoUrl
 
                 const tint = TINTS[hash(id) % TINTS.length]!
                 const initial = name ? name[0]?.toUpperCase() : email?.[0]?.toUpperCase() ?? "--"
@@ -124,7 +125,7 @@ const ResponsesList = (props: ResponsesListProps) => {
                         {checked.has(id) && <Icon name="check" size={12} />}
                     </button>
                     <div className="who">
-                        <span className={`rsp-av t-${tint}`}>{initial}</span>
+                        {avatarUrl ? <img src={avatarUrl} alt="" className={`rsp-av`} /> : <span className={`rsp-av t-${tint}`}>{initial}</span>}
                         <div className="txt">
                             <span className="nm" title={name}>
                                 {name}
