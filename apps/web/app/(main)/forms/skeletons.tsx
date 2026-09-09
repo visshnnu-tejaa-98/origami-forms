@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { PaperBoat, PaperFlower, PaperFrog, PaperCrane, PaperStar } from "../components/origami-art";
 
@@ -143,4 +145,14 @@ export const ToolbarSkeleton = ({
     <Slab w={sortWidth} h={34} />
     {showViewToggle && <Slab w={78} h={34} r={8} />}
   </div>
+);
+export const FormsViewSkeleton = ({ count }: { count?: number }) => (
+  <>
+    <div className="sk-when-grid">
+      <FormsGridSkeleton count={count} />
+    </div>
+    <div className="sk-when-list">
+      <FormsTableSkeleton count={count} />
+    </div>
+  </>
 );

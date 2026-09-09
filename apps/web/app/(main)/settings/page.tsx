@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./settings.css";
 import { Icon } from "../components/icons";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -10,12 +10,7 @@ import ProfilePanel from "./components/ProfilePanel";
 import AppearancePanel from "./components/AppearancePanel";
 import PreferencesPanel from "./components/PreferencesPanel";
 import DangerPanel from "./components/DangerPanel";
-import {
-    PreferencesDraft,
-    ProfileDraft,
-    Role,
-    SettingsSection,
-} from "./types";
+import { PreferencesDraft, ProfileDraft, Role, SettingsSection, ThemeChoice, ViewChoice } from "./types";
 import { useSettings } from "~/hooks/use-usersettings";
 import { useUserStore } from "~/app/store/user-store";
 import { useUpdateUserSettings } from "~/hooks/use-user";
@@ -27,9 +22,10 @@ const VIEWER = {
 };
 
 const Settings = () => {
-    const { userSettings, updateUserSettings } = useSettings()
-    const commitSettings = useUserStore((state) => state.updateSettings)
-    const { updateUserSettings: saveUserSettings } = useUpdateUserSettings()
+    const { userSettings, updateUserSettings } = useSettings();
+    const commitSettings = useUserStore((state) => state.updateSettings);
+    const userSettingsFromRedux = useUserStore(state => state.settings)
+    const { updateUserSettings: saveUserSettings } = useUpdateUserSettings();
     const { setTheme } = useTheme();
 
     const [section, setSection] = useState<SettingsSection>("profile");
@@ -41,35 +37,52 @@ const Settings = () => {
         avatarUrl: "",
     });
 
-    const { theme, view } = userSettings
+    const { theme, view } = userSettings;
     const [prefs, setPrefs] = useState<PreferencesDraft>({
-        formsPerPage: 10,
-        responsesPerPage: 20,
+        formsPerPage: userSettingsFromRedux?.formsPerPage || 10,
+        responsesPerPage: userSettingsFromRedux?.responsesPerPage || 10,
     });
 
     const [deleteAccount, setDeleteAccount] = useState(false);
 
     const isAdmin = VIEWER.role === "admin";
 
-    const touch = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) => (patch: Partial<T>) => {
-        setter((prev) => ({ ...prev, ...patch }));
+    const handlePreferenceChange =
+        <T extends PreferencesDraft>(setter: React.Dispatch<React.SetStateAction<T>>) =>
+            (patch: Partial<T>) => {
+                setter((prev) => ({ ...prev, ...patch }));
+                setDirty(true);
+
+                if (patch.hasOwnProperty("formsPerPage")) {
+                    updateUserSettings("formsPerPage", Number(patch.formsPerPage));
+                }
+
+                if (patch.hasOwnProperty("responsesPerPage")) {
+                    updateUserSettings("responsesPerPage", Number(patch.responsesPerPage));
+                }
+            };
+
+    const handleThemeChange = (theme: ThemeChoice) => {
+        updateUserSettings("theme", theme);
+        setDirty(true);
+    };
+
+    const handleViewChange = (view: ViewChoice) => {
+        updateUserSettings("view", view);
         setDirty(true);
     };
 
     const handleSaveUserSettings = () => {
         const { view, theme, formsPerPage, responsesPerPage } = userSettings;
-
-        saveUserSettings({ view, theme, formsPerPage, responsesPerPage })
-        // commit the draft so the rest of the app sees it without a refetch
-        commitSettings({ view, theme, formsPerPage, responsesPerPage })
-        setTheme(theme) // the chosen theme takes effect here, not on selection
-        setDirty(false)
-    }
+        saveUserSettings({ view, theme, formsPerPage, responsesPerPage });
+        commitSettings({ view, theme, formsPerPage, responsesPerPage });
+        setTheme(theme);
+        setDirty(false);
+    };
 
     const handleDiscardUserSettings = () => {
-        setDirty(false)
-    }
-
+        setDirty(false);
+    };
 
     return (
         <div className="set-page o-page">
@@ -109,14 +122,14 @@ const Settings = () => {
                 <SettingsNav active={section} onSelect={setSection} isAdmin={isAdmin} />
 
                 <div className="set-content">
-
                     {/* Renders if section is 'profile' */}
                     <ProfilePanel
                         section={section}
                         draft={profile}
                         email={VIEWER.email}
                         role={VIEWER.role}
-                        onChange={touch(setProfile)}
+                        // onChange={touch(setProfile)}
+                        onChange={() => { }}
                     />
 
                     {/* Renders if section is 'appearance' */}
@@ -124,23 +137,17 @@ const Settings = () => {
                         section={section}
                         theme={theme}
                         view={view}
-                        onChange={(theme) => {
-                            updateUserSettings("theme", theme)
-                            setDirty(true);
-                        }}
-                        onViewChange={(view) => {
-                            updateUserSettings("view", view)
-                            setDirty(true);
-                        }}
+                        onChange={(theme) => handleThemeChange(theme)}
+                        onViewChange={(view) => handleViewChange(view)}
                     />
 
                     {/* Renders if section is 'preferences' */}
                     <PreferencesPanel
                         section={section}
                         draft={prefs}
-                        onChange={touch(setPrefs)}
+                        onChange={handlePreferenceChange(setPrefs)}
+                    // onChange={handleChangePreferences}
                     />
-
 
                     {/* Renders if section is 'danger' */}
                     <DangerPanel section={section} onDeleteAccount={() => setDeleteAccount(true)} />

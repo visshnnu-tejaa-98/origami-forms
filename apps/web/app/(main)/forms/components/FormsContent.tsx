@@ -1,7 +1,7 @@
 import React from "react";
 import { FormsContentProps } from "../../types";
 import { EMPTY_COPY, LIST } from "../../constants";
-import { FormsGridSkeleton, FormsTableSkeleton } from "../skeletons";
+import { FormsViewSkeleton } from "../skeletons";
 import ErrorComponent from "../../components/ErrorComponent";
 import EmptyTemplate from "./EmptyTemplate";
 import { useRouter } from "next/navigation";
@@ -36,9 +36,7 @@ const FormsContent = (props: FormsContentProps) => {
         router.push("/builder");
     };
 
-    if (loading) {
-        return view === LIST ? <FormsTableSkeleton /> : <FormsGridSkeleton />;
-    }
+    if (loading) return <FormsViewSkeleton />;
 
     if (listFormsError) {
         return (

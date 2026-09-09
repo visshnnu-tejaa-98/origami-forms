@@ -2,7 +2,7 @@
 
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import "./forms.css";
-import { FormsGridSkeleton, FormsHeaderSkeleton, ToolbarSkeleton } from "./skeletons";
+import { FormsHeaderSkeleton, FormsViewSkeleton, ToolbarSkeleton } from "./skeletons";
 import { useUser } from "@clerk/nextjs";
 import { useListForms } from "~/hooks/use-form";
 import { useDebounce } from "~/hooks/use-debounce";
@@ -17,6 +17,7 @@ import FormsHeader from "./components/FormsHeader";
 import FormsContent from "./components/FormsContent";
 import FloatingOrigamiDecorations from "../components/FloatingOrigamiDecorations";
 import { useFormStore } from "~/app/store/form-store";
+import { useUserStore } from "~/app/store/user-store";
 
 const Forms = () => {
   const { searchParams, setParams } = useQueryParams();
@@ -30,11 +31,13 @@ const Forms = () => {
     defaultSort: UPDATED_AT,
     defaultOrder: DESC,
   });
+
   const { isLoaded: isUserLoaded } = useUser();
 
   const urlSearch = searchParams.get("search") ?? "";
 
   const [query, setQuery] = useState(urlSearch);
+
   const debouncedQuery = useDebounce(query.trim(), 400);
 
   useEffect(() => {
@@ -42,7 +45,9 @@ const Forms = () => {
     setParams({ search: debouncedQuery || null, page: null });
   }, [debouncedQuery, urlSearch, setParams]);
 
-  const { page, pageSize, getPaginationProps } = usePagination({ pageSize: 10 });
+  const pageSizeFromRedux = useUserStore(state => state.settings.formsPerPage)
+
+  const { page, pageSize, getPaginationProps } = usePagination({ pageSize: pageSizeFromRedux ?? 10 });
 
   const { formsData, listFormsIsPending, listFormsError, refetchForms } = useListForms({
     page,
@@ -100,7 +105,7 @@ const FormsPage = () => (
       <div className="forms-page">
         <FormsHeaderSkeleton />
         <ToolbarSkeleton />
-        <FormsGridSkeleton />
+        <FormsViewSkeleton />
       </div>
     }
   >

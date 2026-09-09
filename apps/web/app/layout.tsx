@@ -24,6 +24,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=JSON.parse(localStorage.getItem("user")||"{}").state;var v=s&&s.settings&&s.settings.view;document.documentElement.dataset.view=v==="list"?"list":"grid";}catch(e){document.documentElement.dataset.view="grid";}})();`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

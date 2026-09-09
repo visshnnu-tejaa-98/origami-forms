@@ -8,6 +8,7 @@ import { useGetUser } from "~/hooks/use-user";
 import Sidebar from "./components/Sidebar";
 import { Icon } from "./components/icons";
 import { useSidebarRail } from "~/hooks/use-sidebar-rail";
+import { useViewAttribute } from "~/hooks/use-view-attribute";
 import "./shell.css";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
@@ -15,6 +16,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const flush = pathname?.endsWith("/preview") ?? false;
 
   const { railed, closing, collapsed, toggleable, toggle } = useSidebarRail();
+
+  useViewAttribute();
 
   const { isLoaded, isSignedIn, user } = useUser();
   const { createUserAsync } = useGetUser();

@@ -2,9 +2,6 @@ import React from "react";
 import { PAGE_SIZE_CHOICES } from "../constants";
 import { PreferencesPanelProps, SizeRowProps } from "../types";
 
-
-
-
 const SizeRow = ({ label, help, name, value, onPick }: SizeRowProps) => (
     <div className="set-row">
         <div className="label">

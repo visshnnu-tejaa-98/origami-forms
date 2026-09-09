@@ -102,3 +102,9 @@ export type EmptyScreenProps = {
     cta: string,
     onClick: () => void
 }
+
+export type ZustandLocalStorageType = {
+    state: {
+        settings: UserSettingsType;
+    };
+};

@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useMemo } from "react";
-import { ASC, DESC, GRID } from "~/app/(main)/constants";
+import { ASC, DESC } from "~/app/(main)/constants";
 import type { SORT_ORDER, SelectionAll, ToolbarProps } from "~/app/(main)/types";
 import { useQueryParams } from "./use-query-params";
 import { useUserStore } from "~/app/store/user-store";
@@ -32,9 +32,8 @@ export function useToolbar<TTab extends string, TSort extends string>({
     const tab = getParam<TTab>(TAB_PARAM, defaultTab, tabs);
     const sort = getParam<TSort>(SORT_PARAM, defaultSort, sorts);
     const sortOrder = getParam<SORT_ORDER>(ORDER_PARAM, defaultOrder, ORDER_VALUES);
-    const storedView = useUserStore((state) => state.settings.view);
+    const view = useUserStore((state) => state.settings.view);
     const setView = useUserStore((state) => state.updateSettings);
-    const view = storedView ?? GRID;
 
     const setTab = useCallback(
         (next: TTab) => {

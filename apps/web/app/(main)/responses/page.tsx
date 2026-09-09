@@ -33,6 +33,7 @@ import { ListResponseOutputType } from "@repo/services/response/model";
 import { exportResponsesToCsv } from "./utils";
 import ActionsBar from "./components/ActionBar";
 import { useResponsesStore } from "~/app/store/responses.store";
+import { useUserStore } from "~/app/store/user-store";
 
 const Responses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,8 +43,9 @@ const Responses = () => {
   );
   const [tabs, setTabs] = useState(RESPONSE_STATUS_TABS)
 
+  const pageSizeFromRedux = useUserStore(state => state.settings.responsesPerPage)
   const debouncedQuery = useDebounce(searchQuery.trim(), 400);
-  const { page, pageSize, getPaginationProps } = usePagination({ pageSize: 10 });
+  const { page, pageSize, getPaginationProps } = usePagination({ pageSize: pageSizeFromRedux ?? 10 });
   const { toolbarProps, tab, sort, sortOrder, setTab, } = useToolbar<ResponseTab, ResponseSortField>({
     tabs: RESPONSE_TAB_VALUES,
     defaultTab: ALL,
