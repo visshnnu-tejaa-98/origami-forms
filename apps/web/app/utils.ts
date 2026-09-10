@@ -145,11 +145,7 @@ export function getGreeting() {
     return "Good evening";
 }
 
-// returns "month day, year": Sept 29, 2026
-export function formatDate(date = new Date()) {
-    const day = date.getDate();
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const year = date.getFullYear();
 
-    return `${month} ${day} ${year}`;
+export function formatIndianNumber(num: number) {
+    return Number(num).toLocaleString('en-IN');
 }

@@ -223,6 +223,15 @@
 .db-shell .stat-card .delta.down {
   color: var(--coral-deep);
 }
+/* keeps the skeleton the exact height of a real stat card */
+.db-shell .stat-card.sk-card .num {
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+}
+.db-shell .stat-card.sk-card .lbl {
+  margin-top: 6px;
+}
 .db-shell .stat-card .mini-spark {
   position: absolute;
   bottom: 12px;

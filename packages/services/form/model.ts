@@ -444,12 +444,13 @@ export const formStatsListOutputSchema = z.object({
     archived: z.number().int().nonnegative().describe("number of archived forms"),
     expired: z.number().int().nonnegative().describe("number of expired forms"),
     total: z.number().int().nonnegative().describe("total number of forms"),
+    totalResponses: z.number().int().nonnegative().describe("total number of responses"),
+    totalViews: z.number().int().nonnegative().describe("total number of views"),
+    completedResponses: z.number().int().nonnegative().describe("total number of completed responses"),
+    pendingResponses: z.number().int().nonnegative().describe("total number of draft responses"),
+    completionRate: z.number().int().nonnegative().describe("percentage of forms that are completed"),
+    avgTimeCompletion: z.number().int().nonnegative().describe("average time to complete the form in seconds"),
     // TODO: Add the below stats after the responses api is ready
-    // totalResponses: z.number().int().nonnegative().describe("total number of responses"),
-    // completedResponses: z.number().int().nonnegative().describe("total number of responses which hit the max submissions limit"),
-    // completionRate: z.number().int().nonnegative().describe("percentage of forms that are completed"),
-    // averageCompletionRate: z.number().int().nonnegative().describe("average completion rate of all forms"),
-    // totalViews: z.number().int().nonnegative().describe("total number of views"),
     // totalShares: z.number().int().nonnegative().describe("total number of shares"),
 })
 

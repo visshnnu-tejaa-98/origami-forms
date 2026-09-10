@@ -1,6 +1,8 @@
 import db, {
     and,
     asc,
+    avg,
+    count,
     desc,
     eq,
     formFields,
@@ -16,6 +18,8 @@ import db, {
     or,
     responseAnswers,
     sql,
+    sum,
+    views,
 } from "@repo/database";
 import {
     CloneFormInputProps,
@@ -29,7 +33,8 @@ import {
     SubmitPublicResponseProps,
     UpdateFormProps,
     UpSertFormFieldsInputProps,
-    FormClosedReasonProps
+    FormClosedReasonProps,
+    formStatsListOutputSchema
 } from "./model";
 import {
     ADMIN,
@@ -561,7 +566,7 @@ export default class FormService {
             ? and(eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
             : isNull(forms.deletedAt);
 
-        const [rows, totalItems] = await Promise.all([
+        const [rows, totalItems, submissions, totalViews, completedResponses, avgTimeCompletion] = await Promise.all([
             db.query.forms.findMany({
                 where: condition,
                 columns: {
@@ -570,20 +575,69 @@ export default class FormService {
                 },
             }),
             db.$count(forms, condition),
+            db.select({ total: sum(forms.submissionCount) }).from(forms).where(condition),
+            db.select({
+                count: count()
+            }).from(views)
+                .where(
+                    inArray(
+                        views.formId,
+                        db.select({ id: forms.id }).from(forms).where(and(
+                            eq(forms.creatorId, requesterId),
+                            isNull(forms.deletedAt)
+                        ))
+                    )
+                ),
+            db.select({
+                count: count()
+            }).from(formResponses)
+                .where(and(
+                    eq(formResponses.status, 'completed'),
+                    inArray(formResponses.formId,
+                        db.select({ id: forms.id }).from(forms).where(condition)
+                    )
+                )),
+            db.select({ avgTime: avg(formResponses.CompletionTimeInSec) }).from(formResponses)
+                .where(and(
+                    eq(formResponses.status, 'completed'),
+                    inArray(formResponses.formId,
+                        db.select({ id: forms.id }).from(forms).where(condition)
+                    )
+                ))
         ]);
-
         const published = rows.filter((form) => form.status === PUBLISHED && (form.expiresAt === null || form.expiresAt > new Date())).length;
         const draft = rows.filter((form) => form.status === DRAFT).length;
         const archived = rows.filter((form) => form.status === ARCHIVED).length;
         const expired = rows.filter((form) => form.expiresAt && form.expiresAt < new Date() && form.status === PUBLISHED).length;
+        const totalResponses = Number(submissions[0]?.total)
+        const totalViewsCount = Number(totalViews[0]?.count)
+        const completedResponsesCount = Number(completedResponses[0]?.count)
+        const pendingResponses = totalResponses - completedResponsesCount;
+        const completionRate = totalResponses > 0 ? Math.round((completedResponsesCount / totalResponses) * 100) : 0;
+        const avgTime = totalResponses > 0 ? Math.round(Number(avgTimeCompletion?.[0]?.avgTime) ?? 0) : 0;
 
-        return {
+        const result = {
             published,
             draft,
             archived,
             expired,
             total: totalItems,
-        };
+            totalResponses,
+            totalViews: totalViewsCount,
+            completedResponses: completedResponsesCount,
+            pendingResponses,
+            completionRate,
+            avgTimeCompletion: avgTime
+        }
+
+        const res = await formStatsListOutputSchema.safeParseAsync(result);
+
+        if (!res.success) {
+            console.log(res.error);
+            throw new Error("Failed to parse form stats");
+        }
+
+        return res.data;
     }
 
     private publicFormCondition(formId: string) {

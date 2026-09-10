@@ -12,13 +12,7 @@ const formsInitialState = {
         hasNextPage: false,
         hasPrevPage: false,
     },
-    formsStats: {
-        published: 0,
-        draft: 0,
-        archived: 0,
-        expired: 0,
-        total: 0,
-    }
+    formsStats: null as FormStatsListOutputSchemaType | null,
 }
 
 export const useFormStore = create(

@@ -3,7 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import React from "react";
 import { useUserStore } from "~/app/store/user-store";
-import { formatDate, getGreeting, getNameFromEmail } from "~/app/utils";
+import { currentDate, getGreeting, getNameFromEmail } from "~/app/utils";
 import { Icon } from "~/components/origami/icon";
 
 const Topbar = () => {
@@ -13,12 +13,11 @@ const Topbar = () => {
     const firstName = userFirstNameFromRedux
         ? userFirstNameFromRedux
         : (user?.firstName ?? getNameFromEmail(email));
-    const day = formatDate();
     const greetingMessage = getGreeting();
     return (
         <header className="topbar">
             <h1>
-                {greetingMessage}, {firstName}.<span className="smaller">{day}.</span>
+                {greetingMessage}, {firstName}.<span className="smaller">{currentDate}.</span>
             </h1>
             <div className="search">
                 <Icon name="search" size={16} />
