@@ -59,6 +59,7 @@ const Forms = () => {
   });
 
   const setFormsToRedux = useFormStore(state => state.setForms)
+  const formsStatsFromRedux = useFormStore(state => state.formsStats)
   useEffect(() => {
     if (!formsData) return;
     setFormsToRedux(formsData);
@@ -68,7 +69,7 @@ const Forms = () => {
 
   const loading = !isUserLoaded || listFormsIsPending;
 
-  const firstLoad = loading && !formsData;
+  const firstLoad = loading && !formsData && formsStatsFromRedux === null;
 
   const totalResponses = forms.reduce((s, f) => s + f.responses, 0);
 

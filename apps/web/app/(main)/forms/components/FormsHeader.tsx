@@ -3,12 +3,19 @@ import { Icon } from '~/components/origami/icon'
 import { FormHeaderProps } from '../../types'
 import Link from 'next/link'
 import { useFormStore } from '~/app/store/form-store'
+import { useRouter } from 'next/navigation'
 
 const FormsHeader = (props: FormHeaderProps) => {
-    const { query, setQuery, totalResponses } = props
+    const { query, setQuery } = props
+    const router = useRouter()
     const formsStats = useFormStore((state) => state.formsStats)
-    const { total } = formsStats
 
+    if (formsStats === null) {
+        return null;
+    }
+
+    const total = formsStats.total
+    const totalResponses = formsStats.totalResponses
     return (
         <header className="forms-head">
             <div>
@@ -39,7 +46,10 @@ const FormsHeader = (props: FormHeaderProps) => {
                         </button>
                     )}
                 </div>
-                <Link href="#" className="o-btn o-btn--accent">
+                <Link href="#" className="o-btn o-btn--accent" onClick={(e) => {
+                    e.preventDefault();
+                    router.push("/builder")
+                }}>
                     <Icon name="plus" size={15} /> New form
                 </Link>
             </div>
