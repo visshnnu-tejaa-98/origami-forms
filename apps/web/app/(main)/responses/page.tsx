@@ -98,10 +98,6 @@ const Responses = () => {
     );
   }, [responsesStatsData]);
 
-  useEffect(() => {
-    console.log({ tabs })
-  }, [tabs])
-
   const filterOptions: DefaultFilterOptions = {
     sortBy: sort,
     sortOrder,

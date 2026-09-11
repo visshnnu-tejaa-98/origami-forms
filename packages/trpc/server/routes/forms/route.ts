@@ -29,6 +29,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, publicProcedure, router } from "../../trpc";
 import { formService } from "../../services";
+import { realtimeBus } from "@repo/services/socket/bus";
 
 const TAGS = ["Forms"];
 
@@ -141,6 +142,9 @@ export const formsRouter = router({
             if (!result) {
                 throw new Error("Something went wrong while recording your response");
             }
+
+            const { creatorId, ...event } = result.realTime
+            realtimeBus.responseCreated(creatorId, { ...event, responseId: result.responseId })
 
             return result;
         }),

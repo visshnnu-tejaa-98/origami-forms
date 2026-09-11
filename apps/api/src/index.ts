@@ -3,10 +3,12 @@ import { logger } from "@repo/logger";
 import { app as expressApplication } from "./server";
 
 import { env } from "./env";
+import { createSocketServer } from "./socket";
 
 async function init() {
   try {
     const server = http.createServer(expressApplication);
+    createSocketServer(server);
     const PORT: number = env.PORT ? +env.PORT : 8000;
     server.listen(PORT, () => {
       logger.info(`http server is running on PORT ${PORT}`);

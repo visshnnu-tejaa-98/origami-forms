@@ -21,13 +21,16 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@clerk/backend": "^3.17.2",
     "@clerk/express": "^2.1.48",
     "@repo/logger": "workspace:*",
+    "@repo/services": "workspace:^",
     "@repo/trpc": "workspace:*",
     "@scalar/express-api-reference": "^0.8.30",
     "@trpc/server": "^11.8.1",
     "cors": "^2.8.5",
     "express": "^5.2.1",
+    "socket.io": "^4.8.3",
     "trpc-to-openapi": "^3.1.0",
     "zod": "^4.3.5"
   }

@@ -726,9 +726,6 @@ export default class FormService {
                 .map((field) => [field.id, field]),
         );
 
-        console.log(JSON.stringify({ apple: 22222, answerable: [...answerable], formFields: form.fields }, null, 2))
-
-
         const toStore = answers
             .filter((answer) => answerable.has(answer.fieldId))
             .map((answer) => ({
@@ -783,6 +780,15 @@ export default class FormService {
                 success: true,
                 responseId: response.id,
                 message: "Response recorded",
+                realTime: {
+                    creatorId: form.creatorId,
+                    formId: form.id,
+                    formTitle: form.title,
+                    logoUrl: form.logoUrl,
+                    submittedAt: now.toISOString(),
+                    completionTimeInSec: completionTimeInSec ?? null,
+                    submissionCount: form.submissionCount + 1,
+                },
             };
         });
     }

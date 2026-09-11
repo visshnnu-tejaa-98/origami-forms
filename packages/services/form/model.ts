@@ -15,6 +15,7 @@ import {
     UNLISTED,
 } from "@repo/database/constants";
 import { z } from "zod";
+import { baseFormSubmissionFieldsSchema, responseCreatedEventSchema } from "../socket";
 
 // TODO: Replace all the output schemas with nullish / nullable instead of optional
 
@@ -537,10 +538,21 @@ export const submitPublicResponseInputSchema = z.object({
 
 export type SubmitPublicResponseProps = z.infer<typeof submitPublicResponseInputSchema>;
 
+
+
+const submitRealTimePublicResponseSchema = z.object({
+    ...baseFormSubmissionFieldsSchema.shape,
+    creatorId: z.string().uuid().describe("id of the user who created the form"),
+    // responseId: z.string().uuid().describe("id of the response"),
+})
+
+export type SubmitRealTimePublicResponseSchemaType = z.infer<typeof submitRealTimePublicResponseSchema>;
+
 export const submitPublicResponseOutputSchema = z.object({
     success: z.boolean().describe("whether the response was recorded"),
     responseId: z.string().uuid().describe("id of the recorded response"),
     message: z.string().describe("success message"),
+    realTime: submitRealTimePublicResponseSchema
 });
 
 export type SubmitPublicResponseOutputSchemaType = z.infer<typeof submitPublicResponseOutputSchema>;
