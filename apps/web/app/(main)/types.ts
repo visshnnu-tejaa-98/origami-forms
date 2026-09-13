@@ -114,6 +114,8 @@ export type ActivityContentProps = {
     respondeeId: string,
     creatorName: string,
     respondeeName: string;
+    creatorAvatarUrl: string;
+    respondeeAvatarUrl: string;
     activityType: string;
     formName: string;
     occuredAt: string;

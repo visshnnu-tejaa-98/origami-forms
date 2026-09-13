@@ -7,8 +7,15 @@ import { useUserStore } from "~/app/store/user-store";
 import { ActivityContentProps } from "../../types";
 import { ActivitiesSkeleton } from "../skeletons";
 
+const ActivityAvatar = ({ avatarUrl, name }: { avatarUrl: string; name: string }) => {
+    if (avatarUrl) {
+        return <img src={avatarUrl} alt="" className="av av--img" loading="lazy" />;
+    }
+    return <span className="av">{name?.slice(0, 1).toUpperCase() || "A"}</span>;
+};
+
 const ActivityContent = (props: ActivityContentProps) => {
-    const { creatorId, respondeeId, creatorName, respondeeName, activityType, formName, occuredAt } = props;
+    const { creatorId, respondeeId, creatorName, respondeeName, creatorAvatarUrl, respondeeAvatarUrl, activityType, formName, occuredAt } = props;
     const user = useUserStore(state => state.user)
 
     const isCreatorMe = user?.id === creatorId;
@@ -75,13 +82,18 @@ const Activities = () => {
                     let tint = TINTS[hash(idx.toString()) % TINTS.length];
                     return (
                         <div key={idx} className={`row ${tint}`}>
-                            <span className="av">{a.respondeeName?.slice(0, 1).toUpperCase() || "A"}</span>
+                            <ActivityAvatar
+                                avatarUrl={a.respondeeAvatarUrl ?? ""}
+                                name={a.respondeeName ?? ""}
+                            />
                             <div className="body">
                                 <ActivityContent
                                     creatorId={a.creatorId ?? ""}
                                     respondeeId={a.respondeeId ?? ""}
                                     creatorName={a.creatorName ?? ""}
                                     respondeeName={a.respondeeName ?? ""}
+                                    creatorAvatarUrl={a.creatorAvatarUrl ?? ""}
+                                    respondeeAvatarUrl={a.respondeeAvatarUrl ?? ""}
                                     activityType={a.activityType}
                                     formName={a.formName}
                                     occuredAt={a.occuredAt}

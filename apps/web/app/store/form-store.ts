@@ -29,7 +29,6 @@ export const useFormStore = create(
                         set((state) => {
                             // dedupe: a reconnect can replay, and StrictMode double-mounts in dev
                             if (state.liveResponses.some((r) => r.responseId === event.responseId)) return state;
-                            console.log(111)
                             return {
                                 liveResponses: [event, ...state.liveResponses].slice(0, 20),
                                 formsStats: state.formsStats

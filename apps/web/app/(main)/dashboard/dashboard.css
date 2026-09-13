@@ -414,6 +414,11 @@
   font-size: 1rem;
   flex: 0 0 30px;
 }
+.db-shell .activity .row .av--img {
+  object-fit: cover;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-line);
+}
 .db-shell .activity .row.k2 .av {
   background: var(--matcha-soft);
   color: var(--matcha-deep);

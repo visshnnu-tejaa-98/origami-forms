@@ -36,6 +36,8 @@ export const getActivitySchema = z.object({
     creatorName: z.string().nullish().describe("name of the form's creator"),
     respondeeId: z.string().uuid().nullish().describe("id of the user who submitted the form"),
     respondeeName: z.string().nullish().describe("name of the user who performed the activity"),
+    creatorAvatarUrl: z.string().nullish().describe("avatar url of the form's creator"),
+    respondeeAvatarUrl: z.string().nullish().describe("avatar url of the user who performed the activity"),
     activityType: z.enum(ANALYTICS_EVENT_TYPES).describe("type of activity"),
     formName: z.string().describe("name of the form"),
     occuredAt: isoDateSchema.describe("timestamp of activity"),

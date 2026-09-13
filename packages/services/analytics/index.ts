@@ -82,7 +82,8 @@ export default class AnalyticsService {
                         id: true,
                         firstName: true,
                         lastName: true,
-                        email: true
+                        email: true,
+                        avatarUrl: true,
                     }
                 },
                 respondee: {
@@ -90,7 +91,8 @@ export default class AnalyticsService {
                         id: true,
                         firstName: true,
                         lastName: true,
-                        email: true
+                        email: true,
+                        avatarUrl: true,
                     }
                 }
             },
@@ -115,6 +117,8 @@ export default class AnalyticsService {
                 respondeeId: activity.respondeeId,
                 creatorName,
                 respondeeName,
+                creatorAvatarUrl: activity.creator?.avatarUrl || "",
+                respondeeAvatarUrl: activity.respondee?.avatarUrl || "",
                 activityType: activity.activityType,
                 formName: activity.form?.title || "Untitled Form",
                 occuredAt: activity.occuredAt.toISOString(),
