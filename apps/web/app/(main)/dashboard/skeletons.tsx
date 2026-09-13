@@ -35,6 +35,24 @@ export const StatsSkeleton = () => (
   </section>
 );
 
+/** Widths per row so the placeholder feed reads as varied copy, not a stack of identical bars. */
+const ACTIVITY_ROWS = ["82%", "68%", "90%", "74%", "60%"];
+
+export const ActivitiesSkeleton = ({ count = 5 }: { count?: number }) => (
+  <div className="activity" aria-hidden>
+    {ACTIVITY_ROWS.slice(0, count).map((w, i) => (
+      <div key={i} className="row sk-row">
+        <span className="sk sk-shimmer av" style={{ borderRadius: "50%" }} />
+        <div className="body">
+          <Bar w={w} h={11} />
+          <div className="time"><Bar w="52px" h={8} /></div>
+        </div>
+        <span className="sk sk-shimmer pip" />
+      </div>
+    ))}
+  </div>
+);
+
 export const RecentFormsSkeleton =({ count = 5 }: { count?: number }) => (
   <>
     {Array.from({ length: count }).map((_, i) => (

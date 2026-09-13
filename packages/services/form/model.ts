@@ -540,7 +540,7 @@ export type SubmitPublicResponseProps = z.infer<typeof submitPublicResponseInput
 
 
 
-const submitRealTimePublicResponseSchema = z.object({
+export const submitRealTimePublicResponseSchema = z.object({
     ...baseFormSubmissionFieldsSchema.shape,
     creatorId: z.string().uuid().describe("id of the user who created the form"),
     // responseId: z.string().uuid().describe("id of the response"),

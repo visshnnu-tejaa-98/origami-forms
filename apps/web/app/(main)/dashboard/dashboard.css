@@ -454,6 +454,50 @@
   background: var(--accent);
 }
 
+/* activity skeleton — inherits .row/.av/.pip geometry, only the paint differs */
+.db-shell .activity .row.sk-row .av,
+.db-shell .activity .row.sk-row .pip {
+  background: var(--bg-elevated);
+}
+.db-shell .activity .row.sk-row .time {
+  margin-top: 6px;
+}
+
+/* compact in-panel states: empty feed / failed fetch */
+.db-shell .panel .panel-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 28px 16px 22px;
+}
+.db-shell .panel .panel-state .art {
+  color: var(--ink-4);
+  opacity: 0.65;
+  margin-bottom: 2px;
+}
+.db-shell .panel .panel-state.is-error .art {
+  color: var(--coral-deep);
+  opacity: 1;
+}
+.db-shell .panel .panel-state h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+.db-shell .panel .panel-state p {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+.db-shell .panel .panel-state .o-btn {
+  margin-top: 8px;
+}
+
 /* chart */
 .db-shell .chart-wrap {
   position: relative;

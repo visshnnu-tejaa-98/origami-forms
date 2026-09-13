@@ -1,6 +1,6 @@
 
 import { getImageUploadParamsMeta } from "@repo/services/files/meta";
-import { protectedProcedure, publicProcedure, router } from "../../trpc";
+import { protectedProcedure, router } from "../../trpc";
 import { getImageUploadParamsInputSchema, getImageUploadParamsOutputSchema } from "@repo/services/files/model";
 import { fileService } from "../../services";
 

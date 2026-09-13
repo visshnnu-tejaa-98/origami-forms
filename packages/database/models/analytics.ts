@@ -1,32 +1,45 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { formFields, forms } from "./forms";
+import { index, jsonb, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import { forms } from "./forms";
 import { analyticsEventTypeEnum } from "./enum";
 import { relations } from "drizzle-orm";
+import { users } from "./user";
+import { formResponses } from "./response";
 
-export const formAnalyticsEvents = pgTable("analytics_events", {
-    id: uuid("id").primaryKey().defaultRandom(),
-    formId: uuid("form_id")
-        .notNull()
-        .references(() => forms.id, { onDelete: "cascade" }),
-    eventType: analyticsEventTypeEnum("event_type").notNull(),
-    formFieldId: uuid("form_field_id")
-        .notNull()
-        .references(() => formFields.id, { onDelete: "cascade" }),
-    metaData: text("metadata"),
-    occuredAt: timestamp("occured_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
-});
+export const activities = pgTable(
+    "analytics",
+    {
+        id: uuid("id").primaryKey().defaultRandom(),
+        formId: uuid("form_id")
+            .notNull()
+            .references(() => forms.id, { onDelete: "cascade" }),
+        creatorId: uuid("creatorId").references(() => users.id, { onDelete: "cascade" }),
+        respondeeId: uuid("respondeeId").references(() => users.id, { onDelete: "cascade" }),
+        activityType: analyticsEventTypeEnum("activity_type").notNull(),
+        metaData: jsonb("metadata").$type<Record<string, string | number>>().default({}),
+        occuredAt: timestamp("occured_at", { withTimezone: true }).notNull().defaultNow(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+    },
+    (t) => [index("analytics_form_type_occured_idx").on(t.formId, t.activityType, t.occuredAt)],
+);
 
-export type SelectAnalyticsEvents = typeof formAnalyticsEvents.$inferSelect;
-export type InsertAnalyticsEvents = typeof formAnalyticsEvents.$inferInsert;
+export type SelectActivities = typeof activities.$inferSelect;
+export type InsertActivities = typeof activities.$inferInsert;
 
-export const formAnalyticsEventsRelations = relations(formAnalyticsEvents, ({ one }) => ({
+export const formAnalyticsEventsRelations = relations(activities, ({ one }) => ({
     form: one(forms, {
-        fields: [formAnalyticsEvents.formId],
-        references: [forms.id]
+        fields: [activities.formId],
+        references: [forms.id],
     }),
-    field: one(formFields, {
-        fields: [formAnalyticsEvents.formFieldId],
-        references: [formFields.id]
-    })
-}))
+    creator: one(users, {
+        fields: [activities.creatorId],
+        references: [users.id],
+    }),
+    respondee: one(users, {
+        fields: [activities.respondeeId],
+        references: [users.id],
+    }),
+    response: one(formResponses, {
+        fields: [activities.id],
+        references: [formResponses.id],
+    }),
+}));

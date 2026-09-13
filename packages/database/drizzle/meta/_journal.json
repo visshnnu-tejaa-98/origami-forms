@@ -71,6 +71,34 @@
       "when": 1788813094063,
       "tag": "0009_gifted_arclight",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789203636291,
+      "tag": "0010_elite_synch",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789222305330,
+      "tag": "0011_tricky_terrax",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789229797176,
+      "tag": "0012_chemical_tiger_shark",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789230145876,
+      "tag": "0013_noisy_avengers",
+      "breakpoints": true
     }
   ]
 }

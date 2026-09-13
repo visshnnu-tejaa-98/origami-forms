@@ -74,9 +74,10 @@ export const ALL = "all";
 export const RESPONSE_STATUS = [PARTIAL, COMPLETED, ALL] as const;
 
 export const VIEWED = "viewed";
-export const STARTED = "started";
 export const SUBMITTED = "submitted";
-export const ABANDONED = "abandoned";
-export const EMAIL_SENT = "email_sent";
+export const CREATED = "created";
+export const EDITED = "edited"
 
-export const ANALYTICS_EVENT_TYPES = [VIEWED, STARTED, SUBMITTED, ABANDONED, EMAIL_SENT] as const;
+export const ANALYTICS_EVENT_TYPES = [VIEWED, SUBMITTED, CREATED, EDITED] as const;
+export const CREATOR_ACTIVITY_TYPES = [CREATED] as const;
+export const RESPONDENT_ACTIVITY_TYPES = [SUBMITTED] as const;

@@ -13,11 +13,13 @@ import PreviewCanvas from "~/app/(main)/builder/[formId]/preview/components/Prev
 import BrandCreditsLogo from "~/components/origami/BrandCreditsLogo";
 import { useLocation } from "~/hooks/use-location";
 import { useDeviceInfo } from "~/hooks/use-deviceinfo";
+import { usePushActivity } from "~/hooks/use-analytics";
 
 const PublicFormScreen = ({ form }: { form: PublicForm }) => {
     const [sent, setSent] = useState(false);
 
     const { submitResponseAsync, submitResponseIsPending } = useSubmitPublicResponse();
+    const { pushActivity } = usePushActivity()
 
     const steps = useMemo(() => toSteps(form), [form]);
 
@@ -40,6 +42,7 @@ const PublicFormScreen = ({ form }: { form: PublicForm }) => {
                 metadata: hasMetaData ? metaData : undefined,
             });
             setSent(true);
+            pushActivity({ formId: form.id, activityType: 'submitted' })
         },
         [form.id, submitResponseAsync, browser, device, location],
     );

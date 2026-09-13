@@ -108,3 +108,13 @@ export type ZustandLocalStorageType = {
         settings: UserSettingsType;
     };
 };
+
+export type ActivityContentProps = {
+    creatorId: string,
+    respondeeId: string,
+    creatorName: string,
+    respondeeName: string;
+    activityType: string;
+    formName: string;
+    occuredAt: string;
+};
