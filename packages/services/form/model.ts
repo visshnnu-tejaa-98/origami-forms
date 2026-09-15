@@ -358,6 +358,9 @@ export const updateFormOutputSchema = z.object({
     formData: createFormOutputSchema.omit({ realTime: true })
         .nullable()
         .describe("updated form data, or null when no update was performed"),
+    realTime: formDraftedSchema
+        .nullable()
+        .describe("payload for the form:published broadcast, null when the status did not cross into published"),
 });
 
 export type UpdateFormOutputSchemaType = z.infer<typeof updateFormOutputSchema>;

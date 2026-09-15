@@ -82,6 +82,15 @@ const Activities = () => {
             });
             refetchActivities();
         },
+        "form:published": (data) => {
+            pushActivityToRedux({
+                ...data,
+                respondeeId: data.creatorId,
+                respondeeName: data.creatorName,
+                respondeeAvatarUrl: data.creatorAvatarUrl,
+            });
+            refetchActivities();
+        },
     });
 
     useEffect(() => {

@@ -30,6 +30,7 @@ import { TRPCError } from "@trpc/server";
 import { protectedProcedure, publicProcedure, router } from "../../trpc";
 import { formService } from "../../services";
 import { realtimeBus } from "@repo/services/socket/bus";
+import { PUBLISHED } from "@repo/database/constants";
 
 const TAGS = ["Forms"];
 
@@ -59,7 +60,11 @@ export const formsRouter = router({
             }
 
             if (result.realTime) {
-                realtimeBus.formDrafted(result.realTime.creatorId, result.realTime);
+                const publish =
+                    result.realTime.activityType === PUBLISHED
+                        ? realtimeBus.formPublished
+                        : realtimeBus.formDrafted;
+                publish(result.realTime.creatorId, result.realTime);
             }
 
             return result;
@@ -89,6 +94,10 @@ export const formsRouter = router({
 
             if (!result) {
                 throw new Error("Something went wrong while updating form");
+            }
+
+            if (result.realTime) {
+                realtimeBus.formPublished(result.realTime.creatorId, result.realTime);
             }
 
             return result;

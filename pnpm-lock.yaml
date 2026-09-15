@@ -434,6 +434,9 @@ importers:
       '@clerk/express':
         specifier: ^2.1.48
         version: 2.1.48(express@5.2.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
       '@repo/services':
         specifier: workspace:*
         version: link:../services

@@ -105,6 +105,46 @@ export default class FormService {
         return row
     }
 
+    private async recordCreatorActivity(
+        tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+        params: {
+            creatorId: string;
+            formId: string;
+            formName: string;
+            activityType: typeof DRAFTED | typeof PUBLISHED;
+        },
+    ): Promise<FormDraftedEvent | null> {
+        const { creatorId, formId, formName, activityType } = params;
+
+        const creator = await tx.query.users.findFirst({
+            where: eq(users.id, creatorId),
+            columns: { id: true, firstName: true, lastName: true, email: true, avatarUrl: true },
+        });
+
+        if (!creator) return null;
+
+        const [activity] = await tx
+            .insert(activities)
+            .values({ formId, creatorId, respondeeId: creatorId, activityType })
+            .returning({ occuredAt: activities.occuredAt });
+
+        if (!activity) return null;
+
+        return {
+            creatorId,
+            creatorName: this.userService.getFullName({
+                firstName: creator.firstName ?? null,
+                lastName: creator.lastName ?? null,
+                email: creator.email,
+            })!,
+            creatorAvatarUrl: creator.avatarUrl ?? "",
+            activityType,
+            formId,
+            formName,
+            occuredAt: activity.occuredAt.toISOString(),
+        };
+    }
+
     public async createForm(creatorId: string, formData: CreateFormInputModel) {
         return db.transaction(async (tx) => {
             const [form] = await tx
@@ -117,6 +157,10 @@ export default class FormService {
                     slug: slugify(formData.title),
                     visibility: formData.visibility,
                     maxSubmissions: formData.maxSubmissions,
+                    // the client decides draft-vs-published at save time; without this the row
+                    // was always a draft and relied on a follow-up updateForm to correct it
+                    status: formData.status ?? DRAFT,
+                    publishedAt: formData.status === PUBLISHED ? new Date() : null,
                 })
                 .returning();
 
@@ -133,49 +177,12 @@ export default class FormService {
 
             const insertedFields = await tx.insert(formFields).values(fieldValues).returning();
 
-            const isDraft = (formData.status ?? DRAFT) === DRAFT;
-
-            let realTime: FormDraftedEvent | null = null;
-
-            if (isDraft) {
-                const [activity] = await tx.insert(activities).values({
-                    formId: form.id,
-                    creatorId,
-                    respondeeId: creatorId,
-                    activityType: DRAFTED,
-                }).returning({ occuredAt: activities.occuredAt })
-
-                const creator = await tx.query.users.findFirst({
-                    where: eq(users.id, creatorId),
-                    columns: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        avatarUrl: true
-                    }
-                })
-
-                if (!creator) {
-                    return tx.rollback();
-                }
-
-                const fullname = this.userService.getFullName({
-                    firstName: creator?.firstName ?? null,
-                    lastName: creator?.lastName ?? null,
-                    email: creator?.email,
-                })
-
-                realTime = {
-                    creatorId,
-                    creatorName: fullname!,
-                    creatorAvatarUrl: creator?.avatarUrl ?? "",
-                    activityType: DRAFTED,
-                    formId: form.id,
-                    formName: form.title,
-                    occuredAt: activity?.occuredAt.toISOString() ?? "",
-                }
-            }
+            const realTime = await this.recordCreatorActivity(tx, {
+                creatorId,
+                formId: form.id,
+                formName: form.title,
+                activityType: form.status === PUBLISHED ? PUBLISHED : DRAFTED,
+            });
 
             return {
                 ...form,
@@ -319,6 +326,7 @@ export default class FormService {
                     success: false,
                     message: "Cannot move published form to draft when there are submissions",
                     formData: null,
+                    realTime: null,
                 };
             }
         }
@@ -345,14 +353,29 @@ export default class FormService {
                 success: false,
                 message: "No changes to update",
                 formData: null,
+                realTime: null,
             };
         }
 
         const hasResponses = form.submissionCount > 0;
 
+        // only the draft -> published crossing is an activity; re-saving a published form is not
+        const isPublishing = updatedValues.status === PUBLISHED && form.status !== PUBLISHED;
+
+        let realTime: FormDraftedEvent | null = null;
+
         await db.transaction(async (tx) => {
             if (Object.keys(updatedValues).length > 0) {
                 await tx.update(forms).set(updatedValues).where(eq(forms.id, formId));
+            }
+
+            if (isPublishing) {
+                realTime = await this.recordCreatorActivity(tx, {
+                    creatorId: form.creatorId,
+                    formId,
+                    formName: title ?? form.title,
+                    activityType: PUBLISHED,
+                });
             }
 
             if (fields === undefined) return;
@@ -416,6 +439,7 @@ export default class FormService {
             success: true,
             message: "Form updated successfully",
             formData: updatedForm,
+            realTime: realTime as FormDraftedEvent | null,
         };
     }
 

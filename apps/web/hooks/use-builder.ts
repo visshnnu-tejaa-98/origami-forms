@@ -19,13 +19,13 @@ import { blankField, uid } from "~/app/(main)/utils";
 import { toast } from "~/components/origami/toast";
 import { useCreateForm, useUpdateForm } from "./use-form";
 import { useRouter } from "next/navigation";
-import { usePushActivity } from "./use-analytics";
 
 /** a saved field carries its database id; a block added in this session carries a local
  *  `q-xxxx` one. only the former identifies a row the server should update */
 const SAVED_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const PUBLISHED = "published" as const;
+const DRAFT = "draft" as const;
 
 /** a cheap structural fingerprint — enough to tell "nothing changed since the last save" */
 const fingerprint = (form: BuilderForm) => JSON.stringify(form);
@@ -42,7 +42,6 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
 
   const { createFormAsync } = useCreateForm()
   const { updateFormAsync } = useUpdateForm()
-  const { pushActivity } = usePushActivity()
 
   const router = useRouter()
 
@@ -187,12 +186,11 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
           return result.formData;
         }
 
-        const saved = await createFormAsync(toCreatePayload());
-
-        if (status === PUBLISHED) await updateFormAsync({ formId: saved.id, status });
+        // the status goes in with the create, so the server records one activity and
+        // broadcasts one event — no follow-up update, no client-side pushActivity
+        const saved = await createFormAsync({ ...toCreatePayload(), status: status ?? DRAFT });
 
         savedPrint.current = fingerprint(form);
-        if (status === PUBLISHED) pushActivity({ formId: saved.id, activityType: "created" })
         if (!silent) toast.success(status === PUBLISHED ? "Form published." : "Draft saved.");
         if (redirect) router.replace("/forms");
         return saved;
