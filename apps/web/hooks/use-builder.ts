@@ -182,7 +182,14 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
             toast.error(result.message);
             return;
           }
-          savedPrint.current = fingerprint(form);
+          // only the draft → published transition is an activity; re-saving an already
+          // published form shouldn't push a duplicate
+          const published = status === PUBLISHED && form.status !== PUBLISHED;
+          savedPrint.current = fingerprint(published ? { ...form, status: PUBLISHED } : form);
+          if (published) {
+            pushActivity({ formId, activityType: PUBLISHED });
+            setForm((f) => ({ ...f, status: PUBLISHED }));
+          }
           if (!silent) toast.success(status === PUBLISHED ? "Form published." : "Changes saved.");
           return result.formData;
         }
@@ -192,7 +199,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
         if (status === PUBLISHED) await updateFormAsync({ formId: saved.id, status });
 
         savedPrint.current = fingerprint(form);
-        if (status === PUBLISHED) pushActivity({ formId: saved.id, activityType: "created" })
+        pushActivity({ formId: saved.id, activityType: status === PUBLISHED ? PUBLISHED : "drafted" })
         if (!silent) toast.success(status === PUBLISHED ? "Form published." : "Draft saved.");
         if (redirect) router.replace("/forms");
         return saved;
@@ -200,7 +207,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
         toast.error(error instanceof Error ? error.message : "Could not save the form.");
       }
     },
-    [form, formId, router, createFormAsync, toCreatePayload, toUpdatePayload, updateFormAsync]
+    [form, formId, router, createFormAsync, toCreatePayload, toUpdatePayload, updateFormAsync, pushActivity]
   );
 
   const saveAsDraft = useCallback(() => save(), [save]);

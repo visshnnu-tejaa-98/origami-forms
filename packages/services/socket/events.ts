@@ -1,7 +1,8 @@
-import { ResponseCreatedEvent } from "../form/model";
+import { FormUpdateRealTimeEvent, ResponseSubmittedEvent } from "../form/model";
 
 export interface ServerToClientEvents {
-    "response:created": (payload: ResponseCreatedEvent) => void;
+    "response:submitted": (payload: ResponseSubmittedEvent) => void;
+    "form:drafted": (payload: FormUpdateRealTimeEvent) => void;
 }
 
 export interface ClientToServerEvents {

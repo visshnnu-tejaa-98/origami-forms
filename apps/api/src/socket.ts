@@ -57,9 +57,17 @@ export function createSocketServer(httpServer: http.Server) {
     });
 
     const publisher: RealtimePublisher = {
-        responseCreated(userId, payload) {
-            io.to(userRoom(userId)).emit("response:created", payload);
-            io.to(formRoom(payload.formId)).emit("response:created", payload);
+        async responseSubmitted(userId, payload) {
+            const room = userRoom(userId);
+            const listeners = await io.in(room).fetchSockets();
+            logger.debug(`emitting response:submitted to ${room} (${listeners.length} socket(s))`);
+            io.to(room).emit("response:submitted", payload);
+        },
+        async formDrafted(userId, payload) {
+            const room = userRoom(userId);
+            const listeners = await io.in(room).fetchSockets();
+            logger.debug(`emitting form:drafted to ${room} (${listeners.length} socket(s))`);
+            io.to(room).emit("form:drafted", payload);
         },
     };
 

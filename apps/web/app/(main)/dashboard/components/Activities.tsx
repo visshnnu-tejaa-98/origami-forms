@@ -8,7 +8,6 @@ import { hash } from "../../utils";
 import { useUserStore } from "~/app/store/user-store";
 import { ActivityContentProps } from "../../types";
 import { ActivitiesSkeleton } from "../skeletons";
-import { useSocket } from "~/hooks/use-socket";
 
 const ActivityAvatar = ({ avatarUrl, name }: { avatarUrl: string; name: string }) => {
     if (avatarUrl) {
@@ -63,16 +62,10 @@ const Activities = () => {
         refetchActivities,
     } = useGetActivities();
 
-    const pushActivityToRedux = useUserStore(state => state.pushActivity)
+    // live pushes land in the store from the shell (`useActivityFeedSocket`) so they
+    // aren't missed while this panel is unmounted — here we only mirror the query into it
     const updateActivities = useUserStore(state => state.setActivities)
     const activitiesFromRedux = useUserStore(state => state.activities)
-    useSocket({
-        "response:created": (data) => {
-            console.log("Activity from socket:", data);
-            pushActivityToRedux(data)
-            refetchActivities()
-        }
-    });
 
     useEffect(() => {
         if (activities.length === 0) return
@@ -97,7 +90,7 @@ const Activities = () => {
 
         return (
             <div className="activity">
-                {activities?.length && activitiesFromRedux.map((a, idx) => {
+                {activities.map((a, idx) => {
                     let tint = TINTS[hash(idx.toString()) % TINTS.length];
                     return (
                         <div key={idx} className={`row ${tint}`}>
@@ -136,7 +129,7 @@ const Activities = () => {
                 )}
             </div>
             {renderBody()}
-            {isLive && activities.length > 0 && (
+            {isLive && activitiesFromRedux.length > 0 && (
                 <button className="o-btn o-btn--ghost o-btn--block o-btn--sm" style={{ marginTop: "10px" }}>
                     See all activity <Icon name="arrow" size={12} />
                 </button>

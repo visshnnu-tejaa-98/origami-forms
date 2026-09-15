@@ -56,7 +56,7 @@ const FormsList = () => {
             {forms && forms.map((f) => {
                 const badge = STATUS_BADGE[f.status];
                 const isDraft = f.status === "draft";
-                return <div key={f.title} className={`form-row ${f.tint}`}>
+                return <div key={f.id} className={`form-row ${f.tint}`}>
                     <span className="ic">
                         <Icon name={f.icon} size={20} />
                     </span>

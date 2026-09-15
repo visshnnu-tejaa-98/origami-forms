@@ -1,11 +1,11 @@
-import { ANALYTICS_EVENT_TYPES, CREATED, SUBMITTED } from "@repo/database/constants"
+import { ACTIVITIES, ANALYTICS_EVENT_TYPES } from "@repo/database/constants"
 import { z } from "zod"
 import { isoDateSchema } from "../form/model";
 
 export const pushActivityInputSchema = z.object({
     requesterId: z.string().uuid().describe("id of the user performing the activity"),
     formId: z.string().uuid().describe("id of the form"),
-    activityType: z.enum([CREATED, SUBMITTED]).describe("type of activity"),
+    activityType: z.enum(ACTIVITIES).describe("type of activity"),
     metaData: z.record(z.string(), z.union([z.string(), z.number()])).optional().describe("optional metadata"),
 })
 

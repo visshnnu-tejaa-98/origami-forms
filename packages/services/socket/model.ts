@@ -10,11 +10,11 @@
 //     submissionCount: z.number().int().nonnegative().describe("total submissions count"),
 // })
 
-// export const responseCreatedEventSchema = baseFormSubmissionFieldsSchema.extend({
+// export const responseSubmittedEventSchema = baseFormSubmissionFieldsSchema.extend({
 //     responseId: z.string().uuid().describe("id of the response"),
 //     ...baseFormSubmissionFieldsSchema.shape
 // });
 
-// // export type ResponseCreatedEvent = z.infer<typeof responseCreatedEventSchema>
+// // export type ResponseSubmittedEvent = z.infer<typeof responseSubmittedEventSchema>
 
 // export type realTimeSubmittedResponseTriggerPayload = Omit<SelectActivities, "updatedAt">

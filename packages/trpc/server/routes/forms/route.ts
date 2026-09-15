@@ -144,7 +144,7 @@ export const formsRouter = router({
             }
 
             if (result.realTime) {
-                realtimeBus.responseCreated(result.realTime.creatorId, result.realTime)
+                realtimeBus.responseSubmitted(result.realTime.creatorId, result.realTime)
             }
 
             return result;

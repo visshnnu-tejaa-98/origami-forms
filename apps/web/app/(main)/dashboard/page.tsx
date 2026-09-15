@@ -6,7 +6,6 @@ import SummaryInfo from "./components/SummaryInfo";
 
 const Dashboard = () => {
 
-
   return (
     <>
       <Topbar />

@@ -14,6 +14,7 @@ import {
     TEXT_LIKE_FIELDS,
     UNLISTED,
     ACTIVITIES,
+    CREATOR_ACTIVITY_TYPES,
 } from "@repo/database/constants";
 import { z } from "zod";
 
@@ -554,13 +555,25 @@ export const submitRealTimePublicResponseSchema = z.object({
 })
 
 export type SubmitRealTimePublicResponseSchemaType = z.infer<typeof submitRealTimePublicResponseSchema>;
-export type ResponseCreatedEvent = z.infer<typeof submitRealTimePublicResponseSchema>
+export type ResponseSubmittedEvent = z.infer<typeof submitRealTimePublicResponseSchema>
 
 export const submitPublicResponseOutputSchema = z.object({
     success: z.boolean().describe("whether the response was recorded"),
     responseId: z.string().uuid().nullable().describe("id of the recorded response, null when it was not recorded"),
     message: z.string().describe("success or error message"),
-    realTime: submitRealTimePublicResponseSchema.nullable().describe("payload for the response:created broadcast, null when there is nothing to announce")
+    realTime: submitRealTimePublicResponseSchema.nullable().describe("payload for the response:submitted broadcast, null when there is nothing to announce")
 });
 
 export type SubmitPublicResponseOutputSchemaType = z.infer<typeof submitPublicResponseOutputSchema>;
+
+export const formUpdateRealTimeSchema = z.object({
+    creatorId: z.string().uuid().describe("id of the user who created the form"),
+    creatorAvatarUrl: z.string().url().nullable().optional().describe("avatar url of the creator"),
+    creatorName: z.string().nullish().describe("name of the creator"),
+    formId: z.string().uuid().describe("id of the form"),
+    formName: z.string().describe("name of the form"),
+    activityType: z.enum(CREATOR_ACTIVITY_TYPES).describe("type of the event"),
+    occuredAt: z.string().datetime().describe("timestamp of the event"),
+})
+
+export type FormUpdateRealTimeEvent = z.infer<typeof formUpdateRealTimeSchema>

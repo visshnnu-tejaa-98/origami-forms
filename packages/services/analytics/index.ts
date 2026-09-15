@@ -1,6 +1,6 @@
 import { activities, and, db, desc, eq, forms, isNull, or } from "@repo/database";
-import { AUTHENTICATED, CREATED, PUBLISHED } from "@repo/database/constants";
-import { GetActivitiesInputType, GetActivitiesOutputType, PushActivityInputSchemaType, PushActivityOutputSchema } from "./model";
+import { AUTHENTICATED, CREATOR_ACTIVITY_TYPES, PUBLISHED } from "@repo/database/constants";
+import { GetActivitiesInputType, getActivitiesOutputSchema, GetActivitiesOutputType, PushActivityInputSchemaType, pushActivityOutputSchema, PushActivityOutputSchema } from "./model";
 
 const fullName = (user?: { firstName: string; lastName: string | null, email: string } | null): string => {
     if (!user) return "";
@@ -11,6 +11,10 @@ const fullName = (user?: { firstName: string; lastName: string | null, email: st
 export default class AnalyticsService {
     public async pushActivity(payload: PushActivityInputSchemaType): Promise<PushActivityOutputSchema> {
         const { formId, activityType, metaData, requesterId } = payload;
+        // the two actors are gated differently: a creator event must come from the owner,
+        // while a respondent event comes from someone who is deliberately not the owner and
+        // is authorised instead by the form being published and requiring a sign-in
+        const isCreatorActivity = (CREATOR_ACTIVITY_TYPES as readonly string[]).includes(activityType);
         const [form] = await db
             .select({
                 creatorId: forms.creatorId,
@@ -22,15 +26,16 @@ export default class AnalyticsService {
 
         if (!form) throw new Error("Form not found");
 
-        if (form.visibility !== AUTHENTICATED) {
-            throw new Error("Activity is only tracked for authenticated forms");
-        }
-
-        if (activityType !== CREATED && form.creatorId !== requesterId) {
+        if (isCreatorActivity && form.creatorId !== requesterId) {
             throw new Error("You are not authorized to perform this action");
         }
 
-        if (activityType !== CREATED && form.status !== PUBLISHED) {
+        // a respondent event is only attributable on a form that required a sign-in
+        if (!isCreatorActivity && form.visibility !== AUTHENTICATED) {
+            throw new Error("Activity is only tracked for authenticated forms");
+        }
+
+        if (!isCreatorActivity && form.status !== PUBLISHED) {
             throw new Error("This form is not accepting responses");
         }
 
@@ -47,9 +52,9 @@ export default class AnalyticsService {
                 id: activities.id,
                 formId: activities.formId,
                 creatorId: activities.creatorId,
-                respondeeId: activities.respondeeId,
+                respondeeId: activities.respondeeId || "",
                 activityType: activities.activityType,
-                metaData: activities.metaData,
+                metaData: activities.metaData || {},
                 occuredAt: activities.occuredAt,
                 updatedAt: activities.updatedAt,
             });
@@ -127,11 +132,22 @@ export default class AnalyticsService {
             };
         });
 
-        return {
-            success: true,
-            message: "Activities retrieved successfully",
-            data: formattedData
-        };
 
+
+        const res = await getActivitiesOutputSchema.safeParseAsync({
+            success: true,
+            message: "Activities fetched successfully",
+            data: formattedData,
+        })
+
+        if (!res.success) {
+            console.log("Failed to parse activities", res.error)
+            return {
+                success: false,
+                message: "Failed to parse activities",
+                data: [],
+            }
+        }
+        return res.data
     }
 }

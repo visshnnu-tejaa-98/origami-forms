@@ -52,6 +52,16 @@ import {
 } from "@repo/database/constants";
 import crypto from "node:crypto";
 import UserService from "../user";
+import { realtimeBus } from "../socket/bus";
+
+/** what the activity feed calls someone: their name, else the local part of their email */
+const displayName = (
+    user?: { firstName?: string | null; lastName?: string | null; email?: string | null } | null
+): string => {
+    if (!user) return "Unknown User";
+    const name = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
+    return name || user.email?.split("@")[0] || "Unknown User";
+};
 
 export function slugify(input: string): string {
     const cleanSlug = input
@@ -129,6 +139,27 @@ export default class FormService {
             }));
 
             const insertedFields = await tx.insert(formFields).values(fieldValues).returning();
+
+            const creator = await tx.query.users.findFirst({
+                where: eq(users.id, creatorId),
+                columns: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    avatarUrl: true,
+                    email: true,
+                },
+            });
+
+            realtimeBus.formDrafted(creatorId, {
+                creatorId,
+                creatorAvatarUrl: creator?.avatarUrl,
+                creatorName: displayName(creator),
+                formId: form.id,
+                formName: form.title,
+                activityType: "drafted",
+                occuredAt: new Date().toISOString(),
+            })
 
             return {
                 ...form,
@@ -816,11 +847,11 @@ export default class FormService {
                 realTime: {
                     creatorId: form.creatorId,
                     creatorAvatarUrl: creatorDetails?.avatarUrl,
-                    creatorName: `${creatorDetails?.firstName} ${creatorDetails?.lastName}`.trim() ? creatorDetails?.email.split("@")[0] : "Unknown User",
+                    creatorName: displayName(creatorDetails),
 
                     respondeeId: response.userId,
                     respondeeAvatarUrl: respondeeDetails?.avatarUrl,
-                    respondeeName: `${respondeeDetails?.firstName} ${respondeeDetails?.lastName}`.trim() ? respondeeDetails?.email.split("@")[0] : "Unknown User",
+                    respondeeName: displayName(respondeeDetails),
 
                     formId: form.id,
                     formName: form.title,
