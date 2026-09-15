@@ -1,11 +1,11 @@
-import { ANALYTICS_EVENT_TYPES, DRAFTED, PUBLISHED, SUBMITTED } from "@repo/database/constants"
+import { ANALYTICS_EVENT_TYPES, DRAFTED, PUBLISHED, SUBMITTED, VIEWED } from "@repo/database/constants"
 import { z } from "zod"
-import { isoDateSchema } from "../form/model";
+import { isoDateSchema, submitRealTimePublicResponseSchema } from "../form/model";
 
 export const pushActivityInputSchema = z.object({
     requesterId: z.string().uuid().describe("id of the user performing the activity"),
     formId: z.string().uuid().describe("id of the form"),
-    activityType: z.enum([DRAFTED, PUBLISHED, SUBMITTED]).describe("type of activity"),
+    activityType: z.enum([DRAFTED, PUBLISHED, SUBMITTED, VIEWED]).describe("type of activity"),
     metaData: z.record(z.string(), z.union([z.string(), z.number()])).optional().describe("optional metadata"),
 })
 
@@ -20,6 +20,9 @@ export const pushActivityOutputSchema = z.object({
     metaData: z.json().nullish().describe("optional metadata"),
     occuredAt: isoDateSchema.describe("timestamp of activity"),
     updatedAt: isoDateSchema.nullish().describe("timestamp of last update"),
+    realTime: submitRealTimePublicResponseSchema
+        .nullable()
+        .describe("payload for the socket broadcast, null when there is nothing to announce"),
 })
 
 export type PushActivityOutputSchema = z.infer<typeof pushActivityOutputSchema>;

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import "../../../(main)/builder/preview.css";
@@ -11,6 +11,7 @@ import PublicFormScreen from "../components/PublicFormScreen";
 import PublicFormState from "../components/PublicFormState";
 import { useRouter } from "next/navigation";
 import { useIsUserGaveResponseForForm } from "~/hooks/use-response";
+import { usePushActivity } from "~/hooks/use-analytics";
 
 const PublicFormPage = () => {
 
@@ -18,6 +19,8 @@ const PublicFormPage = () => {
     const { publicForm, publicFormError, publicFormIsPending, refetchPublicForm } = usePublicForm({
         formId,
     });
+
+    const { pushActivity } = usePushActivity()
 
     const pathname = usePathname()
     const router = useRouter()
@@ -34,6 +37,10 @@ const PublicFormPage = () => {
     const isUserAlreadyFilledForm = isUserGaveResponseForFormData?.hasSubmitted === true && publicForm?.visibility === "authenticated"
     const submissionCheckPending = submissionCheckEnabled && isUserGaveResponseForFormIsPending
     const isSettling = !authLoaded || publicFormIsPending || submissionCheckPending
+
+    useEffect(() => {
+        pushActivity({ formId, activityType: 'viewed' })
+    }, [formId])
 
     const shell = (children: React.ReactNode) => (
         <div className="db-shell db-shell--public o-scope">

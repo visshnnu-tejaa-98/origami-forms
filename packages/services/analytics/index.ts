@@ -1,4 +1,4 @@
-import { activities, and, db, desc, eq, forms, isNull, or } from "@repo/database";
+import { activities, and, db, desc, eq, forms, isNull, or, users } from "@repo/database";
 import { AUTHENTICATED } from "@repo/database/constants";
 import { GetActivitiesInputType, GetActivitiesOutputType, PushActivityInputSchemaType, PushActivityOutputSchema } from "./model";
 
@@ -16,6 +16,7 @@ export default class AnalyticsService {
                 creatorId: forms.creatorId,
                 visibility: forms.visibility,
                 status: forms.status,
+                title: forms.title,
             })
             .from(forms)
             .where(and(eq(forms.id, formId), isNull(forms.deletedAt)));
@@ -48,7 +49,32 @@ export default class AnalyticsService {
 
         if (!activity) throw new Error("Failed to record activity");
 
+        // the feed renders names and avatars, so the broadcast carries them — otherwise the
+        // optimistic row would show blanks until the refetch lands
+        const [creator, respondee] = await Promise.all([
+            db.query.users.findFirst({
+                where: eq(users.id, form.creatorId),
+                columns: { firstName: true, lastName: true, email: true, avatarUrl: true },
+            }),
+            db.query.users.findFirst({
+                where: eq(users.id, requesterId),
+                columns: { firstName: true, lastName: true, email: true, avatarUrl: true },
+            }),
+        ]);
+
         return {
+            realTime: {
+                creatorId: form.creatorId,
+                creatorName: fullName(creator),
+                creatorAvatarUrl: creator?.avatarUrl ?? null,
+                respondeeId: requesterId,
+                respondeeName: fullName(respondee),
+                respondeeAvatarUrl: respondee?.avatarUrl ?? null,
+                formId,
+                formName: form.title,
+                activityType,
+                occuredAt: activity.occuredAt.toISOString(),
+            },
             id: activity.id,
             formId: activity.formId,
             creatorId: activity.creatorId,

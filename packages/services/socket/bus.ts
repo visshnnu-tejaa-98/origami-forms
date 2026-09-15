@@ -3,6 +3,7 @@ import { FormDraftedEvent, ResponseCreatedEvent } from "../form/model";
 
 export interface RealtimePublisher {
     responseCreated(userId: string, payload: ResponseCreatedEvent): void;
+    formViewed(userId: string, payload: ResponseCreatedEvent): void;
     formDrafted(userId: string, payload: FormDraftedEvent): void;
     formPublished(userId: string, payload: FormDraftedEvent): void
 }
@@ -19,7 +20,15 @@ export const realtimeBus: RealtimePublisher = {
         try {
             publisher.responseCreated(userId, payload);
         } catch (err) {
-            logger.error("failed to publish response:created", { err });
+            logger.error("failed to publish response:submitted", { err });
+        }
+    },
+    formViewed(userId, payload) {
+        if (!publisher) return;
+        try {
+            publisher.formViewed(userId, payload);
+        } catch (err) {
+            logger.error("failed to publish form:viewed", { err });
         }
     },
     formDrafted(userId, payload) {

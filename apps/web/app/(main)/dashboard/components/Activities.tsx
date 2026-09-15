@@ -68,8 +68,11 @@ const Activities = () => {
     const updateActivities = useUserStore(state => state.setActivities)
     const activitiesFromRedux = useUserStore(state => state.activities)
     useSocket({
-        "response:created": (data) => {
-            console.log("Activity from socket:", data);
+        "response:submitted": (data) => {
+            pushActivityToRedux(data)
+            refetchActivities()
+        },
+        "form:viewed": (data) => {
             pushActivityToRedux(data)
             refetchActivities()
         },
@@ -112,14 +115,15 @@ const Activities = () => {
             );
         }
 
-        if (activities.length === 0) return <ActivitiesEmpty />;
+        if (activitiesFromRedux.length === 0) return <ActivitiesEmpty />;
 
         return (
             <div className="activity">
-                {activities?.length && activitiesFromRedux.map((a, idx) => {
-                    let tint = TINTS[hash(idx.toString()) % TINTS.length];
+                {activitiesFromRedux.map((a) => {
+                    const key = `${a.formId}-${a.activityType}-${a.occuredAt}`;
+                    const tint = TINTS[hash(key) % TINTS.length];
                     return (
-                        <div key={idx} className={`row ${tint}`}>
+                        <div key={key} className={`row ${tint}`}>
                             <ActivityAvatar
                                 avatarUrl={a.respondeeAvatarUrl ?? ""}
                                 name={a.respondeeName ?? ""}
@@ -155,7 +159,7 @@ const Activities = () => {
                 )}
             </div>
             {renderBody()}
-            {isLive && activities.length > 0 && (
+            {isLive && activitiesFromRedux.length > 0 && (
                 <button className="o-btn o-btn--ghost o-btn--block o-btn--sm" style={{ marginTop: "10px" }}>
                     See all activity <Icon name="arrow" size={12} />
                 </button>

@@ -78,6 +78,6 @@ export const SUBMITTED = "submitted";
 export const EDITED = "edited"
 export const DRAFTED = "drafted"
 
-export const ANALYTICS_EVENT_TYPES = [SUBMITTED, DRAFTED, PUBLISHED, EDITED] as const;
+export const ANALYTICS_EVENT_TYPES = [SUBMITTED, DRAFTED, PUBLISHED, EDITED, VIEWED] as const;
 export const CREATOR_ACTIVITY_TYPES = [DRAFTED, PUBLISHED, EDITED] as const;
 export const RESPONDENT_ACTIVITY_TYPES = [SUBMITTED, VIEWED] as const;

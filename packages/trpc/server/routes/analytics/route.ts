@@ -2,6 +2,8 @@ import { protectedProcedure, router } from "../../trpc";
 import { getActivitiesInputSchema, getActivitiesOutputSchema, pushActivityInputSchema, pushActivityOutputSchema } from "@repo/services/analytics/model";
 import { getActivitiesMeta, pushActivityMeta } from "@repo/services/analytics/meta";
 import { analyticsService } from "../../services";
+import { realtimeBus } from "@repo/services/socket/bus";
+import { VIEWED } from "@repo/database/constants";
 
 export const analyticsRouter = router({
     pushActivity: protectedProcedure
@@ -16,6 +18,10 @@ export const analyticsRouter = router({
 
             if (!result) {
                 throw new Error("Failed to record activity");
+            }
+
+            if (result.realTime && result.realTime.activityType === VIEWED) {
+                realtimeBus.formViewed(result.realTime.creatorId, result.realTime);
             }
 
             return result;

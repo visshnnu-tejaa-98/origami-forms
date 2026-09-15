@@ -575,7 +575,7 @@ export const submitPublicResponseOutputSchema = z.object({
     success: z.boolean().describe("whether the response was recorded"),
     responseId: z.string().uuid().nullable().describe("id of the recorded response, null when it was not recorded"),
     message: z.string().describe("success or error message"),
-    realTime: submitRealTimePublicResponseSchema.nullable().describe("payload for the response:created broadcast, null when there is nothing to announce")
+    realTime: submitRealTimePublicResponseSchema.nullable().describe("payload for the response:submitted broadcast, null when there is nothing to announce")
 });
 
 export type SubmitPublicResponseOutputSchemaType = z.infer<typeof submitPublicResponseOutputSchema>;

@@ -1,7 +1,8 @@
 import { FormDraftedEvent, ResponseCreatedEvent } from "../form/model";
 
 export interface ServerToClientEvents {
-    "response:created": (payload: ResponseCreatedEvent) => void;
+    "response:submitted": (payload: ResponseCreatedEvent) => void;
+    "form:viewed": (payload: ResponseCreatedEvent) => void;
     "form:drafted": (payload: FormDraftedEvent) => void;
     "form:published": (payload: FormDraftedEvent) => void;
 }
