@@ -1,5 +1,5 @@
 import { activities, and, db, desc, eq, forms, isNull, or } from "@repo/database";
-import { AUTHENTICATED, CREATED, PUBLISHED } from "@repo/database/constants";
+import { AUTHENTICATED } from "@repo/database/constants";
 import { GetActivitiesInputType, GetActivitiesOutputType, PushActivityInputSchemaType, PushActivityOutputSchema } from "./model";
 
 const fullName = (user?: { firstName: string; lastName: string | null, email: string } | null): string => {
@@ -24,14 +24,6 @@ export default class AnalyticsService {
 
         if (form.visibility !== AUTHENTICATED) {
             throw new Error("Activity is only tracked for authenticated forms");
-        }
-
-        if (activityType !== CREATED && form.creatorId !== requesterId) {
-            throw new Error("You are not authorized to perform this action");
-        }
-
-        if (activityType !== CREATED && form.status !== PUBLISHED) {
-            throw new Error("This form is not accepting responses");
         }
 
         const [activity] = await db

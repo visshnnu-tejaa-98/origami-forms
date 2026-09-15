@@ -1,4 +1,5 @@
 import db, {
+    activities,
     and,
     asc,
     avg,
@@ -36,14 +37,15 @@ import {
     UpdateFormProps,
     UpSertFormFieldsInputProps,
     FormClosedReasonProps,
-    formStatsListOutputSchema
+    formStatsListOutputSchema,
+    FormDraftedEvent,
 } from "./model";
 import {
-    ADMIN,
     ARCHIVED,
     CHECK_BOX,
     COMPLETED,
     DRAFT,
+    DRAFTED,
     LAYOUT_FIELD_TYPES,
     MULTI_SELECT,
     PUBLISHED,
@@ -52,6 +54,7 @@ import {
 } from "@repo/database/constants";
 import crypto from "node:crypto";
 import UserService from "../user";
+// import { FormDraftedEvent } from "../socket";
 
 export function slugify(input: string): string {
     const cleanSlug = input
@@ -130,10 +133,55 @@ export default class FormService {
 
             const insertedFields = await tx.insert(formFields).values(fieldValues).returning();
 
+            const isDraft = (formData.status ?? DRAFT) === DRAFT;
+
+            let realTime: FormDraftedEvent | null = null;
+
+            if (isDraft) {
+                const [activity] = await tx.insert(activities).values({
+                    formId: form.id,
+                    creatorId,
+                    respondeeId: creatorId,
+                    activityType: DRAFTED,
+                }).returning({ occuredAt: activities.occuredAt })
+
+                const creator = await tx.query.users.findFirst({
+                    where: eq(users.id, creatorId),
+                    columns: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        avatarUrl: true
+                    }
+                })
+
+                if (!creator) {
+                    return tx.rollback();
+                }
+
+                const fullname = this.userService.getFullName({
+                    firstName: creator?.firstName ?? null,
+                    lastName: creator?.lastName ?? null,
+                    email: creator?.email,
+                })
+
+                realTime = {
+                    creatorId,
+                    creatorName: fullname!,
+                    creatorAvatarUrl: creator?.avatarUrl ?? "",
+                    activityType: DRAFTED,
+                    formId: form.id,
+                    formName: form.title,
+                    occuredAt: activity?.occuredAt.toISOString() ?? "",
+                }
+            }
+
             return {
                 ...form,
                 submissionCount: 0,
                 fields: insertedFields,
+                realTime
             };
         });
     }

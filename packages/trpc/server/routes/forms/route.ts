@@ -58,6 +58,10 @@ export const formsRouter = router({
                 throw new Error("Something went wrong while creating form");
             }
 
+            if (result.realTime) {
+                realtimeBus.formDrafted(result.realTime.creatorId, result.realTime);
+            }
+
             return result;
         }
     ),

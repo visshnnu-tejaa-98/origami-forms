@@ -37,6 +37,11 @@ export default class UserService {
             .then((result) => result[0] ?? null);
     }
 
+    public getFullName({ firstName, lastName, email }: { firstName: string | null, lastName: string | null, email: string }) {
+        if (firstName && lastName) return `${firstName} ${lastName}`;
+        return email.split("@")[0];
+    }
+
     public async createUser(userData: CreateUserInputProps) {
         const { firstName, lastName, email, clerkUserId, avatarUrl, role } =
             await createUserInputSchema.parseAsync(userData);

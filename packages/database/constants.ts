@@ -75,11 +75,9 @@ export const RESPONSE_STATUS = [PARTIAL, COMPLETED, ALL] as const;
 
 export const VIEWED = "viewed";
 export const SUBMITTED = "submitted";
-export const CREATED = "created";
 export const EDITED = "edited"
+export const DRAFTED = "drafted"
 
-export const ANALYTICS_EVENT_TYPES = [VIEWED, SUBMITTED, CREATED, EDITED] as const;
-export const CREATOR_ACTIVITY_TYPES = [CREATED] as const;
-export const RESPONDENT_ACTIVITY_TYPES = [SUBMITTED] as const;
-
-export const ACTIVITIES = [CREATED, SUBMITTED] as const;
+export const ANALYTICS_EVENT_TYPES = [SUBMITTED, DRAFTED, PUBLISHED, EDITED] as const;
+export const CREATOR_ACTIVITY_TYPES = [DRAFTED, PUBLISHED, EDITED] as const;
+export const RESPONDENT_ACTIVITY_TYPES = [SUBMITTED, VIEWED] as const;

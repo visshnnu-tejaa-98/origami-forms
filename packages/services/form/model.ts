@@ -13,7 +13,7 @@ import {
     SINGLE_SELECT,
     TEXT_LIKE_FIELDS,
     UNLISTED,
-    ACTIVITIES,
+    ANALYTICS_EVENT_TYPES,
 } from "@repo/database/constants";
 import { z } from "zod";
 
@@ -240,6 +240,17 @@ export const formFieldOutputSchema = z.object({
 
 export type FormFieldOutputSchemaType = z.infer<typeof formFieldOutputSchema>;
 
+export const formDraftedSchema = z.object({
+    creatorId: z.string().uuid().describe("creator id of the form"),
+    creatorName: z.string().describe("name of the creator"),
+    creatorAvatarUrl: z.string().url().nullish().describe("avatar url of the creator"),
+    activityType: z.enum(ANALYTICS_EVENT_TYPES).describe("type of the activity"),
+    formId: z.string().uuid().describe("id of the form"),
+    formName: z.string().describe("title of the form"),
+    occuredAt: z.string().datetime().describe("time of the activity"),
+})
+
+export type FormDraftedEvent = z.infer<typeof formDraftedSchema>
 
 // TODO: Need to change output schema according to our need in future
 export const createFormOutputSchema = z.object({
@@ -264,6 +275,7 @@ export const createFormOutputSchema = z.object({
     deletedAt: isoDateSchema.nullable().describe("deleted at"),
 
     fields: z.array(formFieldOutputSchema).describe("fields of the form"),
+    realTime: formDraftedSchema.nullable()
 });
 
 export type CreateFormOutputSchemaType = z.infer<typeof createFormOutputSchema>;
@@ -276,7 +288,7 @@ export const getFormByIdInputSchema = z.object({
 
 export type GetFormByIdProps = z.infer<typeof getFormByIdInputSchema>;
 
-export const getFormByIdOutputSchema = createFormOutputSchema;
+export const getFormByIdOutputSchema = createFormOutputSchema.omit({ realTime: true });
 export type GetFormByIdOutputSchemaType = z.infer<typeof getFormByIdOutputSchema>;
 
 export const LIST_FORMS_SORT_FIELDS = [
@@ -310,7 +322,7 @@ export type ListFormsProps = z.infer<typeof listFormsInputSchema>;
 export type ListFormsInput = z.input<typeof listFormsInputSchema>;
 
 export const listFormsOutputSchema = z.object({
-    forms: z.array(createFormOutputSchema.omit({ fields: true, deletedAt: true })),
+    forms: z.array(createFormOutputSchema.omit({ fields: true, deletedAt: true, realTime: true })),
     page: z.number().int().nonnegative().describe("current page number"),
     pageSize: z.number().int().nonnegative().describe("page size"),
     totalItems: z.number().int().nonnegative().describe("total number of matching forms"),
@@ -343,7 +355,7 @@ export type UpdateFormProps = z.infer<typeof updateFormInputSchema>;
 export const updateFormOutputSchema = z.object({
     success: z.boolean().describe("true or false based on if update was successfull"),
     message: z.string().describe("Success or error message"),
-    formData: createFormOutputSchema
+    formData: createFormOutputSchema.omit({ realTime: true })
         .nullable()
         .describe("updated form data, or null when no update was performed"),
 });
@@ -549,7 +561,7 @@ export const submitRealTimePublicResponseSchema = z.object({
     respondeeName: z.string().nullish().describe("name of the respondent"),
     formId: z.string().uuid().describe("id of the form"),
     formName: z.string().describe("name of the form"),
-    activityType: z.enum(ACTIVITIES).describe("type of the event"),
+    activityType: z.enum(ANALYTICS_EVENT_TYPES).describe("type of the event"),
     occuredAt: z.string().datetime().describe("timestamp of the event"),
 })
 

@@ -9,6 +9,7 @@ import { useUserStore } from "~/app/store/user-store";
 import { ActivityContentProps } from "../../types";
 import { ActivitiesSkeleton } from "../skeletons";
 import { useSocket } from "~/hooks/use-socket";
+import { relativeTime } from "~/app/utils";
 
 const ActivityAvatar = ({ avatarUrl, name }: { avatarUrl: string; name: string }) => {
     if (avatarUrl) {
@@ -26,7 +27,7 @@ const ActivityContent = (props: ActivityContentProps) => {
     return (
         <div className="body">
             <strong>{!isCreatorMe ? "You" : respondeeName}</strong> {activityType} <strong>{formName}</strong> Form.
-            <div className="time">{occuredAt}</div>
+            <div className="time">{relativeTime(occuredAt)}</div>
         </div>
     );
 };
@@ -71,7 +72,16 @@ const Activities = () => {
             console.log("Activity from socket:", data);
             pushActivityToRedux(data)
             refetchActivities()
-        }
+        },
+        "form:drafted": (data) => {
+            pushActivityToRedux({
+                ...data,
+                respondeeId: data.creatorId,
+                respondeeName: data.creatorName,
+                respondeeAvatarUrl: data.creatorAvatarUrl,
+            });
+            refetchActivities();
+        },
     });
 
     useEffect(() => {

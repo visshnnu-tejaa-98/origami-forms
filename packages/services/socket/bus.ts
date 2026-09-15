@@ -1,8 +1,9 @@
 import { logger } from "@repo/logger";
-import { ResponseCreatedEvent } from "../form/model";
+import { FormDraftedEvent, ResponseCreatedEvent } from "../form/model";
 
 export interface RealtimePublisher {
     responseCreated(userId: string, payload: ResponseCreatedEvent): void;
+    formDrafted(userId: string, payload: FormDraftedEvent): void;
 }
 
 let publisher: RealtimePublisher | null = null;
@@ -20,4 +21,13 @@ export const realtimeBus: RealtimePublisher = {
             logger.error("failed to publish response:created", { err });
         }
     },
+    formDrafted(userId, payload) {
+        if (!publisher) return;
+        try {
+            publisher.formDrafted(userId, payload);
+        } catch (err) {
+            logger.error("failed to publish form:drafted", { err });
+        }
+    },
+
 };

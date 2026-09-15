@@ -61,6 +61,9 @@ export function createSocketServer(httpServer: http.Server) {
             io.to(userRoom(userId)).emit("response:created", payload);
             io.to(formRoom(payload.formId)).emit("response:created", payload);
         },
+        formDrafted(userId, payload) {
+            io.to(userRoom(userId)).emit("form:drafted", payload);
+        },
     };
 
     registerRealtimePublisher(publisher);
