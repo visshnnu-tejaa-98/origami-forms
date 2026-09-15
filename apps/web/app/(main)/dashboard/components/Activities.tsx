@@ -1,11 +1,14 @@
-import React from "react";
+"use client"
+
+import React, { useEffect } from "react";
 import { Icon } from "../../components/icons";
-import { useGetActivities } from "~/hooks/use-analytics";
+import { useGetActivities, usePushActivity } from "~/hooks/use-analytics";
 import { TINTS } from "../../constants";
 import { hash } from "../../utils";
 import { useUserStore } from "~/app/store/user-store";
 import { ActivityContentProps } from "../../types";
 import { ActivitiesSkeleton } from "../skeletons";
+import { useSocket } from "~/hooks/use-socket";
 
 const ActivityAvatar = ({ avatarUrl, name }: { avatarUrl: string; name: string }) => {
     if (avatarUrl) {
@@ -60,6 +63,22 @@ const Activities = () => {
         refetchActivities,
     } = useGetActivities();
 
+    const pushActivityToRedux = useUserStore(state => state.pushActivity)
+    const updateActivities = useUserStore(state => state.setActivities)
+    const activitiesFromRedux = useUserStore(state => state.activities)
+    useSocket({
+        "response:created": (data) => {
+            console.log("Activity from socket:", data);
+            pushActivityToRedux(data)
+            refetchActivities()
+        }
+    });
+
+    useEffect(() => {
+        if (activities.length === 0) return
+        updateActivities(activities);
+    }, [activities, updateActivities])
+
     const isLive = !getActivitiesIsPending && !getActivitiesIsError;
 
     const renderBody = () => {
@@ -78,7 +97,7 @@ const Activities = () => {
 
         return (
             <div className="activity">
-                {activities.map((a, idx) => {
+                {activities?.length && activitiesFromRedux.map((a, idx) => {
                     let tint = TINTS[hash(idx.toString()) % TINTS.length];
                     return (
                         <div key={idx} className={`row ${tint}`}>

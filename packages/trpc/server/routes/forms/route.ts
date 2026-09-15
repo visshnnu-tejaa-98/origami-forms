@@ -137,14 +137,15 @@ export const formsRouter = router({
         .input(submitPublicResponseInputSchema)
         .output(submitPublicResponseOutputSchema)
         .mutation(async ({ input, ctx }) => {
-            const result = await formService.submitPublicResponse({ ...input, userId: ctx.userId ?? undefined });
+            const result = await formService.submitPublicResponse({ ...input, userId: ctx.userId ?? null });
 
-            if (!result) {
-                throw new Error("Something went wrong while recording your response");
+            if (!result.success) {
+                throw new Error(result.message || "Something went wrong while recording your response");
             }
 
-            const { creatorId, ...event } = result.realTime
-            realtimeBus.responseCreated(creatorId, { ...event, responseId: result.responseId })
+            if (result.realTime) {
+                realtimeBus.responseCreated(result.realTime.creatorId, result.realTime)
+            }
 
             return result;
         }),

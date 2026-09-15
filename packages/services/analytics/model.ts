@@ -40,9 +40,11 @@ export const getActivitySchema = z.object({
     respondeeAvatarUrl: z.string().nullish().describe("avatar url of the user who performed the activity"),
     activityType: z.enum(ANALYTICS_EVENT_TYPES).describe("type of activity"),
     formName: z.string().describe("name of the form"),
+    formId: z.string().uuid().describe("id of the form"),
     occuredAt: isoDateSchema.describe("timestamp of activity"),
 })
 
+export type GetActivityType = z.infer<typeof getActivitySchema>;
 
 export const getActivitiesOutputSchema = z.object({
     success: z.boolean().describe("true or false based on if request was successfull"),

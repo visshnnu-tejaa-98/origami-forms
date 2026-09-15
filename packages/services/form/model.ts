@@ -13,9 +13,9 @@ import {
     SINGLE_SELECT,
     TEXT_LIKE_FIELDS,
     UNLISTED,
+    ACTIVITIES,
 } from "@repo/database/constants";
 import { z } from "zod";
-import { baseFormSubmissionFieldsSchema, responseCreatedEventSchema } from "../socket";
 
 // TODO: Replace all the output schemas with nullish / nullable instead of optional
 
@@ -541,18 +541,26 @@ export type SubmitPublicResponseProps = z.infer<typeof submitPublicResponseInput
 
 
 export const submitRealTimePublicResponseSchema = z.object({
-    ...baseFormSubmissionFieldsSchema.shape,
     creatorId: z.string().uuid().describe("id of the user who created the form"),
-    // responseId: z.string().uuid().describe("id of the response"),
+    creatorAvatarUrl: z.string().url().nullable().optional().describe("avatar url of the creator"),
+    creatorName: z.string().nullish().describe("name of the creator"),
+    respondeeId: z.string().uuid().nullish().describe("id of the user who submitted the form"),
+    respondeeAvatarUrl: z.string().url().nullish().optional().describe("avatar url of the respondent"),
+    respondeeName: z.string().nullish().describe("name of the respondent"),
+    formId: z.string().uuid().describe("id of the form"),
+    formName: z.string().describe("name of the form"),
+    activityType: z.enum(ACTIVITIES).describe("type of the event"),
+    occuredAt: z.string().datetime().describe("timestamp of the event"),
 })
 
 export type SubmitRealTimePublicResponseSchemaType = z.infer<typeof submitRealTimePublicResponseSchema>;
+export type ResponseCreatedEvent = z.infer<typeof submitRealTimePublicResponseSchema>
 
 export const submitPublicResponseOutputSchema = z.object({
     success: z.boolean().describe("whether the response was recorded"),
-    responseId: z.string().uuid().describe("id of the recorded response"),
-    message: z.string().describe("success message"),
-    realTime: submitRealTimePublicResponseSchema
+    responseId: z.string().uuid().nullable().describe("id of the recorded response, null when it was not recorded"),
+    message: z.string().describe("success or error message"),
+    realTime: submitRealTimePublicResponseSchema.nullable().describe("payload for the response:created broadcast, null when there is nothing to announce")
 });
 
 export type SubmitPublicResponseOutputSchemaType = z.infer<typeof submitPublicResponseOutputSchema>;

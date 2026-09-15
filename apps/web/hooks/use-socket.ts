@@ -26,9 +26,9 @@ export function useSocket(handlers: Partial<ServerToClientEvents>) {
                 auth: async (cb) => cb({ token: await getToken() }),
             });
 
-            socket.on("connect", () => console.debug("[socket] connected", socket?.id));
-            socket.on("connect_error", (err) => console.error("[socket] connect_error", err.message));
-            socket.on("disconnect", (reason) => console.debug("[socket] disconnected", reason));
+            socket.on("connect", () => console.log("[socket] connected", socket?.id));
+            socket.on("connect_error", (err) => console.log("[socket] connect_error", err.message));
+            socket.on("disconnect", (reason) => console.log("[socket] disconnected", reason));
         }
 
         const active = socket;

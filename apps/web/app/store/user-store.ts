@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { combine, createJSONStorage, devtools, persist } from "zustand/middleware";
 import { LIGHT, THEMES } from "@repo/database/constants";
 import { GRID, LIST } from "../(main)/constants";
+import { GetActivityType } from "@repo/services/analytics/model";
 
 type User = {
     id: string,
@@ -20,12 +21,15 @@ export type UserSettingsType = {
     responsesPerPage: number
 }
 
+const ACTIVITY_FEED_LIMIT = 6;
+
 type UserInitialState = {
     user: User | null;
     loading: boolean;
     error: boolean;
     errorMessage: string;
     settings: UserSettingsType
+    activities: GetActivityType[]
 }
 
 type UserActions = {
@@ -35,6 +39,8 @@ type UserActions = {
     setError: (error: boolean) => void;
     setErrorMessage: (errorMessage: string) => void;
     updateSettings: (settings: Partial<UserSettingsType>) => void;
+    pushActivity: (activity: GetActivityType) => void;
+    setActivities: (activities: GetActivityType[]) => void;
 }
 
 const userInitialState: UserInitialState = {
@@ -47,7 +53,8 @@ const userInitialState: UserInitialState = {
         theme: LIGHT,
         formsPerPage: 10,
         responsesPerPage: 10
-    }
+    },
+    activities: []
 }
 
 export const useUserStore = create(
@@ -62,6 +69,11 @@ export const useUserStore = create(
                     setErrorMessage: (errorMessage: string) => set({ errorMessage }),
                     updateSettings: (settings: Partial<UserSettingsType>) => set((state) => ({
                         settings: { ...state.settings, ...settings }
+                    })),
+                    setActivities: (activities: GetActivityType[]) =>
+                        set({ activities: activities.slice(0, ACTIVITY_FEED_LIMIT) }),
+                    pushActivity: (activity: GetActivityType) => set((state) => ({
+                        activities: [activity, ...state.activities].slice(0, ACTIVITY_FEED_LIMIT),
                     })),
                 };
             }),

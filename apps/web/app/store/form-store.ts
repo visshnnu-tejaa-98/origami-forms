@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { combine, devtools, persist } from "zustand/middleware";
 import { FormStatsListOutputSchemaType, ListFormsOutputSchemaType } from "@repo/services/form/model";
-import { ResponseCreatedEvent } from "@repo/services/socket";
 
 const formsInitialState = {
     formsData: {
@@ -13,7 +12,6 @@ const formsInitialState = {
         hasNextPage: false,
         hasPrevPage: false,
     },
-    liveResponses: [] as ResponseCreatedEvent[],
     formsStats: null as FormStatsListOutputSchemaType | null,
 }
 
@@ -25,19 +23,7 @@ export const useFormStore = create(
                     setForms: (formsData: ListFormsOutputSchemaType) => set({ formsData }),
                     getFormsData: () => useFormStore.getState().formsData,
                     setFormsStats: (formsStats: FormStatsListOutputSchemaType) => set({ formsStats }),
-                    pushLiveResponse: (event: ResponseCreatedEvent) =>
-                        set((state) => {
-                            // dedupe: a reconnect can replay, and StrictMode double-mounts in dev
-                            if (state.liveResponses.some((r) => r.responseId === event.responseId)) return state;
-                            return {
-                                liveResponses: [event, ...state.liveResponses].slice(0, 20),
-                                formsStats: state.formsStats
-                                    ? { ...state.formsStats, totalResponses: state.formsStats.totalResponses + 1 }
-                                    : state.formsStats,
-                            };
-                        }),
-
-                };
+                }
             }),
             {
                 name: "forms",

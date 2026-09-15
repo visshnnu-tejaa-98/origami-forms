@@ -81,3 +81,5 @@ export const EDITED = "edited"
 export const ANALYTICS_EVENT_TYPES = [VIEWED, SUBMITTED, CREATED, EDITED] as const;
 export const CREATOR_ACTIVITY_TYPES = [CREATED] as const;
 export const RESPONDENT_ACTIVITY_TYPES = [SUBMITTED] as const;
+
+export const ACTIVITIES = [CREATED, SUBMITTED] as const;

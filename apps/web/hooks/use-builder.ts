@@ -19,6 +19,7 @@ import { blankField, uid } from "~/app/(main)/utils";
 import { toast } from "~/components/origami/toast";
 import { useCreateForm, useUpdateForm } from "./use-form";
 import { useRouter } from "next/navigation";
+import { usePushActivity } from "./use-analytics";
 
 /** a saved field carries its database id; a block added in this session carries a local
  *  `q-xxxx` one. only the former identifies a row the server should update */
@@ -41,6 +42,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
 
   const { createFormAsync } = useCreateForm()
   const { updateFormAsync } = useUpdateForm()
+  const { pushActivity } = usePushActivity()
+
   const router = useRouter()
 
   const setTitle = useCallback((title: string) => setForm((f) => ({ ...f, title })), []);
@@ -189,6 +192,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
         if (status === PUBLISHED) await updateFormAsync({ formId: saved.id, status });
 
         savedPrint.current = fingerprint(form);
+        if (status === PUBLISHED) pushActivity({ formId: saved.id, activityType: "created" })
         if (!silent) toast.success(status === PUBLISHED ? "Form published." : "Draft saved.");
         if (redirect) router.replace("/forms");
         return saved;
@@ -201,7 +205,9 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
 
   const saveAsDraft = useCallback(() => save(), [save]);
 
-  const saveAndPublish = useCallback(() => save(PUBLISHED), [save]);
+  const saveAndPublish = useCallback(() => {
+    save(PUBLISHED)
+  }, [save]);
 
   const preview = useCallback(async () => {
     if (formId && fingerprint(form) === savedPrint.current) {

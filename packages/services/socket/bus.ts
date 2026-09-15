@@ -1,5 +1,5 @@
 import { logger } from "@repo/logger";
-import { ResponseCreatedEvent } from "./model";
+import { ResponseCreatedEvent } from "../form/model";
 
 export interface RealtimePublisher {
     responseCreated(userId: string, payload: ResponseCreatedEvent): void;

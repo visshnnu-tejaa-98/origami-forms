@@ -26,7 +26,7 @@ export default class AnalyticsService {
             throw new Error("Activity is only tracked for authenticated forms");
         }
 
-        if (activityType === CREATED && form.creatorId !== requesterId) {
+        if (activityType !== CREATED && form.creatorId !== requesterId) {
             throw new Error("You are not authorized to perform this action");
         }
 
@@ -74,7 +74,8 @@ export default class AnalyticsService {
             with: {
                 form: {
                     columns: {
-                        title: true
+                        title: true,
+                        id: true
                     }
                 },
                 creator: {
@@ -113,6 +114,7 @@ export default class AnalyticsService {
             const respondeeName = fullName(activity.respondee)
 
             return {
+                formId: activity.formId,
                 creatorId: activity.creatorId,
                 respondeeId: activity.respondeeId,
                 creatorName,

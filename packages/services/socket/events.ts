@@ -1,4 +1,4 @@
-import { ResponseCreatedEvent } from "./model";
+import { ResponseCreatedEvent } from "../form/model";
 
 export interface ServerToClientEvents {
     "response:created": (payload: ResponseCreatedEvent) => void;

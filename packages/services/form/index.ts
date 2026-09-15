@@ -19,6 +19,7 @@ import db, {
     responseAnswers,
     sql,
     sum,
+    users,
     views,
 } from "@repo/database";
 import {
@@ -30,6 +31,7 @@ import {
     GetFormByIdProps,
     GetPublicFormProps,
     ListFormsProps,
+    SubmitPublicResponseOutputSchemaType,
     SubmitPublicResponseProps,
     UpdateFormProps,
     UpSertFormFieldsInputProps,
@@ -699,7 +701,7 @@ export default class FormService {
         };
     }
 
-    public async submitPublicResponse(payload: SubmitPublicResponseProps) {
+    public async submitPublicResponse(payload: SubmitPublicResponseProps): Promise<SubmitPublicResponseOutputSchemaType> {
         const { formId, answers, completionTimeInSec, userId, metadata } = payload;
 
         const form = await db.query.forms.findFirst({
@@ -776,20 +778,63 @@ export default class FormService {
                 .set({ submissionCount: sql`${forms.submissionCount} + 1` })
                 .where(eq(forms.id, form.id));
 
+            if (!response.userId) {
+                return {
+                    success: true,
+                    responseId: response.id,
+                    message: "Response recorded",
+                    realTime: null,
+                };
+            }
+
+            const respondeeDetails = await tx.query.users.findFirst({
+                where: eq(users.id, response.userId),
+                columns: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    avatarUrl: true,
+                }
+            })
+
+            const creatorDetails = await tx.query.users.findFirst({
+                where: eq(users.id, form.creatorId),
+                columns: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    avatarUrl: true,
+                }
+            })
+
             return {
                 success: true,
                 responseId: response.id,
                 message: "Response recorded",
                 realTime: {
                     creatorId: form.creatorId,
+                    creatorAvatarUrl: creatorDetails?.avatarUrl,
+                    creatorName: `${creatorDetails?.firstName} ${creatorDetails?.lastName}`.trim() ? creatorDetails?.email.split("@")[0] : "Unknown User",
+
+                    respondeeId: response.userId,
+                    respondeeAvatarUrl: respondeeDetails?.avatarUrl,
+                    respondeeName: `${respondeeDetails?.firstName} ${respondeeDetails?.lastName}`.trim() ? respondeeDetails?.email.split("@")[0] : "Unknown User",
+
                     formId: form.id,
-                    formTitle: form.title,
-                    logoUrl: form.logoUrl,
-                    submittedAt: now.toISOString(),
-                    completionTimeInSec: completionTimeInSec ?? null,
-                    submissionCount: form.submissionCount + 1,
+                    formName: form.title,
+                    activityType: "submitted" as const,
+                    occuredAt: now.toISOString(),
                 },
             };
+        }).catch(() => {
+            return {
+                success: false,
+                message: "Something went wrong",
+                responseId: null,
+                realTime: null,
+            }
         });
     }
 }
