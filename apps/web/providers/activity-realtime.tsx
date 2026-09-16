@@ -31,6 +31,9 @@ export function ActivityRealtimeProvider({ children }: { children: React.ReactNo
     const record = (activity: GetActivityType) => {
         pushActivity(activity);
         utils.analytics.getActivities.invalidate();
+        if (activity.activityType === "submitted") {
+            utils.responses.listResponses.invalidate()
+        }
     };
 
     useSocket({
