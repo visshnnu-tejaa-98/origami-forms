@@ -8,7 +8,6 @@ import { hash } from "../../utils";
 import { useUserStore } from "~/app/store/user-store";
 import { ActivityContentProps } from "../../types";
 import { ActivitiesSkeleton } from "../skeletons";
-import { useSocket } from "~/hooks/use-socket";
 import { relativeTime } from "~/app/utils";
 
 const ActivityAvatar = ({ avatarUrl, name }: { avatarUrl: string; name: string }) => {
@@ -64,37 +63,10 @@ const Activities = () => {
         refetchActivities,
     } = useGetActivities();
 
-    const pushActivityToRedux = useUserStore(state => state.pushActivity)
+    // the socket listener lives in ActivityRealtimeProvider at the layout, so events
+    // still land while this panel is unmounted; this panel only reads the store
     const updateActivities = useUserStore(state => state.setActivities)
     const activitiesFromRedux = useUserStore(state => state.activities)
-    useSocket({
-        "response:submitted": (data) => {
-            pushActivityToRedux(data)
-            refetchActivities()
-        },
-        "form:viewed": (data) => {
-            pushActivityToRedux(data)
-            refetchActivities()
-        },
-        "form:drafted": (data) => {
-            pushActivityToRedux({
-                ...data,
-                respondeeId: data.creatorId,
-                respondeeName: data.creatorName,
-                respondeeAvatarUrl: data.creatorAvatarUrl,
-            });
-            refetchActivities();
-        },
-        "form:published": (data) => {
-            pushActivityToRedux({
-                ...data,
-                respondeeId: data.creatorId,
-                respondeeName: data.creatorName,
-                respondeeAvatarUrl: data.creatorAvatarUrl,
-            });
-            refetchActivities();
-        },
-    });
 
     useEffect(() => {
         if (activities.length === 0) return

@@ -9,6 +9,7 @@ import Sidebar from "./components/Sidebar";
 import { Icon } from "./components/icons";
 import { useSidebarRail } from "~/hooks/use-sidebar-rail";
 import { useViewAttribute } from "~/hooks/use-view-attribute";
+import { ActivityRealtimeProvider } from "~/providers/activity-realtime";
 import "./shell.css";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
@@ -48,6 +49,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   }, [isLoaded, isSignedIn, user?.id]);
 
   return (
+    <ActivityRealtimeProvider>
     <div
       className={`db-shell o-scope${flush ? " db-shell--flush" : ""}${railed ? " db-shell--rail" : ""}${closing ? " db-shell--closing" : ""}`}
     >
@@ -66,6 +68,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       )}
       <main>{children}</main>
     </div>
+    </ActivityRealtimeProvider>
   );
 };
 
