@@ -46,6 +46,7 @@ import {
     COMPLETED,
     DRAFT,
     DRAFTED,
+    EDITED,
     LAYOUT_FIELD_TYPES,
     MULTI_SELECT,
     PUBLISHED,
@@ -111,7 +112,7 @@ export default class FormService {
             creatorId: string;
             formId: string;
             formName: string;
-            activityType: typeof DRAFTED | typeof PUBLISHED;
+            activityType: typeof DRAFTED | typeof PUBLISHED | typeof EDITED;
         },
     ): Promise<FormDraftedEvent | null> {
         const { creatorId, formId, formName, activityType } = params;
@@ -375,6 +376,13 @@ export default class FormService {
                     formId,
                     formName: title ?? form.title,
                     activityType: PUBLISHED,
+                });
+            } else {
+                realTime = await this.recordCreatorActivity(tx, {
+                    creatorId: form.creatorId,
+                    formId,
+                    formName: title ?? form.title,
+                    activityType: EDITED,
                 });
             }
 
