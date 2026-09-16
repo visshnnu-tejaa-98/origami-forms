@@ -4,6 +4,50 @@ const Bar = ({ w, h = 10 }: { w: string; h?: number }) => (
   <span className="sk sk-shimmer" style={{ width: w, height: h }} />
 );
 
+export const GreetingSkeleton = () => (
+  <section className="greet" aria-hidden>
+    <div className="greet-card sk-card">
+      <span className="crane">
+        <span className="sk sk-shimmer" style={{ width: 92, height: 92, borderRadius: 14 }} />
+      </span>
+      <span className="o-eyebrow">
+        <Bar w="96px" h={9} />
+      </span>
+      <h2>
+        <Bar w="72%" h={22} />
+        <div style={{ marginTop: 10 }}><Bar w="54%" h={22} /></div>
+      </h2>
+      <p className="lede">
+        <Bar w="100%" h={10} />
+        <span style={{ marginTop: 7 }}><Bar w="88%" h={10} /></span>
+      </p>
+      <div className="actions">
+        <span className="sk sk-shimmer" style={{ width: 112, height: 38, borderRadius: 12 }} />
+        <span className="sk sk-shimmer" style={{ width: 136, height: 38, borderRadius: 12 }} />
+      </div>
+    </div>
+    <div className="focus-card sk-card">
+      <span className="o-tape o-tape--matcha" />
+      <div className="lbl">
+        <Bar w="92px" h={8} />
+      </div>
+      <h3>
+        <Bar w="68%" h={16} />
+      </h3>
+      {["78%", "70%", "58%"].map((w, i) => (
+        <div key={i} className="row">
+          <span className="sk sk-shimmer" style={{ width: 8, height: 8, borderRadius: "50%" }} />
+          <Bar w={w} h={9} />
+        </div>
+      ))}
+      <div style={{ display: "flex", gap: "6px", marginTop: "14px" }}>
+        <span className="sk sk-shimmer" style={{ width: 74, height: 30, borderRadius: 10 }} />
+        <span className="sk sk-shimmer" style={{ width: 88, height: 30, borderRadius: 10 }} />
+      </div>
+    </div>
+  </section>
+);
+
 const STAT_CARDS = [
   { cls: "", num: 76, lbl: "108px", spark: true },
   { cls: "s2", num: 68, lbl: "104px" },
@@ -53,7 +97,7 @@ export const ActivitiesSkeleton = ({ count = 5 }: { count?: number }) => (
   </div>
 );
 
-export const RecentFormsSkeleton =({ count = 5 }: { count?: number }) => (
+export const RecentFormsSkeleton = ({ count = 5 }: { count?: number }) => (
   <>
     {Array.from({ length: count }).map((_, i) => (
       <div key={i} className="form-row sk-row" aria-hidden>
