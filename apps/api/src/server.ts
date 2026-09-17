@@ -20,14 +20,12 @@ const openApiDocument = generateOpenApiDocument(serverRouter, {
   baseUrl: env.BASE_URL.concat("/api"),
 });
 
-if (env.NODE_ENV !== "production") {
-  app.use(
-    cors({
-      origin: env.WEB_ORIGIN,
-      credentials: true,
-    }),
-  );
-}
+app.use(
+  cors({
+    origin: env.WEB_ORIGIN,
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(

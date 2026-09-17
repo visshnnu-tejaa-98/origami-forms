@@ -10,6 +10,7 @@ async function init() {
     const server = http.createServer(expressApplication);
     createSocketServer(server);
     const PORT: number = env.PORT ? +env.PORT : 8000;
+    if (!Number.isFinite(PORT)) throw new Error(`Invalid PORT: ${env.PORT}`);
     server.listen(PORT, () => {
       logger.info(`http server is running on PORT ${PORT}`);
     });
