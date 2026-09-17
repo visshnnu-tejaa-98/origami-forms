@@ -19,7 +19,7 @@ export function createSocketServer(httpServer: http.Server) {
         {
             path: "/socket.io",
             cors: {
-                origin: "http://localhost:3000",
+                origin: env.WEB_ORIGIN,
                 credentials: true,
             },
         },
