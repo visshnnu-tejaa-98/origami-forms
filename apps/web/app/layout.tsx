@@ -3,6 +3,10 @@ import "./globals.css";
 import "./origami.css";
 import { GlobalProviders } from "~/providers/global";
 
+// Clerk's provider reads search params during render, which makes static
+// prerendering fail. Every route here is auth-gated or live data anyway.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Origami · forms that feel handmade",
   description:
