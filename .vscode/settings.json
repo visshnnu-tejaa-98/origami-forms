@@ -3,5 +3,15 @@
     {
       "mode": "auto"
     }
+  ],
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "driver": "PostgreSQL",
+      "name": "origami-prod",
+      "connectString": "postgresql://postgres:xNkjWsPnbJOvMRCiYRJXKwyAWFUxbDWU@altaria.proxy.rlwy.net:16027/railway"
+    }
   ]
 }
