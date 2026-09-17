@@ -23,12 +23,12 @@ const workspace: NavItem[] = [
   { href: "/dashboard", icon: "home", label: "Overview" },
   { href: "/forms", icon: "forms", label: "My forms", },
   { href: "/responses", icon: "mail", label: "Responses" },
-  { href: "/analytics", icon: "analytics", label: "Analytics" },
+  // { href: "/analytics", icon: "analytics", label: "Analytics" },
 ];
 
 const library: NavItem[] = [
-  { href: "/templates", icon: "templates", label: "Templates" },
-  { href: "/design-system", icon: "sparkles", label: "Design system" },
+  // { href: "/templates", icon: "templates", label: "Templates" },
+  // { href: "/design-system", icon: "sparkles", label: "Design system" },
 ];
 
 const Sidebar = () => {
@@ -41,8 +41,7 @@ const Sidebar = () => {
   const setFormStatsDataToRedux = useFormStore((state) => state.setFormsStats);
 
   const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
-  const firstName = user?.firstName ?? getNameFromEmail(email);
-  const initial = (user?.firstName ?? getNameFromEmail(email)!).charAt(0).toUpperCase();
+  // const firstName = user?.firstName ?? getNameFromEmail(email);
 
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
@@ -64,6 +63,17 @@ const Sidebar = () => {
       setFormStatsDataToRedux(formsStatsData)
     }
   }, [formsStatsData]);
+
+  const emailAddress = useUserStore(state => state.user?.emailAddress)
+  const firstName = useUserStore(state => state.user?.firstName)
+  const initial = (user?.firstName ?? getNameFromEmail(emailAddress ?? email)!).charAt(0).toUpperCase();
+
+  const imageUrl = useUserStore(state => state.user?.imageUrl) || user?.imageUrl || "";
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const showAvatarImage = !!imageUrl && !avatarFailed;
+
+  useEffect(() => setAvatarFailed(false), [imageUrl]);
+
 
   const renderItem = (item: NavItem) => {
     const showCount = !!(item.count && item.count > 0);
@@ -94,14 +104,14 @@ const Sidebar = () => {
       <div className="sb-section">Workspace</div>
       {workspaceLinks.map(renderItem)}
 
-      <div className="sb-section">Library</div>
+      {library.length > 0 && <div className="sb-section">Library</div>}
       {library.map(renderItem)}
 
       <div className="sb-section">Account</div>
-      <Link className={`sb-item${isActive("/pricing") ? " active" : ""}`} href="/pricing" title="Billing">
+      {/* <Link className={`sb-item${isActive("/pricing") ? " active" : ""}`} href="/pricing" title="Billing">
         <Icon name="zap" size={17} /><span>Billing</span>
         <span className="o-badge o-badge--matcha" style={{ marginLeft: "auto", fontSize: "0.62rem", padding: "1px 6px" }}>free</span>
-      </Link>
+      </Link> */}
       <Link className={`sb-item${isActive("/settings") ? " active" : ""}`} href="/settings" title="Settings">
         <Icon name="settings" size={17} /><span>Settings</span>
       </Link>
@@ -116,10 +126,24 @@ const Sidebar = () => {
       </div>
 
       <div className="sb-user">
-        <span className="o-avatar o-avatar--sm" style={{ background: "var(--sakura-soft)", color: "var(--sakura-deep)" }}>{initial}</span>
+        <span
+          className={`o-avatar o-avatar--sm${showAvatarImage ? " o-avatar--img" : ""}`}
+          style={{ background: "var(--sakura-soft)", color: "var(--sakura-deep)" }}
+        >
+          {showAvatarImage ? (
+            <img
+              src={imageUrl}
+              alt={firstName ? `${firstName}'s avatar` : "Your avatar"}
+              referrerPolicy="no-referrer"
+              onError={() => setAvatarFailed(true)}
+            />
+          ) : (
+            initial
+          )}
+        </span>
         <div>
           <div className="name">{firstName}</div>
-          <div className="plan">{email}</div>
+          <div className="plan">{emailAddress ? emailAddress : ""}</div>
         </div>
       </div>
     </aside>

@@ -9,6 +9,7 @@ import { RecentFormsSkeleton } from '../skeletons'
 import ErrorComponent from '../../components/ErrorComponent'
 import { STATUS_BADGE, toUiForm } from '../../utils'
 import EmptyComponent from '../../components/EmptyComponent'
+import { useRouter } from 'next/navigation'
 
 const FormsList = () => {
     const { formsData, listFormsIsPending, listFormsError, refetchForms } = useListForms({
@@ -22,6 +23,8 @@ const FormsList = () => {
         if (!formsData?.forms) return []
         return formsData.forms.map(toUiForm);
     }, [formsData]);
+
+    const router = useRouter()
 
     return (
         <div className="panel">
@@ -45,7 +48,7 @@ const FormsList = () => {
                 />
             }
 
-            {forms.length === 0 &&
+            {forms.length === 0 && !listFormsIsPending &&
                 <EmptyComponent
                     title="Nothing on the desk yet."
                     message="Your recent folds will gather here. Make the first one and watch this panel fill up."
@@ -56,7 +59,15 @@ const FormsList = () => {
             {forms && forms.map((f) => {
                 const badge = STATUS_BADGE[f.status];
                 const isDraft = f.status === "draft";
-                return <div key={f.id} className={`form-row ${f.tint}`}>
+
+                const onClick = () => {
+                    if (isDraft) {
+                        router.push(`/builder?id=${f.id}`)
+                    } else {
+                        router.push(`/responses?search=${f.title}`)
+                    }
+                }
+                return <div key={f.id} className={`form-row ${f.tint}`} onClick={onClick}>
                     <span className="ic">
                         <Icon name={f.icon} size={20} />
                     </span>

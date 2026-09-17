@@ -115,9 +115,9 @@ const Greeting = () => {
                     <Link className="o-btn o-btn--accent" href="/builder">
                         New form
                     </Link>
-                    <Link className="o-btn" href="#">
+                    {/* <Link className="o-btn" href="#">
                         <Icon name="analytics" size={14} /> See analytics
-                    </Link>
+                    </Link> */}
                 </div>
             </div>
             <div className="focus-card">
@@ -140,9 +140,9 @@ const Greeting = () => {
                     {topForm?.updatedAt ? ` · edited ${relativeTime(topForm.updatedAt)}` : ''}
                 </div>
                 <div style={{ display: "flex", gap: "6px", marginTop: "14px" }}>
-                    <Link className="o-btn o-btn--sm" href={topForm ? `/builder/${topForm.id}` : '/builder'}>
+                    {/* <Link className="o-btn o-btn--sm" href={topForm ? `/builder/${topForm.id}` : '/builder'}>
                         <Icon name="edit" size={13} /> Edit
-                    </Link>
+                    </Link> */}
                     {topForm && (
                         <Link className="o-btn o-btn--sm o-btn--accent" href={`/builder/${topForm.id}/preview`}>
                             <Icon name="eye" size={13} /> Preview

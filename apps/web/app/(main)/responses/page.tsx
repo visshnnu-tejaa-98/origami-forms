@@ -28,7 +28,7 @@ import { useDebounce } from "~/hooks/use-debounce";
 import ResponseAnswerDetails from "./components/ResponseAnswerDetails";
 import { ResponsesPageSkeleton } from "./skeletons";
 import { DefaultFilterOptions } from "./types";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ListResponseOutputType } from "@repo/services/response/model";
 import { exportResponsesToCsv } from "./utils";
 import ActionsBar from "./components/ActionBar";
@@ -53,6 +53,9 @@ const Responses = () => {
     defaultSort: SUBMITTED_AT,
     defaultOrder: DESC,
   });
+  const searchParams = useSearchParams()
+  const initialSearch = searchParams.get("search") || ""
+
   const { responsesData, listResponsesIsError, listResponsesIsPending, listResponsesIsFetching, refetchResponses } =
     useListResponses({
       sortBy: sort,
@@ -69,11 +72,13 @@ const Responses = () => {
   const setResponsesData = useResponsesStore(state => state.setResponsesData)
   const setResponsesStats = useResponsesStore(state => state.setResponsesStats)
 
+
   useEffect(() => {
     if (responsesData) {
       setResponsesData(responsesData)
+      setSearchQuery(initialSearch)
     }
-  }, [responsesData])
+  }, [responsesData, initialSearch])
 
   useEffect(() => {
     if (responsesStatsData) {
@@ -109,6 +114,7 @@ const Responses = () => {
   const onClearFilters = () => {
     setSearchQuery("");
     setTab(ALL);
+    router.replace("/responses")
   };
 
   const onClickCreateForm = () => router.push("/builder");

@@ -500,6 +500,10 @@ main,
   border: 1.5px solid var(--surface-card);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
+/* photo variant — the img fills the circle, initial stays the fallback */
+.o-avatar--img { overflow: hidden; padding: 0; }
+.o-avatar--img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
 .o-avatar--sm { width: 28px; height: 28px; font-size: 0.95rem; }
 .o-avatar--lg { width: 52px; height: 52px; font-size: 1.4rem; }
 

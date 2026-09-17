@@ -19,7 +19,7 @@ const Topbar = () => {
             <h1>
                 {greetingMessage}, {firstName}.<span className="smaller">{currentDate}.</span>
             </h1>
-            <div className="search">
+            {/* <div className="search">
                 <Icon name="search" size={16} />
                 <input placeholder="Search forms, responses, themes…" />
                 <span className="o-kbd">⌘K</span>
@@ -30,7 +30,7 @@ const Topbar = () => {
             </button>
             <button className="icon-btn" title="Help">
                 <Icon name="sparkles" size={18} />
-            </button>
+            </button> */}
         </header>
     );
 };

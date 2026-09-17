@@ -2,9 +2,11 @@ import React from 'react'
 import { ResponseHeaderProps } from '../types'
 import { Icon } from '../../components/icons'
 import { formatItemCount } from '~/app/utils'
+import { useRouter } from 'next/navigation'
 
 const ResponseHeader = (props: ResponseHeaderProps) => {
     const { totalItems, searchQuery, setSearchQuery, onExportCsv, canExport } = props
+    const router = useRouter()
 
     return (
         <header className="rsp-head">
@@ -26,7 +28,10 @@ const ResponseHeader = (props: ResponseHeaderProps) => {
                         <button
                             type="button"
                             className="search-clear"
-                            onClick={() => setSearchQuery("")}
+                            onClick={() => {
+                                setSearchQuery("")
+                                router.replace("/responses")
+                            }}
                             aria-label="Clear search"
                             title="Clear search"
                         >

@@ -113,7 +113,7 @@ const Activities = () => {
                                     occuredAt={a.occuredAt}
                                 />
                             </div>
-                            <span className="pip" />
+                            {/* <span className="pip" /> */}
                         </div>
                     );
                 })}
@@ -131,11 +131,11 @@ const Activities = () => {
                 )}
             </div>
             {renderBody()}
-            {isLive && activitiesFromRedux.length > 0 && (
+            {/* {isLive && activitiesFromRedux.length > 0 && (
                 <button className="o-btn o-btn--ghost o-btn--block o-btn--sm" style={{ marginTop: "10px" }}>
                     See all activity <Icon name="arrow" size={12} />
                 </button>
-            )}
+            )} */}
         </div>
     );
 };
