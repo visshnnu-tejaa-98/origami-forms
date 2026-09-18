@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useParams, usePathname } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import "../../../(main)/builder/preview.css";
 import "../public-form.css";
 import { usePublicForm } from "~/hooks/use-public-form";
@@ -12,6 +12,8 @@ import PublicFormState from "../components/PublicFormState";
 import { useRouter } from "next/navigation";
 import { useIsUserGaveResponseForForm } from "~/hooks/use-response";
 import { usePushActivity } from "~/hooks/use-analytics";
+import { useGetUser } from "~/hooks/use-user";
+import { useUserStore } from "~/app/store/user-store";
 
 const PublicFormPage = () => {
 
@@ -38,9 +40,40 @@ const PublicFormPage = () => {
     const submissionCheckPending = submissionCheckEnabled && isUserGaveResponseForFormIsPending
     const isSettling = !authLoaded || publicFormIsPending || submissionCheckPending
 
+
+    const { isLoaded: authIsLoaded, isSignedIn: authIsSignedIn, user: authUser } = useUser();
+    const { createUserAsync } = useGetUser();
+    const setUserToRedux = useUserStore((state) => state.setUser);
+
+    useEffect(() => {
+        if (!authIsLoaded) return;
+        if (!authIsSignedIn) return;
+        if (!authUser?.id) return;
+
+        createUserAsync({
+            firstName: authUser.firstName ?? undefined,
+            lastName: authUser.lastName ?? undefined,
+            email: authUser.emailAddresses[0]?.emailAddress ?? "",
+            avatarUrl: authUser.imageUrl || undefined,
+            clerkUserId: authUser.id,
+        }).then((user) => {
+            setUserToRedux({
+                id: user.id,
+                clerkId: user.clerkUserId,
+                emailAddress: user.email!,
+                firstName: user.firstName!,
+                lastName: user.lastName!,
+                imageUrl: user.avatarUrl!,
+                role: user.role!,
+            });
+        });
+    }, [authIsLoaded, authIsSignedIn, authUser?.id]);
+
     useEffect(() => {
         pushActivity({ formId, activityType: 'viewed' })
     }, [formId])
+
+
 
     const shell = (children: React.ReactNode) => (
         <div className="db-shell db-shell--public o-scope">
@@ -114,15 +147,15 @@ const PublicFormPage = () => {
         );
     }
 
-    if (isUserAlreadyFilledForm) {
-        return shell(
-            <PublicFormState
-                icon="clip"
-                title="You have already submitted this form."
-                description="You cannot submit the form more than once."
-            />,
-        );
-    }
+    // if (isUserAlreadyFilledForm) {
+    //     return shell(
+    //         <PublicFormState
+    //             icon="clip"
+    //             title="You have already submitted this form."
+    //             description="You cannot submit the form more than once."
+    //         />,
+    //     );
+    // }
 
     return <PublicFormScreen form={publicForm} />;
 };
