@@ -1,0 +1,88 @@
+"use client";
+
+import React, { useState } from "react";
+import "./analytics.css";
+import { PaperCrane } from "../components/origami-art";
+import AnalyticsDecorations from "./components/AnalyticsDecorations";
+import AnalyticsHeader from "./components/AnalyticsHeader";
+import KpiGrid from "./components/KpiGrid";
+import SubmissionsTrend from "./components/SubmissionsTrend";
+import DeviceBreakdown from "./components/DeviceBreakdown";
+import GeoBreakdown from "./components/GeoBreakdown";
+import FieldBreakdown from "./components/FieldBreakdown";
+import { ALL_FORMS, DEFAULT_RANGE } from "./constants";
+import {
+    MOCK_FORMS,
+    getChoiceFields,
+    getCities,
+    getCountries,
+    getDevices,
+    getKpis,
+    getResponseBuckets,
+    getTrend,
+} from "./mock-data";
+import type { RangeKey, ScopeKey } from "./types";
+
+const Analytics = () => {
+    const [scope, setScope] = useState<ScopeKey>(ALL_FORMS);
+    const [range, setRange] = useState<RangeKey>(DEFAULT_RANGE);
+    // the responses card carries its own window, the way the dashboard's ChartPanel
+    // does — the header range stays with the headline figures above it
+    const [chartRange, setChartRange] = useState<RangeKey>(DEFAULT_RANGE);
+
+    const kpis = getKpis(scope, range);
+    const buckets = getResponseBuckets(scope);
+    const trend = getTrend(scope, chartRange);
+    const devices = getDevices(scope);
+    const countries = getCountries(scope);
+    const cities = getCities(scope);
+    const choiceFields = getChoiceFields(scope);
+
+    const isGlobal = scope === ALL_FORMS;
+
+    return (
+        <div className="ana-page">
+            <AnalyticsDecorations />
+
+            <AnalyticsHeader
+                forms={MOCK_FORMS}
+                scope={scope}
+                setScope={setScope}
+                range={range}
+                setRange={setRange}
+            />
+
+            <KpiGrid kpis={kpis} />
+
+            {/* the count and the plot share one card, both driven by the card's
+                own window selector */}
+            <SubmissionsTrend
+                data={trend}
+                range={chartRange}
+                setRange={setChartRange}
+                buckets={buckets}
+            />
+
+            <section className="ana-split">
+                <DeviceBreakdown devices={devices} />
+                <GeoBreakdown countries={countries} cities={cities} />
+            </section>
+
+            {/* a workspace roll-up has no single field list, so this panel is form-scoped */}
+            {!isGlobal && choiceFields.length > 0 && <FieldBreakdown fields={choiceFields} />}
+
+            {isGlobal && (
+                <aside className="ana-hint">
+                    <span className="ana-hint__art" aria-hidden>
+                        <PaperCrane size={34} />
+                    </span>
+                    <p>
+                        Pick a single form above to see how each question was answered.
+                    </p>
+                </aside>
+            )}
+        </div>
+    );
+};
+
+export default Analytics;

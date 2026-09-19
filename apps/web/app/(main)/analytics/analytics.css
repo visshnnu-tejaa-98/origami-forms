@@ -1,0 +1,441 @@
+/* ============================================================
+   ANALYTICS · the ledger page
+   Renders inside the (main) shell layout (shell.css), on the
+   Origami tokens (origami.css). Panels follow the same paper
+   card treatment as the dashboard and responses pages.
+   ============================================================ */
+
+.db-shell .ana-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  /* everything real sits above the drifting paper menagerie */
+  isolation: isolate;
+
+  /* Categorical series steps, validated against both surfaces for lightness,
+     chroma, CVD separation and contrast. Recharts marks take the same values as
+     literal hex (see use-chart-palette.ts) — SVG attributes cannot read a var(). */
+  --ana-c1: #c66145;
+  --ana-c2: #3a72a8;
+  --ana-c3: #6f9a53;
+  --ana-c4: #8a63c4;
+  --ana-c5: #b08b21;
+}
+[data-theme="dark"] .db-shell .ana-page {
+  --ana-c1: #d9745c;
+  --ana-c2: #3f8fd0;
+  --ana-c3: #6aa140;
+  --ana-c4: #9a72cc;
+  --ana-c5: #ab862a;
+}
+
+/* ====== FLOATING PAPER DECO ====== */
+/* Ornament only — behind everything, and never in the way of a pointer. */
+.db-shell .ana-page > :not(.ana-deco) { position: relative; z-index: 1; }
+/* Every section above sits at z-index 1, which makes each one its own stacking
+   context — so the picker's menu could not rise above a *later* sibling no matter
+   how high its own z-index went, and it opened underneath the KPI cards. Lifting
+   the whole header above its siblings is what lets the menu escape. */
+.db-shell .ana-page > .ana-head { z-index: 5; }
+.db-shell .ana-deco {
+  position: absolute; inset: 0;
+  overflow: hidden; pointer-events: none; z-index: 0;
+}
+.db-shell .ana-deco .ad { position: absolute; animation: paperFloat 7s ease-in-out infinite; }
+.db-shell .ana-deco .ad-crane   { top: 8px;    right: 2%;  color: var(--accent);        opacity: 0.13; --rot: -10deg; }
+.db-shell .ana-deco .ad-plane   { top: 30%;    left: -10px; color: var(--indigo-deep);   opacity: 0.1;  --rot: 12deg;  animation-duration: 9s; animation-delay: 0.6s; }
+.db-shell .ana-deco .ad-boat    { bottom: 16%; right: 1%;   color: var(--matcha-deep);   opacity: 0.11; --rot: 6deg;   animation-duration: 8.5s; animation-delay: 1.1s; }
+.db-shell .ana-deco .ad-sakura  { top: 52%;    right: 12%;  color: var(--sakura-deep);   opacity: 0.14; --rot: -6deg;  animation-duration: 6.5s; }
+.db-shell .ana-deco .ad-sakura2 { top: 22%;    left: 26%;   color: var(--sakura-deep);   opacity: 0.1;  --rot: 14deg;  animation-duration: 7.5s; animation-delay: 0.8s; }
+.db-shell .ana-deco .ad-star    { bottom: 34%; left: 4%;    color: var(--highlighter-deep); opacity: 0.16; --rot: -12deg; animation-duration: 6s; animation-delay: 0.3s; }
+.db-shell .ana-deco .ad-crane2  { bottom: 6%;  left: 30%;   color: var(--lavender-deep); opacity: 0.1;  --rot: 8deg;   animation-duration: 9.5s; animation-delay: 1.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .ana-deco .ad { animation: none; }
+}
+
+/* ====== HEADER ====== */
+.db-shell .ana-head {
+  display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;
+}
+.db-shell .ana-head__title h1 {
+  position: relative; display: inline-block;
+  font-family: var(--font-hand); font-size: 2.6rem; line-height: 1; margin: 0; color: var(--ink-1);
+}
+/* brush stroke swiped under the title, in the house style */
+.db-shell .ana-head__title h1::after {
+  content: ""; position: absolute; z-index: -1;
+  left: -3%; right: -3%; bottom: -0.1em; height: 0.26em;
+  background: var(--accent);
+  border-radius: 50% 50% 60% 40% / 80% 30% 70% 20%;
+  opacity: 0.3; transform: rotate(-1.2deg);
+}
+.db-shell .ana-head__title .sub {
+  color: var(--ink-3); font-size: 0.92rem; font-style: italic; margin: 6px 0 0;
+}
+.db-shell .ana-head__controls {
+  margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+
+/* ====== FORM PICKER ====== */
+.db-shell .ana-picker { position: relative; }
+.db-shell .ana-picker__trigger {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface-card); border: 1px solid var(--rule-line);
+  border-radius: 11px 8px 12px 9px / 9px 12px 8px 11px; padding: 8px 12px; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.86rem; font-weight: 600; color: var(--ink-1);
+  box-shadow: var(--shadow-paper-1);
+  transition: border-color 160ms;
+}
+.db-shell .ana-picker__trigger:hover { border-color: var(--rule-strong); }
+.db-shell .ana-picker__label {
+  max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.db-shell .ana-picker__menu {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 20;
+  min-width: 280px; margin: 0; padding: 6px; list-style: none;
+  background: var(--surface-card); border: 1px solid var(--rule-line);
+  border-radius: var(--r-md); box-shadow: var(--shadow-paper-3);
+}
+.db-shell .ana-picker__item {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: 8px; cursor: pointer;
+  background: transparent; text-align: left;
+  font-family: var(--font-body); font-size: 0.86rem; color: var(--ink-2);
+}
+.db-shell .ana-picker__item:hover { background: var(--bg-elevated); color: var(--ink-1); }
+.db-shell .ana-picker__item.active { background: var(--accent-soft); color: var(--accent-deep); font-weight: 600; }
+.db-shell .ana-picker__item > span:nth-child(2) {
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ====== SEGMENTED RANGE CONTROL ====== */
+.db-shell .ana-seg {
+  display: inline-flex; background: var(--bg-elevated);
+  border: 1px solid var(--rule-line); border-radius: 999px; padding: 3px;
+}
+.db-shell .ana-seg button {
+  border: 0; background: transparent; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 600; color: var(--ink-3);
+  padding: 6px 14px; border-radius: 999px;
+  transition: background 160ms, color 160ms;
+}
+.db-shell .ana-seg button:hover { color: var(--ink-1); }
+.db-shell .ana-seg button.active {
+  background: var(--surface-card); color: var(--ink-1); box-shadow: var(--shadow-paper-1);
+}
+.db-shell .ana-seg--sm { margin-left: auto; }
+.db-shell .ana-seg--sm button { font-size: 0.74rem; padding: 4px 11px; }
+
+/* ====== PANEL SHELL ====== */
+.db-shell .ana-panel {
+  position: relative; /* anchors the washi tape */
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  /* the hand-cut paper radius, not a uniform corner */
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-2);
+  padding: 26px 24px 22px;
+}
+.db-shell .ana-panel__head {
+  display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.db-shell .ana-panel__head h3 {
+  position: relative;
+  font-family: var(--font-hand); font-size: 1.6rem; line-height: 1; margin: 0; color: var(--ink-1);
+  padding-bottom: 3px;
+}
+/* a quick pencil stroke under each panel title */
+.db-shell .ana-panel__head h3::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 3px;
+  background: var(--accent-soft);
+  border-radius: 50% 50% 60% 40% / 90% 40% 80% 30%;
+  transform: rotate(-0.5deg);
+}
+.db-shell .ana-panel__head .sub { color: var(--ink-3); font-size: 0.84rem; font-style: italic; }
+
+/* ====== KPI ROW ====== */
+.db-shell .ana-kpis {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;
+}
+.db-shell .ana-kpi {
+  position: relative;
+  background: var(--surface-card); border: 1px solid var(--rule-line);
+  /* each tile cut slightly differently, as if torn by hand */
+  border-radius: 14px 10px 16px 12px / 12px 16px 10px 14px;
+  box-shadow: var(--shadow-paper-1);
+  padding: 18px 20px;
+  transition: transform 180ms, box-shadow 180ms;
+}
+.db-shell .ana-kpi:nth-child(2) { border-radius: 10px 15px 11px 16px / 16px 11px 15px 10px; }
+.db-shell .ana-kpi:nth-child(3) { border-radius: 16px 11px 14px 10px / 11px 15px 12px 16px; }
+.db-shell .ana-kpi:nth-child(4) { border-radius: 12px 16px 10px 14px / 15px 10px 16px 11px; }
+.db-shell .ana-kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-paper-2); }
+.db-shell .ana-kpi.tinted {
+  background: var(--accent-soft); border-color: var(--accent);
+}
+.db-shell .ana-kpi.tinted .ana-kpi__lbl,
+.db-shell .ana-kpi.tinted .ana-kpi__num,
+.db-shell .ana-kpi.tinted .ana-kpi__delta { color: var(--accent-deep); }
+.db-shell .ana-kpi.tinted .ana-kpi__ic { background: var(--surface-card); color: var(--accent-deep); }
+.db-shell .ana-kpi__ic {
+  position: absolute; top: 14px; right: 14px;
+  width: 32px; height: 32px; display: grid; place-items: center;
+  border-radius: 8px; background: var(--bg-elevated); color: var(--ink-3);
+}
+.db-shell .ana-kpi__lbl {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0; padding-right: 38px;
+}
+.db-shell .ana-kpi__num {
+  font-family: var(--font-hand); font-size: 2.5rem; line-height: 1; color: var(--ink-1); margin: 6px 0 0;
+}
+.db-shell .ana-kpi__delta {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.78rem; color: var(--matcha-deep); margin: 8px 0 0;
+}
+.db-shell .ana-kpi__delta.down { color: var(--coral-deep); }
+.db-shell .ana-kpi__delta.muted { color: var(--ink-4); font-style: italic; }
+
+/* the count for the selected window is the card's headline figure */
+.db-shell .ana-trend__headline { font-size: 2.9rem; }
+
+/* ====== TREND CHART ====== */
+.db-shell .ana-trend__meta {
+  display: flex; gap: 30px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 8px;
+}
+.db-shell .ana-trend__meta .lbl {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0;
+}
+.db-shell .ana-trend__meta .big {
+  font-family: var(--font-hand); font-size: 2.1rem; line-height: 1; color: var(--ink-1); margin: 2px 0 0;
+}
+.db-shell .ana-trend__meta .cap { font-size: 0.76rem; color: var(--ink-3); margin: 2px 0 0; }
+
+.db-shell .ana-legend {
+  margin: 0 0 0 auto; padding: 0; list-style: none;
+  display: inline-flex; gap: 16px; font-size: 0.8rem; color: var(--ink-3);
+}
+.db-shell .ana-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.db-shell .ana-legend i { width: 12px; height: 4px; border-radius: 2px; display: inline-block; }
+
+.db-shell .ana-trend__chart { margin-top: 6px; }
+/* recharts draws its own focus ring on the surface; the grid stays recessive */
+.db-shell .ana-trend__chart .recharts-surface { overflow: visible; }
+
+.db-shell .ana-tip {
+  background: var(--surface-card); border: 1px solid var(--rule-line);
+  border-radius: var(--r-sm); box-shadow: var(--shadow-paper-2);
+  padding: 10px 12px; min-width: 150px;
+}
+.db-shell .ana-tip__date {
+  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 6px;
+}
+.db-shell .ana-tip__row {
+  display: flex; align-items: center; gap: 8px; margin: 3px 0; font-size: 0.84rem;
+}
+.db-shell .ana-tip__row i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.db-shell .ana-tip__name { color: var(--ink-3); }
+.db-shell .ana-tip__val { margin-left: auto; font-weight: 600; color: var(--ink-1); }
+
+/* ====== SPLIT ROW (devices + geo) ====== */
+/* `align-items: start` keeps each panel at its own content height. Without it the
+   grid stretches both to match the taller one, so a form with responses from only
+   a country or two left the geo panel padded out with empty space to match the
+   device rings beside it. */
+.db-shell .ana-split {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 22px;
+  align-items: start;
+}
+
+/* ====== SHARE RINGS (devices + geo) ====== */
+/* One line of dials. They wrap only when the panel genuinely cannot fit them,
+   and each dial is labelled underneath so the arc is never the only cue. */
+.db-shell .ana-rings {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-wrap: wrap; gap: 18px 20px;
+}
+.db-shell .ana-ring {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 78px; min-width: 0;
+}
+.db-shell .ana-ring__dial { position: relative; width: 68px; height: 68px; }
+.db-shell .ana-ring__dial svg { width: 100%; height: 100%; display: block; }
+.db-shell .ana-ring__pct {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-family: var(--font-hand); font-size: 1.15rem; line-height: 1; color: var(--ink-1);
+}
+.db-shell .ana-ring__name {
+  display: flex; align-items: center; gap: 4px; max-width: 100%;
+  margin-top: 6px; font-size: 0.8rem; color: var(--ink-2);
+}
+.db-shell .ana-ring__name svg { flex: none; color: var(--ink-3); }
+.db-shell .ana-ring__glyph { flex: none; font-size: 0.86rem; line-height: 1; }
+.db-shell .ana-ring__text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.db-shell .ana-ring__count {
+  font-size: 0.72rem; color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+
+/* ====== SHARED BAR (geo + options) ====== */
+.db-shell .ana-bar {
+  display: block; height: 8px; border-radius: 999px;
+  background: var(--bg-sunken); overflow: hidden;
+}
+/* the fill carries a faint washi weave, so a bar reads as a strip of tape
+   rather than a flat progress meter */
+.db-shell .ana-bar__fill {
+  display: block; height: 100%; border-radius: 999px;
+  background-color: var(--ana-c1);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.16) 0 3px,
+    transparent 3px 6px
+  );
+  transition: width 260ms ease;
+}
+
+/* ====== FIELD / OPTION BREAKDOWN (bento wall) ====== */
+/* Laid out on a fine row unit; use-bento-spans.ts measures each card and gives it
+   a matching `grid-row: span N`, so cards pack against the one above rather than
+   every cell in a row inheriting the tallest card's height.
+   `align-items: start` is what keeps a card content-sized inside its span. */
+.db-shell .ana-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* a fine row unit with no row-gap: the vertical gap is the card's own bottom
+     margin, so packing lands within one row unit instead of one gap */
+  grid-auto-rows: 4px;
+  column-gap: 16px; row-gap: 0;
+  align-items: start;
+  /* absorbs the bottom margin of the last card in each column */
+  margin-bottom: -16px;
+}
+/* A sheet with its top-right corner turned down. The corner is clipped away and
+   `.ana-fold` shades the exposed wedge, so the card reads as folded rather than
+   as a rectangle with a triangle stuck on it.
+   Deliberately unrotated: getBoundingClientRect returns an axis-aligned box, so a
+   tilted card would measure taller than it is and throw the bento packing out. */
+.db-shell .ana-field {
+  position: relative;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--rule-line);
+  border-radius: 10px 4px 14px 12px / 12px 4px 10px 14px;
+  background: var(--bg-elevated); padding: 18px 20px;
+  margin-bottom: 16px;
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+  transition: border-color 180ms, transform 180ms, background 180ms;
+}
+.db-shell .ana-field:hover {
+  border-color: var(--rule-strong);
+  background: var(--surface-card);
+  transform: translateY(-2px);
+}
+/* the underside of the turned-down corner */
+.db-shell .ana-fold {
+  position: absolute; top: 0; right: 0; width: 20px; height: 20px;
+  background: linear-gradient(45deg, var(--paper-edge) 50%, transparent 50%);
+  opacity: 0.85;
+}
+[data-theme="dark"] .db-shell .ana-fold { opacity: 0.6; }
+
+.db-shell .ana-field__head { display: flex; align-items: flex-start; gap: 10px; }
+.db-shell .ana-field__num {
+  font-family: var(--font-hand); font-size: 1.15rem; line-height: 1.3;
+  color: var(--accent-deep); flex: none;
+}
+/* the question itself is the thing being read — it outranks the option labels */
+.db-shell .ana-field__label {
+  flex: 1; min-width: 0; margin: 0;
+  font-size: 1.08rem; font-weight: 600; line-height: 1.4; color: var(--ink-1);
+}
+.db-shell .ana-field__head .o-badge { flex: none; margin-top: 2px; }
+
+.db-shell .ana-field__meta {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 0.8rem; color: var(--ink-3);
+  margin: 10px 0 0; padding: 0 0 14px;
+  border-bottom: 1px dashed var(--rule-line);
+}
+.db-shell .ana-field__meta b { color: var(--ink-1); font-weight: 600; }
+.db-shell .ana-field__meta .skipped b { color: var(--ink-2); }
+
+.db-shell .ana-options {
+  margin: 14px 0 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 13px;
+}
+/* label over bar, so a narrow card gives the bar its full width */
+.db-shell .ana-option { display: flex; flex-direction: column; gap: 5px; }
+.db-shell .ana-option__top { display: flex; align-items: baseline; gap: 10px; }
+.db-shell .ana-option__label {
+  flex: 1; min-width: 0; font-size: 0.9rem; color: var(--ink-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.db-shell .ana-option__pct {
+  flex: none; font-family: var(--font-hand); font-size: 1.2rem; line-height: 1; color: var(--ink-1);
+}
+.db-shell .ana-option__track { display: flex; align-items: center; gap: 10px; }
+.db-shell .ana-option__track .ana-bar { flex: 1; min-width: 0; }
+.db-shell .ana-option__count {
+  flex: none; width: 52px; text-align: right;
+  font-size: 0.74rem; color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+/* the leading option reads first — weight and ink, not a second hue */
+.db-shell .ana-option.lead .ana-option__label { color: var(--ink-1); font-weight: 600; }
+.db-shell .ana-option:not(.lead) .ana-bar__fill { opacity: 0.55; }
+
+/* Short fields have spare room inside their tile, so they spend it on the numbers
+   instead of on padding — this is what gives the wall its mix of tile sizes. */
+.db-shell .ana-field--compact .ana-options { gap: 16px; }
+.db-shell .ana-field--compact .ana-option__pct { font-size: 1.5rem; }
+.db-shell .ana-field--compact .ana-option__label { font-size: 0.94rem; }
+.db-shell .ana-field--compact .ana-bar { height: 10px; }
+
+/* shown in place of a list that has nothing in it yet */
+.db-shell .ana-empty {
+  margin: 0; padding: 10px 0 4px;
+  font-size: 0.86rem; font-style: italic; color: var(--ink-3);
+}
+
+/* ====== HINT ====== */
+/* a torn scrap of note paper, taped to the bottom of the page */
+.db-shell .ana-hint {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin: 0 auto; padding: 14px 24px; max-width: 520px;
+  background: var(--surface-sticky);
+  border-radius: 3px 14px 14px 3px / 3px 14px 14px 3px;
+  box-shadow: var(--shadow-sticky);
+  transform: rotate(-0.8deg);
+}
+.db-shell .ana-hint p {
+  margin: 0; font-family: var(--font-hand); font-size: 1.22rem;
+  line-height: 1.25; color: var(--ink-1);
+}
+.db-shell .ana-hint__art { color: var(--accent-deep); opacity: 0.7; flex: none; }
+
+/* ====== SKELETONS ====== */
+.db-shell .ana-sk { display: flex; flex-direction: column; gap: 22px; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1240px) {
+  /* two cards stop paying for themselves once each is narrower than its question */
+  .db-shell .ana-fields { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1080px) {
+  .db-shell .ana-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .db-shell .ana-split { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  .db-shell .ana-head__controls { margin-left: 0; width: 100%; }
+  .db-shell .ana-picker__label { max-width: 150px; }
+  .db-shell .ana-panel { padding: 18px 16px; }
+  .db-shell .ana-trend__meta { gap: 20px; }
+  .db-shell .ana-legend { margin: 6px 0 0; width: 100%; }
+  .db-shell .ana-field { padding: 16px; }
+  .db-shell .ana-field__label { font-size: 1rem; }
+}
