@@ -203,7 +203,7 @@ export default class FormService {
             ? and(eq(forms.id, formId), eq(forms.creatorId, requesterId), isNull(forms.deletedAt))
             : and(eq(forms.id, formId), isNull(forms.deletedAt));
 
-        return await db.query.forms.findFirst({
+        const form = await db.query.forms.findFirst({
             where: condition,
             with: {
                 fields: {
@@ -211,7 +211,18 @@ export default class FormService {
                     orderBy: asc(formFields.order),
                 },
             },
-        });
+        })
+
+        if (!form) return null;
+
+        const viewCount = await db.$count(
+            views,
+            and(eq(views.formId, form.id), isNull(views.deletedAt)),
+        );
+
+        console.log(JSON.stringify({ ...form, views: viewCount }, null, 2))
+
+        return { ...form, views: viewCount }
     }
 
     public async listForms(payload: ListFormsProps) {
@@ -291,9 +302,22 @@ export default class FormService {
             db.$count(forms, condition),
         ]);
 
+        const viewCounts = rows.length
+            ? await db
+                .select({ formId: views.formId, total: count() })
+                .from(views)
+                .where(and(
+                    inArray(views.formId, rows.map((form) => form.id)),
+                    isNull(views.deletedAt),
+                ))
+                .groupBy(views.formId)
+            : [];
+
+        const viewsByForm = new Map(viewCounts.map((row) => [row.formId, Number(row.total)]));
+
         const totalPages = Math.ceil(totalItems / pageSize);
         return {
-            forms: rows,
+            forms: rows.map((form) => ({ ...form, views: viewsByForm.get(form.id) ?? 0 })),
             page,
             pageSize,
             totalItems,
@@ -492,6 +516,17 @@ export default class FormService {
                     .set({ deletedAt: now })
                     .where(inArray(responseAnswers.responseId, deletedResponsesIds.map((response) => response.id)));
             }
+            // activities and views belong to the form, not to its responses — a form with no
+            // responses still has a drafted/published activity and view rows to retire
+            console.log(11111, "came here!")
+            await tx
+                .update(activities)
+                .set({ deletedAt: now })
+                .where(and(eq(activities.formId, formId), isNull(activities.deletedAt)));
+            await tx
+                .update(views)
+                .set({ deletedAt: now })
+                .where(and(eq(views.formId, formId), isNull(views.deletedAt)));
         });
 
         return {

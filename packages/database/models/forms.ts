@@ -68,6 +68,7 @@ export const views = pgTable("form_views", {
 
     sessionId: text("session_id").notNull(),
     viewedAt: timestamp("viewed_at", { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true })
 }, (t) => [
     uniqueIndex("form_view_from_session_uq").on(t.formId, t.sessionId)
 ]);
@@ -89,7 +90,8 @@ export const formRelations = relations(forms, ({ one, many }) => ({
         references: [users.id]
     }),
     fields: many(formFields),
-    responses: many(formResponses)
+    responses: many(formResponses),
+    views: many(views),
 }))
 
 export const formFieldRelations = relations(formFields, ({ one }) => ({

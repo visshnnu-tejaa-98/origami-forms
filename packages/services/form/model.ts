@@ -288,7 +288,9 @@ export const getFormByIdInputSchema = z.object({
 
 export type GetFormByIdProps = z.infer<typeof getFormByIdInputSchema>;
 
-export const getFormByIdOutputSchema = createFormOutputSchema.omit({ realTime: true });
+export const getFormByIdOutputSchema = createFormOutputSchema.omit({ realTime: true }).extend({
+    views: z.number().describe("view count of the form"),
+});
 export type GetFormByIdOutputSchemaType = z.infer<typeof getFormByIdOutputSchema>;
 
 export const LIST_FORMS_SORT_FIELDS = [
@@ -322,7 +324,11 @@ export type ListFormsProps = z.infer<typeof listFormsInputSchema>;
 export type ListFormsInput = z.input<typeof listFormsInputSchema>;
 
 export const listFormsOutputSchema = z.object({
-    forms: z.array(createFormOutputSchema.omit({ fields: true, deletedAt: true, realTime: true })),
+    forms: z.array(
+        createFormOutputSchema
+            .omit({ fields: true, deletedAt: true, realTime: true })
+            .extend({ views: z.number().int().nonnegative().describe("view count of the form") }),
+    ),
     page: z.number().int().nonnegative().describe("current page number"),
     pageSize: z.number().int().nonnegative().describe("page size"),
     totalItems: z.number().int().nonnegative().describe("total number of matching forms"),
@@ -355,7 +361,7 @@ export type UpdateFormProps = z.infer<typeof updateFormInputSchema>;
 export const updateFormOutputSchema = z.object({
     success: z.boolean().describe("true or false based on if update was successfull"),
     message: z.string().describe("Success or error message"),
-    formData: createFormOutputSchema.omit({ realTime: true })
+    formData: getFormByIdOutputSchema
         .nullable()
         .describe("updated form data, or null when no update was performed"),
     realTime: formDraftedSchema
