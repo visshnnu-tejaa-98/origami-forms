@@ -1,4 +1,4 @@
-import { activities, and, db, desc, eq, forms, isNull, or, users } from "@repo/database";
+import { activities, and, db, desc, eq, forms, isNull, or, users, views } from "@repo/database";
 import { AUTHENTICATED } from "@repo/database/constants";
 import { GetActivitiesInputType, GetActivitiesOutputType, PushActivityInputSchemaType, PushActivityOutputSchema } from "./model";
 
@@ -23,29 +23,37 @@ export default class AnalyticsService {
 
         if (!form) throw new Error("Form not found");
 
-        if (form.visibility !== AUTHENTICATED) {
-            throw new Error("Activity is only tracked for authenticated forms");
-        }
-
-        const [activity] = await db
-            .insert(activities)
-            .values({
+        const activity = await db.transaction(async (tx) => {
+            await tx.insert(views).values({
                 formId,
-                creatorId: form.creatorId,
-                respondeeId: requesterId,
-                activityType,
-                metaData,
-            })
-            .returning({
-                id: activities.id,
-                formId: activities.formId,
-                creatorId: activities.creatorId,
-                respondeeId: activities.respondeeId,
-                activityType: activities.activityType,
-                metaData: activities.metaData,
-                occuredAt: activities.occuredAt,
-                updatedAt: activities.updatedAt,
+                viewedAt: new Date(),
+                sessionId: crypto.randomUUID(),
             });
+
+            if (form.visibility !== AUTHENTICATED) {
+                throw new Error("Activity is only tracked for authenticated forms");
+            }
+            const [activityResponse] = await tx
+                .insert(activities)
+                .values({
+                    formId,
+                    creatorId: form.creatorId,
+                    respondeeId: requesterId,
+                    activityType,
+                    metaData,
+                })
+                .returning({
+                    id: activities.id,
+                    formId: activities.formId,
+                    creatorId: activities.creatorId,
+                    respondeeId: activities.respondeeId,
+                    activityType: activities.activityType,
+                    metaData: activities.metaData,
+                    occuredAt: activities.occuredAt,
+                    updatedAt: activities.updatedAt,
+                });
+            return activityResponse;
+        });
 
         if (!activity) throw new Error("Failed to record activity");
 
@@ -87,8 +95,12 @@ export default class AnalyticsService {
     }
     public async getActivities(payload: GetActivitiesInputType): Promise<GetActivitiesOutputType> {
         const { requesterId } = payload
+        const condition = and(
+            or(eq(activities.respondeeId, requesterId), eq(activities.creatorId, requesterId)),
+            isNull(activities.deletedAt),
+        );
         const activitiesFromDb = await db.query.activities.findMany({
-            where: or(eq(activities.respondeeId, requesterId), eq(activities.creatorId, requesterId)),
+            where: condition,
             with: {
                 form: {
                     columns: {

@@ -18,6 +18,7 @@ export const activities = pgTable(
         metaData: jsonb("metadata").$type<Record<string, string | number>>().default({}),
         occuredAt: timestamp("occured_at", { withTimezone: true }).notNull().defaultNow(),
         updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(() => new Date()),
+        deletedAt: timestamp("deleted_at", { withTimezone: true }),
     },
     (t) => [index("analytics_form_type_occured_idx").on(t.formId, t.activityType, t.occuredAt)],
 );
