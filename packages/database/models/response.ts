@@ -5,7 +5,6 @@ import {
     text,
     integer,
     jsonb,
-    varchar,
 } from "drizzle-orm/pg-core";
 import { formFields, forms } from "./forms";
 import { responseStatusEnum } from "./enum";

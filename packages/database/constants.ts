@@ -81,3 +81,10 @@ export const DRAFTED = "drafted"
 export const ANALYTICS_EVENT_TYPES = [SUBMITTED, DRAFTED, PUBLISHED, EDITED, VIEWED] as const;
 export const CREATOR_ACTIVITY_TYPES = [DRAFTED, PUBLISHED, EDITED] as const;
 export const RESPONDENT_ACTIVITY_TYPES = [SUBMITTED, VIEWED] as const;
+
+export const DAY = "1"
+export const WEEK = "7"
+export const MONTH = "30"
+export const LIFETIME = "lifetime"
+
+export const FORM_ANALYTICS_SCOPE = [DAY, WEEK, MONTH, LIFETIME] as const;
