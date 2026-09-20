@@ -31,9 +31,12 @@ const createFormMeta = ({ getPathFn, tags }: FormMetaInputProps): OpenApiMetaCon
 ### Overview
 
 Creates a new form together with all of its fields in a single database transaction.
-The form is owned by the authenticated user (\`creatorId\`) and starts in \`draft\`
-status. A URL-safe \`slug\` is generated from the title with a random suffix to keep it
-unique, and every field is assigned a unique \`labelKey\`.
+The form is owned by the authenticated user (\`creatorId\`). A URL-safe \`slug\` is
+generated from the title with a random suffix to keep it unique, and every field is
+assigned a unique \`labelKey\`.
+
+\`status\` is chosen by the caller and defaults to \`draft\`; passing \`published\` creates a
+live form directly and stamps \`publishedAt\`, without a follow-up update.
 
 ### Request Body
 
@@ -42,19 +45,27 @@ unique, and every field is assigned a unique \`labelKey\`.
 | \`title\` | string | Yes | Form title (2–255 characters). |
 | \`description\` | string | No | Optional form description. |
 | \`logoUrl\` | string | No | Valid URL of the form logo. |
-| \`visibility\` | enum | No | One of \`public\`, \`unlisted\`. Defaults to \`unlisted\`. |
+| \`visibility\` | enum | No | One of \`public\`, \`unlisted\`, \`authenticated\`. Defaults to \`unlisted\`. |
 | \`maxSubmissions\` | number | No | Positive integer cap on total submissions. |
+| \`status\` | enum | No | \`draft\`, \`published\`, \`archived\` or \`expired\`. Defaults to \`draft\`. |
+| \`expiresAt\` | string (date) | No | When submissions stop being accepted. |
 | \`fields\` | array | Yes | At least one field. Shape depends on the field \`type\` (text, number, select, multi-select, date, file upload). |
 
 ### Flow
 
-1. A form row is inserted with a generated \`slug\` and \`status: draft\`.
-2. Each field in \`fields\` is inserted with a generated \`labelKey\`, preserving \`order\`.
-3. If any step fails, the whole transaction is rolled back so no partial form is left behind.
+1. A form row is inserted with a generated \`slug\` and the requested \`status\`.
+2. Each field in \`fields\` is inserted with a generated \`labelKey\`. Ordering comes from the
+   array's position, **not** from any \`order\` value sent by the client — the two can
+   disagree, and the array wins.
+3. A creator activity is recorded (\`published\` when the form was created live, otherwise
+   \`drafted\`), and its broadcast payload is returned as \`realTime\`.
+4. If any step fails, the whole transaction is rolled back so no partial form is left behind.
 
 ### Response
 
-Returns the created form's id: \`{ id }\`.
+Returns the created form row with \`submissionCount: 0\`, its inserted \`fields\`, and
+\`realTime\` — the activity-feed payload for the socket broadcast, or \`null\` when the
+creator record could not be read.
 
 ### Errors
 
@@ -91,11 +102,25 @@ user can only read forms they created.
 1. The requester's role is resolved to determine admin access.
 2. A non-admin query is scoped to \`creatorId === requesterId\`; an admin query is not.
 3. Soft-deleted forms and soft-deleted fields are excluded.
+4. A second query counts the form's live \`form_views\` rows. It is a \`COUNT\` rather than a
+   join, so a form with many views does not drag those rows into the payload.
 
 ### Response
 
-Returns the form with its \`fields\` array (ordered by \`order\`), or \`null\` when no
-matching form exists or the requester is not allowed to see it.
+Returns the form with its \`fields\` array (ordered by \`order\`) plus a \`views\` count, or
+\`null\` when no matching form exists or the requester is not allowed to see it.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| \`views\` | number | Count of non-deleted \`form_views\` rows for this form, all-time — not narrowed by any date range. |
+
+\`null\` covers both "no such form" and "not permitted"; the two are deliberately
+indistinguishable so a non-owner cannot probe for the existence of a form id.
+
+### Notes for callers
+
+Nothing writes \`form_views\` from the public form route yet, so \`views\` reads \`0\` for
+forms that have only ever been opened anonymously.
 `,
         },
     };
@@ -114,7 +139,7 @@ const listFormsMeta = ({ getPathFn, tags }: FormMetaInputProps): OpenApiMetaConf
 
 Returns a paginated list of non-deleted forms with optional filtering, searching and
 sorting. Admins see all forms; regular users see only the forms they created. Fields are
-not included in the list payload.
+not included in the list payload; a per-form \`views\` count is.
 
 ### Query Parameters
 
@@ -122,18 +147,35 @@ not included in the list payload.
 | --- | --- | --- | --- |
 | \`requesterId\` | string (uuid) | Yes | Id of the requesting user (admins see all forms). |
 | \`search\` | string | No | Case-insensitive partial match against the form title. |
-| \`status\` | enum | No | Filter by \`draft\`, \`published\`, or \`archived\`. |
-| \`visibility\` | enum | No | Filter by \`public\` or \`unlisted\`. |
+| \`status\` | enum | No | One of \`draft\`, \`published\`, \`archived\`, \`expired\`. See *Status filtering* below. |
+| \`visibility\` | enum | No | One of \`public\`, \`unlisted\`, \`authenticated\`. |
 | \`maxSubmissions\` | number | No | Only forms whose current submission count is at most this value. |
 | \`sortBy\` | enum | No | One of \`createdAt\`, \`updatedAt\`, \`title\`, \`submissionCount\`, \`maxSubmissions\`, \`status\`. Defaults to \`updatedAt\`. |
 | \`sortOrder\` | enum | No | \`asc\` or \`desc\`. Defaults to \`desc\`. |
 | \`page\` | number | No | 1-indexed page number. Defaults to \`1\`. |
 | \`pageSize\` | number | No | Items per page (1–100). Defaults to \`10\`. |
 
+### Status filtering
+
+\`status\` is not a plain column match — \`published\` and \`expired\` both read the
+\`published\` column and split on \`expiresAt\`:
+
+| Value | Matches |
+| --- | --- |
+| \`published\` | status \`published\` **and** \`expiresAt\` is null or still in the future |
+| \`expired\` | status \`published\` **and** \`expiresAt\` already passed |
+| \`draft\` / \`archived\` | a direct status match |
+
+So a form that has run out of time is never returned by \`status: "published"\`.
+
 ### Response
 
 Returns \`{ forms, page, pageSize, totalItems, totalPages, hasNextPage, hasPrevPage }\`,
 where \`totalItems\` is the count of all forms matching the same filters.
+
+Each entry carries a \`views\` count — non-deleted \`form_views\` rows for that form,
+all-time and not narrowed by any filter above. The counts are gathered in one grouped
+query over the page, so a form with no views reports \`0\` rather than being omitted.
 `,
         },
     };
@@ -164,8 +206,8 @@ is intentionally immutable and is never regenerated on update.
 | \`title\` | string | No | New title (2–255 characters). |
 | \`description\` | string \\| null | No | New description, or \`null\` to clear. |
 | \`logoUrl\` | string \\| null | No | New logo URL, or \`null\` to clear. |
-| \`status\` | enum | No | New status (\`draft\`, \`published\`, \`archived\`). |
-| \`visibility\` | enum | No | New visibility (\`public\`, \`unlisted\`). |
+| \`status\` | enum | No | New status (\`draft\`, \`published\`, \`archived\`, \`expired\`). |
+| \`visibility\` | enum | No | New visibility (\`public\`, \`unlisted\`, \`authenticated\`). |
 | \`maxSubmissions\` | number \\| null | No | New submission cap, or \`null\` to clear. |
 | \`expiresAt\` | string (date) \\| null | No | New expiry date/time, or \`null\` to clear. |
 
@@ -178,9 +220,23 @@ is intentionally immutable and is never regenerated on update.
 
 ### Response
 
-Returns \`{ success, message, formData }\`. On success \`formData\` holds the updated form;
-on a blocked transition or when there is nothing to update, \`success\` is \`false\` and
-\`formData\` is \`null\`.
+Returns \`{ success, message, formData, realTime }\`. On success \`formData\` holds the
+re-read form — the same shape as *Get a form by id*, including its \`fields\` and a
+\`views\` count. On a blocked transition or when there is nothing to update, \`success\` is
+\`false\` and \`formData\` is \`null\`.
+
+\`realTime\` carries the activity-feed payload: a \`published\` activity when the update
+crossed from draft into published, otherwise \`edited\`. Note that an activity is recorded
+on **every** successful update, not only on publish.
+
+### Editing fields
+
+When \`fields\` is supplied it replaces the whole list: entries with a known \`id\` are
+updated, new entries are inserted, and any existing field missing from the array is
+soft-deleted. Omit \`fields\` entirely to leave them untouched.
+
+Once a form has submissions this is restricted — changing a field's \`type\` or removing a
+field throws, so historical answers keep their meaning.
 
 ### Errors
 
@@ -202,8 +258,8 @@ const deleteFormMeta = ({ getPathFn, tags }: FormMetaInputProps): OpenApiMetaCon
             description: `
 ### Overview
 
-Soft-deletes a form and cascades the soft-delete to its fields, its responses and those
-responses' answers, all in a single transaction. Nothing is physically removed —
+Soft-deletes a form and cascades the soft-delete to its fields, its responses, those
+responses' answers, and the form's activity and view rows — all in a single transaction. Nothing is physically removed —
 \`deletedAt\` is stamped on every still-live row. A \`published\` form can be deleted even
 when it already has submissions; its responses are soft-deleted alongside it.
 
@@ -220,7 +276,10 @@ when it already has submissions; its responses are soft-deleted alongside it.
 2. The requester is authorized — an admin may delete any form, anyone else only a form they created.
 3. \`deletedAt\` is set on the form; if no row matched the transaction is rolled back.
 4. \`deletedAt\` is set on all of the form's fields that are not already soft-deleted.
-5. \`deletedAt\` is set on all of the form's live responses, and then on the answers belonging to those responses.
+5. \`deletedAt\` is set on all of the form's live responses, and then on the answers
+   belonging to those responses.
+6. \`deletedAt\` is set on the form's live \`analytics\` and \`form_views\` rows. This happens
+   whether or not the form had any responses.
 
 ### Response
 
@@ -288,33 +347,46 @@ const formStatsMeta = ({ getPathFn, tags }: FormMetaInputProps): OpenApiMetaConf
             description: `
 ### Overview
 
-Fetches statistics for non-deleted forms, with optional filtering. Admins see all forms; regular users see only the forms they created.
+Fetches the counters behind the dashboard's headline row, over every non-deleted form the
+requester can see. Admins see all forms; everyone else only the forms they created.
+
+This endpoint accepts **no filters** — not status, visibility, submission count or date.
+It always reports over the requester's full visible set.
 
 ### Query Parameters
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| \`requesterId\` | string (uuid) | Yes | Id of the requesting user (admins see all forms). |
-| \`status\` | enum | No | Filter by \`draft\`, \`published\`, or \`archived\`. |
-| \`visibility\` | enum | No | Filter by \`public\` or \`unlisted\`. |
-| \`maxSubmissions\` | number | No | Only forms whose current submission count is at most this value. |
+| \`requesterId\` | string (uuid) | Yes | Id of the requesting user (admins see all forms). Supplied from the session, not the client. |
 
 ### Response
 
-Returns \`{
-  published: number,
-  draft: number,
-  archived: number,
-  total: number
-}\`, where:\n
-- \`published\` — number of published forms;\n
-- \`draft\` — number of draft forms;\n
-- \`archived\` — number of archived forms;\n
-- \`total\` — total number of forms matching the filters.\n
+| Field | Type | Description |
+| --- | --- | --- |
+| \`published\` | number | Status \`published\` whose \`expiresAt\` is null or still ahead. |
+| \`draft\` | number | Status \`draft\`. |
+| \`archived\` | number | Status \`archived\`. |
+| \`expired\` | number | Status \`published\` whose \`expiresAt\` has passed. |
+| \`total\` | number | All non-deleted forms in scope. |
+| \`totalResponses\` | number | **Sum of \`forms.submissionCount\`**, not a count of response rows. |
+| \`completedResponses\` | number | Count of response rows with status \`completed\`. |
+| \`pendingResponses\` | number | \`totalResponses - completedResponses\`. |
+| \`totalViews\` | number | Count of \`form_views\` rows across the requester's forms. |
+| \`completionRate\` | number | \`completedResponses / totalResponses\` as a whole percent. |
+| \`avgTimeCompletion\` | number | Mean \`completion_time\` over completed responses, in whole seconds. |
+
+\`published\` and \`expired\` are disjoint, so \`published + draft + archived + expired\` can
+be lower than \`total\` if a form holds a status outside that set.
+
+Because \`totalResponses\` counts submissions recorded on the form row while
+\`completedResponses\` counts actual rows, the two can drift apart — treat
+\`completionRate\` as indicative rather than exact.
 
 ### Errors
 
-- **Validation** — a query parameter fails its schema constraint (e.g. \`maxSubmissions\` is not positive).\n
+- **Validation** — \`requesterId\` is missing or is not a valid uuid.
+- **Parse failure** — the assembled counters did not match the output schema; the service
+  throws \`Failed to parse form stats\`.\n
 `,
         },
     };

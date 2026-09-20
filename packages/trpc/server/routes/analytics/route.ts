@@ -1,6 +1,6 @@
 import { protectedProcedure, router } from "../../trpc";
-import { getActivitiesInputSchema, getActivitiesOutputSchema, pushActivityInputSchema, pushActivityOutputSchema } from "@repo/services/analytics/model";
-import { getActivitiesMeta, pushActivityMeta } from "@repo/services/analytics/meta";
+import { getActivitiesInputSchema, getActivitiesOutputSchema, getAnalyticsInputSchema, getAnalyticsOutputSchema, pushActivityInputSchema, pushActivityOutputSchema } from "@repo/services/analytics/model";
+import { getActivitiesMeta, getAnalyticsMeta, pushActivityMeta } from "@repo/services/analytics/meta";
 import { analyticsService } from "../../services";
 import { realtimeBus } from "@repo/services/socket/bus";
 import { VIEWED } from "@repo/database/constants";
@@ -38,6 +38,22 @@ export const analyticsRouter = router({
 
             if (!result) {
                 throw new Error("Failed to fetch activities");
+            }
+
+            return result;
+        }),
+    getAnalytics: protectedProcedure
+        .meta(getAnalyticsMeta({ getPathFn: () => "/get-analytics", tags: ["Analytics"] }))
+        .input(getAnalyticsInputSchema.omit({ requesterId: true }))
+        .output(getAnalyticsOutputSchema)
+        .query(async ({ input, ctx }) => {
+            const result = await analyticsService.getAnalytics({
+                ...input,
+                requesterId: ctx.userId,
+            });
+
+            if (!result) {
+                throw new Error("Failed to fetch analytics");
             }
 
             return result;
