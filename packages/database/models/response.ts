@@ -14,6 +14,7 @@ import { users } from "./user";
 
 export type FormMetadata = {
     country?: string | null;
+    countryCode?: string | null;
     city?: string | null;
     device?: string | null,
     browser?: string | null,

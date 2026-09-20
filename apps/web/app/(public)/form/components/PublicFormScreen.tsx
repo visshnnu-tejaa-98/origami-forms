@@ -32,7 +32,8 @@ const PublicFormScreen = ({ form }: { form: PublicForm }) => {
                 browser: browser ?? undefined,
                 device: device ?? undefined,
                 city: location?.city ?? undefined,
-                country: location?.countryCode ?? undefined,
+                country: location?.country ?? undefined,
+                countryCode: location?.countryCode ?? undefined,
             }
             const hasMetaData = Object.values(metaData).some((value) => value !== undefined);
             await submitResponseAsync({
