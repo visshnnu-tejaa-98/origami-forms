@@ -1,6 +1,7 @@
 "use client"
 
 import React from 'react'
+import './stats.css'
 import { Icon } from '../../components/icons'
 import { useFormStore } from '~/app/store/form-store'
 import { formatCompletionTime, formatIndianNumber } from '~/app/utils'

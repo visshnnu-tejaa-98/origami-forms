@@ -92,7 +92,7 @@ const Activities = () => {
         return (
             <div className="activity">
                 {activitiesFromRedux.map((a) => {
-                    const key = `${a.formId}-${a.activityType}-${a.occuredAt}`;
+                    const key = `${a.formId}-${a.activityType}-${a.occuredAt}-${Math.random()}`;
                     const tint = TINTS[hash(key) % TINTS.length];
                     return (
                         <div key={key} className={`row ${tint}`}>

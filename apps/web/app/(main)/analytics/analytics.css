@@ -38,6 +38,7 @@
    how high its own z-index went, and it opened underneath the KPI cards. Lifting
    the whole header above its siblings is what lets the menu escape. */
 .db-shell .ana-page > .ana-head { z-index: 5; }
+.db-shell .ana-page > .stats-row { margin-bottom: 0; }
 .db-shell .ana-deco {
   position: absolute; inset: 0;
   overflow: hidden; pointer-events: none; z-index: 0;

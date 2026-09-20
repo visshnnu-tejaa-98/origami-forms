@@ -5,7 +5,6 @@ import "./analytics.css";
 import { PaperCrane } from "../components/origami-art";
 import AnalyticsDecorations from "./components/AnalyticsDecorations";
 import AnalyticsHeader from "./components/AnalyticsHeader";
-import KpiGrid from "./components/KpiGrid";
 import SubmissionsTrend from "./components/SubmissionsTrend";
 import DeviceBreakdown from "./components/DeviceBreakdown";
 import GeoBreakdown from "./components/GeoBreakdown";
@@ -17,11 +16,11 @@ import {
     getCities,
     getCountries,
     getDevices,
-    getKpis,
     getResponseBuckets,
     getTrend,
 } from "./mock-data";
 import type { RangeKey, ScopeKey } from "./types";
+import Stats from "../dashboard/components/Stats";
 
 const Analytics = () => {
     const [scope, setScope] = useState<ScopeKey>(ALL_FORMS);
@@ -30,7 +29,6 @@ const Analytics = () => {
     // does — the header range stays with the headline figures above it
     const [chartRange, setChartRange] = useState<RangeKey>(DEFAULT_RANGE);
 
-    const kpis = getKpis(scope, range);
     const buckets = getResponseBuckets(scope);
     const trend = getTrend(scope, chartRange);
     const devices = getDevices(scope);
@@ -52,7 +50,7 @@ const Analytics = () => {
                 setRange={setRange}
             />
 
-            <KpiGrid kpis={kpis} />
+            <Stats />
 
             {/* the count and the plot share one card, both driven by the card's
                 own window selector */}
