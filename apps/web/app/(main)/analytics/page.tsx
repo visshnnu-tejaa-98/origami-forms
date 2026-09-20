@@ -25,12 +25,9 @@ import Stats from "../dashboard/components/Stats";
 const Analytics = () => {
     const [scope, setScope] = useState<ScopeKey>(ALL_FORMS);
     const [range, setRange] = useState<RangeKey>(DEFAULT_RANGE);
-    // the responses card carries its own window, the way the dashboard's ChartPanel
-    // does — the header range stays with the headline figures above it
-    const [chartRange, setChartRange] = useState<RangeKey>(DEFAULT_RANGE);
 
     const buckets = getResponseBuckets(scope);
-    const trend = getTrend(scope, chartRange);
+    const trend = getTrend(scope, range);
     const devices = getDevices(scope);
     const countries = getCountries(scope);
     const cities = getCities(scope);
@@ -52,14 +49,8 @@ const Analytics = () => {
 
             <Stats />
 
-            {/* the count and the plot share one card, both driven by the card's
-                own window selector */}
-            <SubmissionsTrend
-                data={trend}
-                range={chartRange}
-                setRange={setChartRange}
-                buckets={buckets}
-            />
+            {/* the card has no window control of its own — the header range drives it */}
+            <SubmissionsTrend data={trend} range={range} buckets={buckets} />
 
             <section className="ana-split">
                 <DeviceBreakdown devices={devices} />

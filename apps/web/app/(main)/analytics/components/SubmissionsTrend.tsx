@@ -16,10 +16,9 @@ import type { RangeKey, ResponseBucket, TrendPoint } from "../types";
 
 type Props = {
     data: TrendPoint[];
-    /** The window this card is plotting — owned by the card's own selector. */
+    /** The window being plotted — chosen by the page header's range control. */
     range: RangeKey;
-    setRange: (range: RangeKey) => void;
-    /** The 1d / 1w / 1m / lifetime windows; the selected one supplies the headline count. */
+    /** The 1d / 1w / 1m / lifetime windows; the one matching `range` supplies the headline count. */
     buckets: ResponseBucket[];
 };
 
@@ -70,7 +69,7 @@ const TrendTooltip = ({
     );
 };
 
-const SubmissionsTrend = ({ data, range, setRange, buckets }: Props) => {
+const SubmissionsTrend = ({ data, range, buckets }: Props) => {
     const { series: colors } = useChartPalette();
     const selected = buckets.find((bucket) => bucket.range === range) ?? buckets[0];
 
@@ -87,41 +86,35 @@ const SubmissionsTrend = ({ data, range, setRange, buckets }: Props) => {
             <div className="ana-panel__head">
                 <h3>Responses</h3>
                 <span className="sub">how many came in, and when</span>
-
-                {/* the card owns its own window — picking one moves both the
-                    headline count and the plot below it */}
-                <div className="ana-seg ana-seg--sm" role="group" aria-label="Response window">
-                    {buckets.map((bucket) => (
-                        <button
-                            key={bucket.key}
-                            type="button"
-                            className={bucket.range === range ? "active" : ""}
-                            aria-pressed={bucket.range === range}
-                            onClick={() => setRange(bucket.range)}
-                        >
-                            {bucket.label}
-                        </button>
-                    ))}
-                </div>
             </div>
 
             <div className="ana-trend__meta">
-                <div>
-                    <p className="lbl">Responses</p>
-                    <p className="big ana-trend__headline">
+                {/* one hero figure, not three competing ones — the selected window's
+                    count is the headline, peak and average support it */}
+                <div className="ana-trend__hero">
+                    <p className="ana-trend__eyebrow">{selected?.caption ?? "in view"}</p>
+                    <p className="ana-trend__headline">
                         {formatIndianNumber(selected?.count ?? totalSubmissions)}
                     </p>
-                    <p className="cap">{selected?.caption ?? ""}</p>
+                    <p className="ana-trend__heroLbl">responses</p>
                 </div>
-                <div>
-                    <p className="lbl">Peak</p>
-                    <p className="big">{formatIndianNumber(peak.submissions)}</p>
-                    <p className="cap">{peak.date ? tickFormatter(peak.date, range) : "—"}</p>
-                </div>
-                <div>
-                    <p className="lbl">{range === "24h" ? "Hourly avg" : "Daily avg"}</p>
-                    <p className="big">{formatIndianNumber(dailyAverage)}</p>
-                </div>
+
+                <dl className="ana-trend__stats">
+                    <div className="ana-stat">
+                        <dt>Peak</dt>
+                        <dd>
+                            {formatIndianNumber(peak.submissions)}
+                            <span>{peak.date ? tickFormatter(peak.date, range) : "—"}</span>
+                        </dd>
+                    </div>
+                    <div className="ana-stat">
+                        <dt>{range === "24h" ? "Hourly avg" : "Daily avg"}</dt>
+                        <dd>
+                            {formatIndianNumber(dailyAverage)}
+                            <span>per {range === "24h" ? "hour" : "day"}</span>
+                        </dd>
+                    </div>
+                </dl>
 
                 {/* identity never rests on color alone — the swatch is paired with its name */}
                 <ul className="ana-legend">

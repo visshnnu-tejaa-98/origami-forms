@@ -6,16 +6,6 @@ import { FIELD_TYPE_META } from "../constants";
 import { useBentoSpans } from "../use-bento-spans";
 import type { ChoiceFieldSummary } from "../types";
 
-/**
- * Form-scope only: every field whose answers come from a fixed set, with each
- * option's share drawn as a filled range indicator.
- *
- * Laid out as a bento wall — each card takes only the height its own options need,
- * so a two-option field does not inherit the height of a five-option one beside it.
- *
- * Multi-select percentages are shares of respondents, not of picks, so they add up
- * past 100 by design — one person can tick several boxes.
- */
 const FieldBreakdown = ({ fields }: { fields: ChoiceFieldSummary[] }) => {
     const gridRef = useBentoSpans(fields.map((field) => field.id).join(","));
 

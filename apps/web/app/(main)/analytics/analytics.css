@@ -199,30 +199,66 @@
 .db-shell .ana-kpi__delta.down { color: var(--coral-deep); }
 .db-shell .ana-kpi__delta.muted { color: var(--ink-4); font-style: italic; }
 
-/* the count for the selected window is the card's headline figure */
-.db-shell .ana-trend__headline { font-size: 2.9rem; }
-
 /* ====== TREND CHART ====== */
+/* A banded strip between the title and the plot: hero figure, supporting stats,
+   then the controls. The band is tinted and creased top and bottom so it reads as
+   its own shelf rather than as loose text floating above the chart. */
 .db-shell .ana-trend__meta {
-  display: flex; gap: 30px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 24px;
+  margin: 0 -24px 6px;
+  padding: 18px 24px;
+  background: linear-gradient(180deg, var(--bg-elevated), transparent);
+  border-top: 1px dashed var(--rule-line);
+  border-bottom: 1px dashed var(--rule-line);
 }
-.db-shell .ana-trend__meta .lbl {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--ink-3); margin: 0;
+
+/* ---- hero figure ---- */
+.db-shell .ana-trend__hero { min-width: 0; }
+.db-shell .ana-trend__eyebrow {
+  margin: 0; font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3);
 }
-.db-shell .ana-trend__meta .big {
-  font-family: var(--font-hand); font-size: 2.1rem; line-height: 1; color: var(--ink-1); margin: 2px 0 0;
+.db-shell .ana-trend__headline {
+  margin: 4px 0 0; font-family: var(--font-hand);
+  font-size: 3.4rem; line-height: 0.92; color: var(--ink-1);
 }
-.db-shell .ana-trend__meta .cap { font-size: 0.76rem; color: var(--ink-3); margin: 2px 0 0; }
+.db-shell .ana-trend__heroLbl {
+  margin: 2px 0 0; font-size: 0.82rem; color: var(--ink-3); font-style: italic;
+}
+
+/* ---- supporting stats, behind a fold line ---- */
+.db-shell .ana-trend__stats {
+  display: flex; gap: 22px; margin: 0;
+  padding-left: 24px; border-left: 1px dashed var(--rule-line);
+}
+.db-shell .ana-stat dt {
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3);
+}
+.db-shell .ana-stat dd {
+  margin: 4px 0 0; display: flex; flex-direction: column;
+  font-family: var(--font-hand); font-size: 1.6rem; line-height: 1; color: var(--ink-1);
+}
+/* the qualifier under each value stays body type — only figures wear the hand */
+.db-shell .ana-stat dd span {
+  font-family: var(--font-body); font-size: 0.74rem; color: var(--ink-3);
+  margin-top: 4px; white-space: nowrap;
+}
+
+/* ---- legend, pinned to the far end of the band ---- */
+.db-shell .ana-trend__meta .ana-legend { justify-self: end; }
 
 .db-shell .ana-legend {
-  margin: 0 0 0 auto; padding: 0; list-style: none;
-  display: inline-flex; gap: 16px; font-size: 0.8rem; color: var(--ink-3);
+  margin: 0; padding: 0; list-style: none;
+  display: inline-flex; gap: 14px; font-size: 0.78rem; color: var(--ink-3);
 }
 .db-shell .ana-legend li { display: inline-flex; align-items: center; gap: 6px; }
 .db-shell .ana-legend i { width: 12px; height: 4px; border-radius: 2px; display: inline-block; }
 
-.db-shell .ana-trend__chart { margin-top: 6px; }
+.db-shell .ana-trend__chart { margin-top: 14px; }
 /* recharts draws its own focus ring on the surface; the grid stays recessive */
 .db-shell .ana-trend__chart .recharts-surface { overflow: visible; }
 
@@ -435,8 +471,14 @@
   .db-shell .ana-head__controls { margin-left: 0; width: 100%; }
   .db-shell .ana-picker__label { max-width: 150px; }
   .db-shell .ana-panel { padding: 18px 16px; }
-  .db-shell .ana-trend__meta { gap: 20px; }
-  .db-shell .ana-legend { margin: 6px 0 0; width: 100%; }
+  /* the band stacks rather than squeezing three columns into a phone width */
+  .db-shell .ana-trend__meta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px; margin: 0 -16px 6px; padding: 16px;
+  }
+  .db-shell .ana-trend__headline { font-size: 2.8rem; }
+  .db-shell .ana-trend__stats { padding-left: 0; border-left: 0; }
+  .db-shell .ana-trend__meta .ana-legend { justify-self: start; }
   .db-shell .ana-field { padding: 16px; }
   .db-shell .ana-field__label { font-size: 1rem; }
 }

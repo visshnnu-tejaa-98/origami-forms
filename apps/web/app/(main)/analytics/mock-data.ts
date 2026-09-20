@@ -113,7 +113,6 @@ export function getTrend(scope: ScopeKey, range: RangeKey): TrendPoint[] {
         const drift = 1 + index / points;
         const wobble = 1 + Math.sin(index / 2.2) * 0.28;
         const submissions = Math.round((base * drift * wobble) / (range === "24h" ? 18 : 1));
-
         return {
             date: date.toISOString(),
             submissions,
