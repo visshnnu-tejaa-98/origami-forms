@@ -1,3 +1,7 @@
+import { LAYOUT_FIELD_TYPES } from "@repo/database/constants";
+import { AnalyticsData, FieldSummary, ShareRow } from "./(main)/analytics/types";
+import type { IconName } from "./(main)/components/icons";
+
 // Output: 'July 23, 2026'
 export const currentDate = new Date().toLocaleDateString("en-US", {
     month: "long", // "July"
@@ -148,4 +152,91 @@ export function getGreeting() {
 
 export function formatIndianNumber(num: number) {
     return Number(num).toLocaleString('en-IN');
+}
+
+const UNKNOWN = "unknown";
+
+const DEVICE_ICONS: Record<string, IconName> = {
+    "iPhone": "phone",
+    "iPad": "layers",
+    "Macintosh": "desktop",
+    "Windows PC": "desktop",
+    "Linux": "desktop",
+    "Mac": "desktop",
+    [UNKNOWN]: "grid",
+};
+
+export const hydrateDeviceStats = (deviceStats: AnalyticsData["deviceStats"]): ShareRow[] => {
+    if (!deviceStats) return []
+
+    const rows = deviceStats.map((deviceStat) => {
+        const deviceType = deviceStat.deviceType ?? UNKNOWN;
+
+        return {
+            key: deviceType,
+            label: deviceType,
+            percentage: Math.round(Number(deviceStat.percentage)),
+            icon: DEVICE_ICONS[deviceType] ?? "grid",
+        }
+    })
+    const named = rows.filter((row) => row.key !== UNKNOWN)
+    const unknown = rows.filter((row) => row.key === UNKNOWN)
+
+    return [...named, ...unknown]
+}
+
+export const hydratedCountryStats = (countryStats: AnalyticsData["countryStats"]): ShareRow[] => {
+    if (!countryStats) return []
+
+    const rows = countryStats.map((countryStat) => ({
+        key: countryStat.country,
+        label: countryStat.country,
+        percentage: Math.round(Number(countryStat.percentage)),
+    }))
+
+    const named = rows.filter((row) => row.key !== UNKNOWN)
+    const unknown = rows.filter((row) => row.key === UNKNOWN)
+
+    return [...named, ...unknown]
+}
+
+export const hydratedCityStats = (cityStats: AnalyticsData["cityStats"]): ShareRow[] => {
+    if (!cityStats) return []
+
+    const rows = cityStats.map((cityStat) => ({
+        key: cityStat.city,
+        label: cityStat.city,
+        percentage: Math.round(Number(cityStat.percentage)),
+    }))
+
+
+
+    const named = rows.filter((row) => row.key !== UNKNOWN)
+    const unknown = rows.filter((row) => row.key === UNKNOWN)
+
+    return [...named, ...unknown]
+}
+
+export const hydrateAnswerBreakdown = (
+    answerBreakdown: AnalyticsData["answerBreakdownAnalytics"],
+): FieldSummary[] => {
+    if (!answerBreakdown) return []
+
+    return answerBreakdown
+        .filter((field) => field !== null && field !== undefined)
+        .filter((field) => !LAYOUT_FIELD_TYPES.includes(field.questionType as typeof LAYOUT_FIELD_TYPES[number]))
+        .map((field, index) => ({
+            key: `${index}-${field.questionTitle}`,
+            order: index + 1,
+            label: field.questionTitle,
+            type: field.questionType,
+            answeredCount: field.answeredCount,
+            skippedCount: field.skippedCount,
+            options: (field.options ?? []).map((option) => ({
+                key: option.optionLabel,
+                label: option.optionLabel,
+                count: 0,
+                percentage: Math.round(Number(String(option.percentage).replace("%", ""))) || 0,
+            })),
+        }))
 }

@@ -1,5 +1,6 @@
 import { trpc } from "~/trpc/client";
 import { toast } from "sonner";
+import { GetAnalyticsInputSchemaType } from "@repo/services/analytics/model";
 
 export function usePushActivity() {
     const {
@@ -58,5 +59,34 @@ export function useGetActivities() {
         getActivitiesIsSuccess,
         getActivitiesStatus,
         refetchActivities,
+    };
+}
+
+export function useGetAnalytics({ formId, scope }: { formId?: string, scope: GetAnalyticsInputSchemaType["scope"] }) {
+    const {
+        data: analyticsResponse,
+        error: getAnalyticsError,
+        failureCount: getAnalyticsFailureCount,
+        isError: getAnalyticsIsError,
+        isPending: getAnalyticsIsPending,
+        isSuccess: getAnalyticsIsSuccess,
+        status: getAnalyticsStatus,
+        refetch: refetchAnalytics,
+    } = trpc.analytics.getAnalytics.useQuery({ formId, scope }, {
+        refetchOnWindowFocus: true,
+    });
+
+    // const analytics = analyticsResponse?.analytics || [];
+
+    return {
+        analytics: analyticsResponse,
+        analyticsResponse,
+        getAnalyticsError,
+        getAnalyticsFailureCount,
+        getAnalyticsIsError,
+        getAnalyticsIsPending,
+        getAnalyticsIsSuccess,
+        getAnalyticsStatus,
+        refetchAnalytics,
     };
 }

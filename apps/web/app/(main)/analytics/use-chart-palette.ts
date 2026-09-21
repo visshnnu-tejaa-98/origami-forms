@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { DARK } from "@repo/database/constants";
-import { CHART_SERIES } from "./constants";
+import { CHART_SERIES, CHART_SERIES_OVERFLOW } from "./constants";
 
 /**
  * Recharts writes `stroke` and `fill` as SVG presentation attributes, where
@@ -22,6 +22,7 @@ export function useChartPalette() {
 
     return {
         series: isDark ? CHART_SERIES.dark : CHART_SERIES.light,
+        overflow: isDark ? CHART_SERIES_OVERFLOW.dark : CHART_SERIES_OVERFLOW.light,
         isDark,
     };
 }

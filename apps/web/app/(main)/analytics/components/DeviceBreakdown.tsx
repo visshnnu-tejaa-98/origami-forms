@@ -2,21 +2,27 @@
 
 import React from "react";
 import ShareRings from "./ShareRings";
+import { BlankSheet } from "../../components/origami-art";
 import type { ShareRow } from "../types";
 
-/**
- * Device split as a row of dials. Three named categories, so hues are assigned in
- * fixed order and each is directly labelled — the ring is never the only way to
- * tell them apart.
- */
-const DeviceBreakdown = ({ devices }: { devices: ShareRow[] }) => (
+const DeviceBreakdown = ({ devices }: { devices?: ShareRow[] | null }) => (
     <section className="ana-panel">
         <div className="ana-panel__head">
             <h3>Devices</h3>
             <span className="sub">share of responses</span>
         </div>
 
-        <ShareRings rows={devices} emptyLabel="No device data for this period yet." />
+        {devices && devices.length > 0 ? (
+            <ShareRings rows={devices} />
+        ) : (
+            <div className="ana-panel__empty">
+                <span className="art" aria-hidden>
+                    <BlankSheet size={44} />
+                </span>
+                <h4>Nothing folded yet</h4>
+                <p>No responses over this window, so no device split.</p>
+            </div>
+        )}
     </section>
 );
 

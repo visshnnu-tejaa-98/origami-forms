@@ -6,7 +6,6 @@ import type { ShareRow } from "../types";
 
 type Tab = "country" | "city";
 
-/** Where responses came from, as a row of dials — see ShareRings on hue order. */
 const GeoBreakdown = ({ countries, cities }: { countries: ShareRow[]; cities: ShareRow[] }) => {
     const [tab, setTab] = useState<Tab>("country");
     const rows = tab === "country" ? countries : cities;
@@ -36,7 +35,7 @@ const GeoBreakdown = ({ countries, cities }: { countries: ShareRow[]; cities: Sh
                 </div>
             </div>
 
-            <ShareRings rows={rows} emptyLabel={`No ${tab} data for this period yet.`} />
+            <ShareRings rows={rows} />
         </section>
     );
 };

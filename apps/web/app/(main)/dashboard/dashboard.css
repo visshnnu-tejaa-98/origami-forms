@@ -163,8 +163,9 @@
   background: var(--peach-deep);
 }
 
-/* The stats row lives in components/stats.css, imported by Stats.tsx — it is
-   rendered on the analytics page too, so its styles travel with the component. */
+/* The stats row lives in (main)/components/stats.css, imported by both Stats.tsx and
+   FormStats.tsx — it renders on the analytics page too, so its styles travel with
+   the components rather than with this page. */
 
 /* ====== MAIN GRID ====== */
 .db-shell .grid-cols {

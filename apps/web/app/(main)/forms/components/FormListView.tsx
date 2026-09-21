@@ -38,6 +38,8 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                     const builderLink = `/builder/${f.id}?from=list`
                     const previewLink = `/builder/${f.id}/preview?from=list`
                     const publicLink = `/form/${f.id}`
+                    const analyticsLink = `/analytics?formId=${f.id}&title=${encodeURIComponent(f.title)}`;
+
 
                     return (
                         <div
@@ -117,9 +119,27 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                                             <Icon name="link" size={15} />
                                         </span>
                                     )}
-                                    <button className="tool" title="Share link" aria-label="Share">
+                                    {isDraft ? (
+                                        <span
+                                            className="icon-act is-disabled"
+                                            title="Publish this form to see its analytics"
+                                            aria-disabled
+                                        >
+                                            <Icon name="analytics" size={15} />
+                                        </span>
+                                    ) : (
+                                        <Link
+                                            className="icon-act"
+                                            title="See analytics"
+                                            aria-label={`See analytics for ${f.title}`}
+                                            href={analyticsLink}
+                                        >
+                                            <Icon name="analytics" size={15} />
+                                        </Link>
+                                    )}
+                                    {/* <button className="tool" title="Share link" aria-label="Share">
                                         <Icon name="share" size={15} />
-                                    </button>
+                                    </button> */}
                                     <button
                                         className="tool"
                                         title="Delete"

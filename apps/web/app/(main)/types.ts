@@ -120,3 +120,11 @@ export type ActivityContentProps = {
     formName: string;
     occuredAt: string;
 };
+
+export type FormStatsProps = {
+    totalResponses: string,
+    completionRate: number,
+    formatCompletionTime: (time: number) => string,
+    avgTimeCompletion: number,
+    totalViews: string,
+}

@@ -1,5 +1,5 @@
-import { activities, and, avg, count, db, desc, eq, formFields, formResponses, forms, gte, inArray, isNull, or, responseAnswers, sql, sum, users, views } from "@repo/database";
-import { AUTHENTICATED } from "@repo/database/constants";
+import { activities, and, asc, avg, count, db, desc, eq, formFields, formResponses, forms, gte, inArray, isNull, lte, or, responseAnswers, sql, users, views } from "@repo/database";
+import { AUTHENTICATED, CHECK_BOX, MULTI_SELECT, RADIO, SINGLE_SELECT } from "@repo/database/constants";
 import { GetActivitiesInputType, GetActivitiesOutputType, getAnalyticsInputSchema, GetAnalyticsInputSchemaType, getAnalyticsOutputSchema, GetAnalyticsOutputSchemaType, PushActivityInputSchemaType, PushActivityOutputSchema } from "./model";
 import UserService from "../user";
 
@@ -189,18 +189,10 @@ export default class AnalyticsService {
 
         const isAdmin = await this.userService.isAdmin(requesterId);
 
-        const conditions = [];
-        const conditionsForViews = [];
-        const conditionForResponses = []
+        const conditions = [isNull(forms.deletedAt)];
 
-        if (isAdmin) {
-            conditions.push(isNull(forms.deletedAt))
-            conditionsForViews.push(isNull(views.deletedAt))
-            conditionForResponses.push(isNull(formResponses.deletedAt))
-        } else {
+        if (!isAdmin) {
             conditions.push(eq(forms.creatorId, requesterId))
-            conditionsForViews.push(eq(forms.creatorId, requesterId))
-            conditionForResponses.push(eq(formResponses.userId, requesterId))
         }
 
         const now = new Date();
@@ -209,25 +201,12 @@ export default class AnalyticsService {
         const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
         const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
 
-        switch (scope) {
-            case "1":
-                conditions.push(gte(forms.publishedAt, new Date(now.getTime() - ONE_DAY)))
-                break;
-            case "7":
-                conditions.push(gte(forms.publishedAt, new Date(now.getTime() - ONE_WEEK)))
-                break;
-            case "30":
-                conditions.push(gte(forms.publishedAt, new Date(now.getTime() - ONE_MONTH)))
-                break;
-            case "lifetime":
-                break;
-            default:
-                throw new Error("Invalid scope")
+        if (!["1", "7", "30", "lifetime"].includes(scope)) {
+            throw new Error("Invalid scope")
         }
 
         if (formId) {
             conditions.push(eq(forms.id, formId))
-            conditionsForViews.push(eq(views.formId, formId))
         }
 
         let startDate: Date | null;
@@ -263,17 +242,38 @@ export default class AnalyticsService {
 
         const condition = and(...conditions)
 
+        const inResponseWindow = startDate
+            ? and(gte(formResponses.submittedAt, startDate), lte(formResponses.submittedAt, endDate))
+            : undefined;
+        const inViewWindow = startDate
+            ? and(gte(views.viewedAt, startDate), lte(views.viewedAt, endDate))
+            : undefined;
+
+        const targetedForms = db.select({ id: forms.id }).from(forms).where(condition);
+
         const totalFormsQuery = db.$count(forms, condition)
         const totalResponsesQuery = db
-            .select({ total: sum(forms.submissionCount) })
-            .from(forms)
-            .where(condition);
+            .select({ total: count() })
+            .from(formResponses)
+            .where(
+                and(
+                    isNull(formResponses.deletedAt),
+                    inArray(formResponses.formId, targetedForms),
+                    inResponseWindow,
+                ),
+            );
         const totalViewsQuery = db
             .select({
                 count: count(),
             })
             .from(views)
-            .where(inArray(views.formId, db.select({ id: forms.id }).from(forms).where(condition)));
+            .where(
+                and(
+                    isNull(views.deletedAt),
+                    inArray(views.formId, targetedForms),
+                    inViewWindow,
+                ),
+            );
         const completedResponsesQuery = db
             .select({
                 count: count(),
@@ -282,10 +282,9 @@ export default class AnalyticsService {
             .where(
                 and(
                     eq(formResponses.status, "completed"),
-                    inArray(
-                        formResponses.formId,
-                        db.select({ id: forms.id }).from(forms).where(condition),
-                    ),
+                    inArray(formResponses.formId, targetedForms),
+                    inResponseWindow,
+                    isNull(formResponses.deletedAt),
                 ),
             );
         const avgTimeCompletionQuery = db
@@ -294,10 +293,9 @@ export default class AnalyticsService {
             .where(
                 and(
                     eq(formResponses.status, "completed"),
-                    inArray(
-                        formResponses.formId,
-                        db.select({ id: forms.id }).from(forms).where(condition),
-                    ),
+                    inArray(formResponses.formId, targetedForms),
+                    inResponseWindow,
+                    isNull(formResponses.deletedAt),
                 ),
             );
         const peakResponseCountQuery = db
@@ -309,9 +307,10 @@ export default class AnalyticsService {
             })
             .from(formResponses)
             .where(
-                inArray(
-                    formResponses.formId,
-                    db.select({ id: forms.id }).from(forms).where(condition),
+                and(
+                    inArray(formResponses.formId, targetedForms),
+                    inResponseWindow,
+                    isNull(formResponses.deletedAt),
                 ),
             )
             .groupBy(sql`submission_date`)
@@ -331,9 +330,10 @@ export default class AnalyticsService {
                     })
                     .from(formResponses)
                     .where(
-                        inArray(
-                            formResponses.formId,
-                            db.select({ id: forms.id }).from(forms).where(condition),
+                        and(
+                            inArray(formResponses.formId, targetedForms),
+                            inResponseWindow,
+                            isNull(formResponses.deletedAt),
                         ),
                     )
                     .groupBy(sql`submission_date`)
@@ -346,9 +346,10 @@ export default class AnalyticsService {
             })
             .from(formResponses)
             .where(
-                inArray(
-                    formResponses.formId,
-                    db.select({ id: forms.id }).from(forms).where(condition),
+                and(
+                    inArray(formResponses.formId, targetedForms),
+                    inResponseWindow,
+                    isNull(formResponses.deletedAt),
                 ),
             )
             .groupBy(sql`device_type`)
@@ -361,9 +362,10 @@ export default class AnalyticsService {
         })
             .from(formResponses)
             .where(
-                inArray(
-                    formResponses.formId,
-                    db.select({ id: forms.id }).from(forms).where(condition),
+                and(
+                    inArray(formResponses.formId, targetedForms),
+                    inResponseWindow,
+                    isNull(formResponses.deletedAt),
                 ),
             )
             .groupBy(sql`country`)
@@ -375,18 +377,26 @@ export default class AnalyticsService {
         })
             .from(formResponses)
             .where(
-                inArray(
-                    formResponses.formId,
-                    db.select({ id: forms.id }).from(forms).where(condition),
+                and(
+                    inArray(formResponses.formId, targetedForms),
+                    inResponseWindow,
+                    isNull(formResponses.deletedAt),
                 ),
             )
             .groupBy(sql`city`)
             .orderBy(desc(count()))
 
-        const targetedFormIdsSubquery = db
-            .select({ id: forms.id })
-            .from(forms)
-            .where(condition);
+
+        const windowedResponses = db
+            .select({ id: formResponses.id })
+            .from(formResponses)
+            .where(
+                and(
+                    isNull(formResponses.deletedAt),
+                    inArray(formResponses.formId, targetedForms),
+                    inResponseWindow,
+                ),
+            );
 
         const answerBreakdownRawQuery = db
             .select({
@@ -402,12 +412,13 @@ export default class AnalyticsService {
                 responseAnswers,
                 and(
                     eq(responseAnswers.formFieldId, formFields.id),
-                    isNull(responseAnswers.deletedAt)
+                    isNull(responseAnswers.deletedAt),
+                    inArray(responseAnswers.responseId, windowedResponses)
                 )
             )
             .where(
                 and(
-                    inArray(formFields.formId, targetedFormIdsSubquery),
+                    inArray(formFields.formId, targetedForms),
                     isNull(formFields.deletedAt)
                 )
             )

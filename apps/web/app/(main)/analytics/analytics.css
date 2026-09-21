@@ -131,6 +131,7 @@
 
 /* ====== PANEL SHELL ====== */
 .db-shell .ana-panel {
+  --ana-panel-body: 118px;
   position: relative; /* anchors the washi tape */
   background: var(--surface-card);
   border: 1px solid var(--rule-line);
@@ -285,20 +286,42 @@
    device rings beside it. */
 .db-shell .ana-split {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 22px;
-  align-items: start;
+  /* both bodies are a fixed height now, so the cards can stretch to match and
+     the only difference left between them is the taller head on the geo panel */
+  align-items: stretch;
 }
 
 /* ====== SHARE RINGS (devices + geo) ====== */
-/* One line of dials. They wrap only when the panel genuinely cannot fit them,
-   and each dial is labelled underneath so the arc is never the only cue. */
+/* One line of dials, always one line. The number of devices or countries is not
+   known ahead of time, so wrapping would grow the panel without limit and shunt
+   everything below it down the page. Instead the row keeps a fixed height and
+   scrolls sideways — the panel occupies the same space whether it holds two
+   dials or twenty. Each dial is labelled underneath, so the arc is never the
+   only cue. */
 .db-shell .ana-rings {
-  margin: 0; padding: 0; list-style: none;
-  display: flex; flex-wrap: wrap; gap: 18px 20px;
+  margin: 0; padding: 0 0 10px; list-style: none;
+  display: flex; flex-wrap: nowrap; gap: 20px;
+  height: var(--ana-panel-body);
+  align-items: flex-start;
+  overflow-x: auto; overflow-y: hidden;
+  /* a dial should never be left half-shown once the drag ends */
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
 }
 .db-shell .ana-ring {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  width: 78px; min-width: 0;
+  width: 78px; flex: none; min-width: 0;
+  scroll-snap-align: start;
 }
+
+/* a pencil-line scrollbar, sized so it does not crowd the labels above it */
+.db-shell .ana-rings { scrollbar-width: thin; scrollbar-color: var(--ink-5) transparent; }
+.db-shell .ana-rings::-webkit-scrollbar { height: 6px; }
+.db-shell .ana-rings::-webkit-scrollbar-track { background: transparent; }
+.db-shell .ana-rings::-webkit-scrollbar-thumb {
+  background: var(--ink-5); border-radius: 999px;
+}
+.db-shell .ana-rings:hover::-webkit-scrollbar-thumb { background: var(--ink-4); }
 .db-shell .ana-ring__dial { position: relative; width: 68px; height: 68px; }
 .db-shell .ana-ring__dial svg { width: 100%; height: 100%; display: block; }
 .db-shell .ana-ring__pct {
@@ -426,6 +449,39 @@
 .db-shell .ana-option.lead .ana-option__label { color: var(--ink-1); font-weight: 600; }
 .db-shell .ana-option:not(.lead) .ana-bar__fill { opacity: 0.55; }
 
+/* the type pill carries its glyph, so the kind of field is readable without
+   parsing the wording — the two sit on one baseline */
+.db-shell .ana-field__head .o-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.db-shell .ana-field__head .o-badge svg { flex: none; opacity: 0.8; }
+
+/* ====== FREE-ENTRY FIELD BODY ====== */
+/* Short text, email, a file upload: no option split to chart, so the card gives
+   its room to the one thing that can be judged — how many of the people who
+   reached the question actually filled it in. Same bar as the options above, so
+   the two kinds of card read as one family. */
+.db-shell .ana-field__rate {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 16px;
+}
+.db-shell .ana-field__rate-top { display: flex; align-items: baseline; gap: 9px; }
+.db-shell .ana-field__rate-pct {
+  flex: none;
+  font-family: var(--font-hand); font-size: 2rem; line-height: 0.9; color: var(--ink-1);
+}
+.db-shell .ana-field__rate-lbl {
+  flex: 1; min-width: 0;
+  font-size: 0.8rem; line-height: 1.35; color: var(--ink-3);
+}
+.db-shell .ana-field__rate .ana-bar { height: 10px; }
+
+/* the reason this card has no chart, said once and quietly */
+.db-shell .ana-field__note {
+  margin: 2px 0 0;
+  font-size: 0.76rem; font-style: italic; line-height: 1.45; color: var(--ink-4);
+}
+
 /* Short fields have spare room inside their tile, so they spend it on the numbers
    instead of on padding — this is what gives the wall its mix of tile sizes. */
 .db-shell .ana-field--compact .ana-options { gap: 16px; }
@@ -433,10 +489,44 @@
 .db-shell .ana-field--compact .ana-option__label { font-size: 0.94rem; }
 .db-shell .ana-field--compact .ana-bar { height: 10px; }
 
-/* shown in place of a list that has nothing in it yet */
+/* shown in place of a list that has nothing in it yet — it stands in for the
+   rings, so it holds their height rather than collapsing the panel */
 .db-shell .ana-empty {
-  margin: 0; padding: 10px 0 4px;
+  margin: 0; padding: 0;
+  display: flex; align-items: center;
+  min-height: var(--ana-panel-body);
   font-size: 0.86rem; font-style: italic; color: var(--ink-3);
+}
+
+/* ====== PANEL EMPTY STATE ====== */
+/* A panel with no data keeps its heading and swaps only the body, so the two
+   halves of .ana-split stay level side by side. Same vocabulary as the
+   full-page .forms-empty — accent art that floats, a hand-written line, muted
+   body copy — scaled down to sit inside a card rather than fill a page. */
+.db-shell .ana-panel__empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; min-height: var(--ana-panel-body); padding: 4px 16px; text-align: center;
+  position: relative;
+}
+
+/* the sheet sits on its own faint patch of paper, the way the dials would */
+.db-shell .ana-panel__empty .art {
+  display: inline-block; margin-bottom: 4px;
+  color: var(--accent);
+  animation: paperFloat 6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .ana-panel__empty .art { animation: none; }
+}
+
+.db-shell .ana-panel__empty h4 {
+  font-family: var(--font-hand); font-size: 1.35rem; line-height: 1.1;
+  margin: 0; color: var(--ink-2); font-weight: 400;
+}
+
+.db-shell .ana-panel__empty p {
+  margin: 0; max-width: 32ch;
+  font-size: 0.88rem; line-height: 1.5; color: var(--ink-3);
 }
 
 /* ====== HINT ====== */
