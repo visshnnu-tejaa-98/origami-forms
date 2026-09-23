@@ -886,6 +886,16 @@
   font-size: 1.05rem;
 }
 
+/* the skipped stretch of pages — a mark, not a control */
+.db-shell .pager-gap {
+  width: 22px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
 .db-shell .pager-btn .flip {
   transform: rotate(180deg);
 }

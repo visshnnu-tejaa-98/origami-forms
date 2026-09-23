@@ -205,6 +205,11 @@
   background: var(--accent-soft); color: var(--accent-deep); border-color: var(--accent);
   font-family: var(--font-hand); font-size: 1.05rem;
 }
+/* the skipped stretch of pages — a mark, not a control */
+.db-shell .rsp-pager .pager-gap {
+  width: 20px; display: grid; place-items: center;
+  color: var(--ink-3); font-size: 0.9rem; user-select: none;
+}
 .db-shell .rsp-pager .pager-btn .flip { transform: rotate(180deg); }
 
 /* ====== EMPTY STATE (list) ====== */

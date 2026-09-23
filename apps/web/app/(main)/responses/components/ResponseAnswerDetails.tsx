@@ -104,14 +104,14 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                         </span>
                     )}
                     <p className="form-title">{selected.formTitle}</p>
-                    <Link
+                    {analyticsLink && <Link
                         className="rsp-form-strip__analytics"
                         href={analyticsLink}
                         title={`See analytics for ${selected.formTitle}`}
                     >
                         <Icon name="analytics" size={14} />
                         <span>Analytics</span>
-                    </Link>
+                    </Link>}
                 </div>
 
                 <div className="rsp-detail-body">
