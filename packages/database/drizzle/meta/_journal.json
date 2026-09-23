@@ -127,6 +127,20 @@
       "when": 1789793039764,
       "tag": "0017_fair_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790166697853,
+      "tag": "0018_premium_hex",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790166880332,
+      "tag": "0019_dusty_toro",
+      "breakpoints": true
     }
   ]
 }

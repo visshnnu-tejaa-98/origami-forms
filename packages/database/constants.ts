@@ -20,6 +20,8 @@ export const ARCHIVED = "archived";
 export const EXPIRED = "expired"
 
 export const FORM_STATUS_OPTIONS = [DRAFT, PUBLISHED, ARCHIVED, EXPIRED] as const
+export const TEMPLATE_STATUS_OPTIONS = [DRAFT, PUBLISHED, ARCHIVED] as const
+
 
 export const PUBLIC = "public";
 export const UNLISTED = "unlisted";
@@ -66,6 +68,7 @@ export const NUMBER_LIKE_FIELDS = [NUMBER, RATING] as const
 export const LAYOUT_FIELD_TYPES = [PAGE_BREAK, HEADING] as const
 
 export const FORM_FIELD_TYPES = [...FIELD_TYPES, ...LAYOUT_FIELD_TYPES] as const
+export const TEMPLATE_FIELD_TYPES = [...FIELD_TYPES, ...LAYOUT_FIELD_TYPES] as const
 
 export const PARTIAL = "partial";
 export const COMPLETED = "completed";
