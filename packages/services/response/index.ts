@@ -170,6 +170,7 @@ export default class ResponseService {
                 email: user?.email || undefined,
                 name,
                 logoUrl: form.logoUrl,
+                formId: form.id,
                 formTitle: form.title,
                 answers: alignedAnswers,
             };

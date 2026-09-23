@@ -6,10 +6,12 @@ import { Form } from "../../types";
 import { useDeleteForm } from "~/hooks/use-form";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import { CardIcon } from "./FormsContent";
+import { useRouter } from "next/navigation";
 
 const FromListView = ({ forms }: { forms: Form[] }) => {
     const { deleteFormAsync } = useDeleteForm()
     const [pendingDelete, setPendingDelete] = useState<Form | null>(null);
+    const router = useRouter()
 
     const confirmDelete = () => {
         if (!pendingDelete) return;
@@ -40,12 +42,22 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                     const publicLink = `/form/${f.id}`
                     const analyticsLink = `/analytics?formId=${f.id}&title=${encodeURIComponent(f.title)}`;
 
+                    const onClick = (e: React.MouseEvent<HTMLElement>) => {
+                        if ((e.target as HTMLElement).closest("a, button, [aria-disabled]")) return;
+
+                        if (isDraft) {
+                            router.push(builderLink)
+                        } else {
+                            router.push(analyticsLink)
+                        }
+                    }
 
                     return (
                         <div
                             key={f.id}
                             className={`otable-row ${f.tint}${f.pinned ? " is-pinned" : ""}`}
                             role="row"
+                            onClick={onClick}
                         >
                             <div className="c-form">
                                 <CardIcon logoUrl={f.logoUrl} icon={f.icon} isLogoExists={isLogoExists} />
@@ -118,24 +130,6 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                                         >
                                             <Icon name="link" size={15} />
                                         </span>
-                                    )}
-                                    {isDraft ? (
-                                        <span
-                                            className="icon-act is-disabled"
-                                            title="Publish this form to see its analytics"
-                                            aria-disabled
-                                        >
-                                            <Icon name="analytics" size={15} />
-                                        </span>
-                                    ) : (
-                                        <Link
-                                            className="icon-act"
-                                            title="See analytics"
-                                            aria-label={`See analytics for ${f.title}`}
-                                            href={analyticsLink}
-                                        >
-                                            <Icon name="analytics" size={15} />
-                                        </Link>
                                     )}
                                     {/* <button className="tool" title="Share link" aria-label="Share">
                                         <Icon name="share" size={15} />

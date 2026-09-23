@@ -1,12 +1,42 @@
 "use client";
 
 import React from "react";
-import { formatIndianNumber } from "~/app/utils";
 import { Icon } from "../../components/icons";
 import { BlankSheet } from "../../components/origami-art";
 import { FIELD_TYPE_META } from "../constants";
 import { useBentoSpans } from "../use-bento-spans";
 import type { FieldSummary } from "../types";
+
+const AnswerRate = ({
+    answered,
+    skipped,
+    hero,
+}: {
+    answered: number;
+    skipped: number;
+    hero: boolean;
+}) => {
+    const seen = answered + skipped;
+
+    if (seen === 0) {
+        return <p className="ana-rate__none">Nobody has reached this question yet.</p>;
+    }
+
+    const answeredPct = Math.round((answered / seen) * 100);
+    const skippedPct = 100 - answeredPct;
+
+    return (
+        <div className={`ana-rate${hero ? " ana-rate--hero" : ""}`}>
+            <span className="ana-rate__crease" aria-hidden>
+                <span className="fold" style={{ width: `${answeredPct}%` }} />
+            </span>
+            <p className="ana-rate__line">
+                <b>{answeredPct}%</b> answered
+                <span className="ana-rate__skip">{skippedPct}% skipped</span>
+            </p>
+        </div>
+    );
+};
 
 const FieldBreakdown = ({ fields }: { fields: FieldSummary[] }) => {
     const gridRef = useBentoSpans(fields.map((field) => field.key).join(","));
@@ -39,17 +69,15 @@ const FieldBreakdown = ({ fields }: { fields: FieldSummary[] }) => {
             <div className="ana-fields" ref={gridRef}>
                 {fields.map((field) => {
                     const meta = FIELD_TYPE_META[field.type];
-                    const hasOptions = field.options.length > 0;
-                    const seen = field.answeredCount + field.skippedCount;
-                    const responseRate = seen > 0 ? Math.round((field.answeredCount / seen) * 100) : 0;
-                    const compact = hasOptions && field.options.length <= 3;
+                    const visibleOptions = field.options.filter((option) => option.percentage > 0);
+                    const hasOptions = visibleOptions.length > 0;
+                    const compact = hasOptions && visibleOptions.length <= 3;
 
                     return (
                         <article
                             key={field.key}
                             className={`ana-field${compact ? " ana-field--compact" : ""}`}
                         >
-                            {/* dog-eared corner — the card reads as a folded sheet */}
                             <span className="ana-fold" aria-hidden />
 
                             <header className="ana-field__head">
@@ -63,23 +91,19 @@ const FieldBreakdown = ({ fields }: { fields: FieldSummary[] }) => {
                                 </span>
                             </header>
 
-                            <p className="ana-field__meta">
-                                <span>
-                                    <b>{formatIndianNumber(field.answeredCount)}</b> answered
-                                </span>
-                                {field.skippedCount > 0 && (
-                                    <span className="skipped">
-                                        <b>{formatIndianNumber(field.skippedCount)}</b> skipped
-                                    </span>
-                                )}
-                            </p>
+                            <AnswerRate
+                                answered={field.answeredCount}
+                                skipped={field.skippedCount}
+                                hero={!hasOptions}
+                            />
 
-                            {hasOptions ? (
+                            {hasOptions && (
                                 <ul className="ana-options">
-                                    {field.options.map((option, index) => (
-                                        <li
+                                    {visibleOptions.map((option) => {
+                                        const maxPercentage = Math.max(...visibleOptions.map((o) => o.percentage))
+                                        return <li
                                             key={option.key}
-                                            className={`ana-option${index === 0 ? " lead" : ""}`}
+                                            className={`ana-option${option.percentage === maxPercentage ? " lead" : ""}`}
                                         >
                                             <span className="ana-option__top">
                                                 <span className="ana-option__label" title={option.label}>
@@ -101,27 +125,8 @@ const FieldBreakdown = ({ fields }: { fields: FieldSummary[] }) => {
                                                 </span>
                                             </span>
                                         </li>
-                                    ))}
+                                    })}
                                 </ul>
-                            ) : (
-                                <div className="ana-field__rate">
-                                    <span className="ana-field__rate-top">
-                                        <span className="ana-field__rate-pct">{responseRate}%</span>
-                                        <span className="ana-field__rate-lbl">
-                                            {seen > 0 ? "of everyone who reached it" : "nobody has reached it yet"}
-                                        </span>
-                                    </span>
-                                    <span className="ana-bar" aria-hidden>
-                                        <span
-                                            className="ana-bar__fill"
-                                            style={{ width: `${responseRate}%` }}
-                                        />
-                                    </span>
-                                    <p className="ana-field__note">
-                                        Free-entry answers are not charted — open the responses
-                                        table to read them.
-                                    </p>
-                                </div>
                             )}
                         </article>
                     );

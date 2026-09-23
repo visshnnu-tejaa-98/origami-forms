@@ -281,6 +281,27 @@
   border-bottom: 1px solid var(--rule-line);
 }
 
+/* sits at the far edge of the strip, tied to the form the response belongs to */
+.db-shell .rsp-form-strip__analytics {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  margin-left: auto;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--ink-3);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 200ms, color 200ms;
+}
+
+.db-shell .rsp-form-strip__analytics:hover {
+  background: var(--bg-sunken);
+  color: var(--ink-1);
+}
+
 .db-shell .rsp-form-strip .logo {
   display: grid;
   place-items: center;

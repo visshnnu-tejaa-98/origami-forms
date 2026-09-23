@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { ResponseAnswerDetailsProps } from "../types";
 import { Icon } from "../../components/icons";
 import { TINTS } from "../../constants";
@@ -69,6 +70,8 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
         </span>
     );
 
+    const analyticsLink = `/analytics?formId=${selected.formId}&title=${encodeURIComponent(selected.formTitle)}`;
+
     const timeOptions = { railwayTime: true }
     const formatTimeProps = {
         isoString: time,
@@ -101,6 +104,14 @@ const ResponseAnswerDetails = (props: ResponseAnswerDetailsProps) => {
                         </span>
                     )}
                     <p className="form-title">{selected.formTitle}</p>
+                    <Link
+                        className="rsp-form-strip__analytics"
+                        href={analyticsLink}
+                        title={`See analytics for ${selected.formTitle}`}
+                    >
+                        <Icon name="analytics" size={14} />
+                        <span>Analytics</span>
+                    </Link>
                 </div>
 
                 <div className="rsp-detail-body">

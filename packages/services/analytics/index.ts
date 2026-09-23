@@ -1,5 +1,5 @@
-import { activities, and, asc, avg, count, db, desc, eq, formFields, formResponses, forms, gte, inArray, isNull, lte, or, responseAnswers, sql, users, views } from "@repo/database";
-import { AUTHENTICATED, CHECK_BOX, MULTI_SELECT, RADIO, SINGLE_SELECT } from "@repo/database/constants";
+import { activities, and, avg, count, db, desc, eq, formFields, formResponses, forms, gte, inArray, isNull, lt, lte, or, responseAnswers, sql, users, views } from "@repo/database";
+import { AUTHENTICATED } from "@repo/database/constants";
 import { GetActivitiesInputType, GetActivitiesOutputType, getAnalyticsInputSchema, GetAnalyticsInputSchemaType, getAnalyticsOutputSchema, GetAnalyticsOutputSchemaType, PushActivityInputSchemaType, PushActivityOutputSchema } from "./model";
 import UserService from "../user";
 
@@ -251,6 +251,14 @@ export default class AnalyticsService {
 
         const targetedForms = db.select({ id: forms.id }).from(forms).where(condition);
 
+        const TREND_BUCKET: Record<string, string> = {
+            "1": "1 hour",
+            "7": "1 day",
+            "30": "1 day",
+            lifetime: "1 week",
+        };
+        const bucketInterval = TREND_BUCKET[scope] ?? "1 day";
+
         const totalFormsQuery = db.$count(forms, condition)
         const totalResponsesQuery = db
             .select({ total: count() })
@@ -424,6 +432,67 @@ export default class AnalyticsService {
             )
             .groupBy(formFields.id, formFields.label, formFields.type, formFields.options);
 
+
+        let trendStart: Date | null = startDate;
+        if (!trendStart) {
+            const [earliest] = await db
+                .select({ first: sql<Date | null>`MIN(${formResponses.submittedAt})` })
+                .from(formResponses)
+                .where(
+                    and(
+                        isNull(formResponses.deletedAt),
+                        inArray(formResponses.formId, targetedForms),
+                    ),
+                );
+            trendStart = earliest?.first ? new Date(earliest.first) : null;
+        }
+
+        const emptyTrend = Promise.resolve([] as { date: string; total: number }[]);
+
+        const bucketGrid = sql`generate_series(
+            DATE_TRUNC('hour', ${trendStart}::timestamptz),
+            ${endDate}::timestamptz,
+            ${bucketInterval}::interval
+        ) AS bucket(start)`;
+        const bucketStart = sql`bucket.start`;
+        const bucketEnd = sql`${bucketStart} + ${bucketInterval}::interval`;
+
+        const submissionsTrendQuery = trendStart
+            ? db
+                .select({ date: sql<string>`bucket.start`, total: count(formResponses.id) })
+                .from(bucketGrid)
+                .leftJoin(
+                    formResponses,
+                    and(
+                        gte(formResponses.submittedAt, bucketStart),
+                        lt(formResponses.submittedAt, bucketEnd),
+                        gte(formResponses.submittedAt, trendStart),
+                        isNull(formResponses.deletedAt),
+                        inArray(formResponses.formId, targetedForms),
+                    ),
+                )
+                .groupBy(bucketStart)
+                .orderBy(bucketStart)
+            : emptyTrend;
+
+        const viewsTrendQuery = trendStart
+            ? db
+                .select({ date: sql<string>`bucket.start`, total: count(views.id) })
+                .from(bucketGrid)
+                .leftJoin(
+                    views,
+                    and(
+                        gte(views.viewedAt, bucketStart),
+                        lt(views.viewedAt, bucketEnd),
+                        gte(views.viewedAt, trendStart),
+                        isNull(views.deletedAt),
+                        inArray(views.formId, targetedForms),
+                    ),
+                )
+                .groupBy(bucketStart)
+                .orderBy(bucketStart)
+            : emptyTrend;
+
         const [
             totalForms,
             totalResponses,
@@ -435,7 +504,9 @@ export default class AnalyticsService {
             deviceStats,
             countryStats,
             cityStats,
-            answerBreakdown
+            answerBreakdown,
+            submissionsTrend,
+            viewsTrend
         ] = await Promise.all([
             totalFormsQuery,
             totalResponsesQuery,
@@ -447,8 +518,23 @@ export default class AnalyticsService {
             deviceStatsQuery,
             countryStatsQuery,
             cityStatsQuery,
-            answerBreakdownRawQuery
+            answerBreakdownRawQuery,
+            submissionsTrendQuery,
+            viewsTrendQuery
         ]);
+
+
+        const viewsByBucket = new Map(
+            viewsTrend.map((row) => [new Date(row.date).toISOString(), row.total]),
+        );
+        const trend = submissionsTrend.map((row) => {
+            const date = new Date(row.date).toISOString();
+            return {
+                date,
+                submissions: row.total,
+                views: viewsByBucket.get(date) ?? 0,
+            };
+        });
 
         const totalResponsesValue = Number(totalResponses[0]?.total) || 0;
         const totalViewsValue = Number(totalViews[0]?.count) || 0;
@@ -529,11 +615,10 @@ export default class AnalyticsService {
                 deviceStats: deviceStatsValue,
                 countryStats: countryStatsValue,
                 cityStats: cityStatsValue,
-                answerBreakdownAnalytics
+                answerBreakdownAnalytics,
+                trend
             }
         }
-
-        // console.log({ countryStats })
 
         const result = await getAnalyticsOutputSchema.safeParseAsync(resultObj)
         if (!result.data) {

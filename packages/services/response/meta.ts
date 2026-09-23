@@ -75,6 +75,7 @@ Each entry of \`responses\` has the shape:
 | \`email\` | string \\| null | Respondent's email, absent for anonymous submissions. |
 | \`status\` | enum | \`partial\` or \`completed\`. |
 | \`logoUrl\` | string \\| null | Logo of the form the response belongs to. |
+| \`formId\` | string (uuid) | Id of the form the response belongs to. |
 | \`formTitle\` | string | Title of the form the response belongs to. |
 | \`submittedAt\` | string (date-time) \\| null | When the response was submitted; \`null\` while still \`partial\`. |
 | \`completionTimeInSec\` | number \\| null | Seconds the respondent spent completing the form. |

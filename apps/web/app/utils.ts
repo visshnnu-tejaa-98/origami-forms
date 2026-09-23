@@ -1,5 +1,5 @@
 import { LAYOUT_FIELD_TYPES } from "@repo/database/constants";
-import { AnalyticsData, FieldSummary, ShareRow } from "./(main)/analytics/types";
+import { AnalyticsData, FieldSummary, ShareRow, TrendPoint } from "./(main)/analytics/types";
 import type { IconName } from "./(main)/components/icons";
 
 // Output: 'July 23, 2026'
@@ -239,4 +239,14 @@ export const hydrateAnswerBreakdown = (
                 percentage: Math.round(Number(String(option.percentage).replace("%", ""))) || 0,
             })),
         }))
+}
+
+export const hydrateTrend = (trend: AnalyticsData["trend"]): TrendPoint[] => {
+    if (!trend) return []
+
+    return trend.map((point) => ({
+        date: point.date,
+        submissions: Number(point.submissions) || 0,
+        views: Number(point.views) || 0,
+    }))
 }

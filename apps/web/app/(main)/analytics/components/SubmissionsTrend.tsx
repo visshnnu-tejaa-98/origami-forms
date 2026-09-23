@@ -11,22 +11,20 @@ import {
     YAxis,
 } from "recharts";
 import { formatIndianNumber } from "~/app/utils";
+import { BlankSheet } from "../../components/origami-art";
 import { useChartPalette } from "../use-chart-palette";
-import type { RangeKey, ResponseBucket, TrendPoint } from "../types";
+import type { Scope, TrendPoint } from "../types";
 
 type Props = {
     data: TrendPoint[];
-    /** The window being plotted — chosen by the page header's range control. */
-    range: RangeKey;
-    /** The 1d / 1w / 1m / lifetime windows; the one matching `range` supplies the headline count. */
-    buckets: ResponseBucket[];
+    scope: Scope;
+    totalResponses: number;
 };
 
-/** Hours inside a 24h window, days inside 7d/30d, week-starts across all time. */
-const tickFormatter = (iso: string, range: RangeKey) => {
+const tickFormatter = (iso: string, scope: Scope) => {
     const date = new Date(iso);
-    if (range === "24h") {
-        return `${date.getUTCHours().toString().padStart(2, "0")}:00`;
+    if (scope.key === "1") {
+        return date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false });
     }
     return date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 };
@@ -40,20 +38,20 @@ const TrendTooltip = ({
     active,
     payload,
     label,
-    range,
+    scope,
     colors,
 }: {
     active?: boolean;
     payload?: { dataKey?: string | number; value?: number | string }[];
     label?: string;
-    range: RangeKey;
+    scope: Scope;
     colors: readonly string[];
 }) => {
     if (!active || !payload?.length) return null;
 
     return (
         <div className="ana-tip">
-            <p className="ana-tip__date">{label ? tickFormatter(label, range) : ""}</p>
+            <p className="ana-tip__date">{label ? tickFormatter(label, scope) : ""}</p>
             {SERIES.map((series, index) => {
                 const point = payload.find((item) => item.dataKey === series.key);
                 if (!point) return null;
@@ -69,9 +67,28 @@ const TrendTooltip = ({
     );
 };
 
-const SubmissionsTrend = ({ data, range, buckets }: Props) => {
+const SubmissionsTrend = ({ data, scope, totalResponses }: Props) => {
     const { series: colors } = useChartPalette();
-    const selected = buckets.find((bucket) => bucket.range === range) ?? buckets[0];
+    const isHourly = scope.key === "1";
+
+    if (data.length === 0) {
+        return (
+            <section className="ana-panel ana-trend">
+                <span className="o-tape o-tape--left" aria-hidden />
+                <div className="ana-panel__head">
+                    <h3>Responses</h3>
+                    <span className="sub">how many came in, and when</span>
+                </div>
+                <div className="ana-panel__empty">
+                    <span className="art" aria-hidden>
+                        <BlankSheet size={44} />
+                    </span>
+                    <h4>Nothing to plot yet</h4>
+                    <p>No responses in this window. Pick a wider one, or wait for the first.</p>
+                </div>
+            </section>
+        );
+    }
 
     const totalSubmissions = data.reduce((sum, point) => sum + point.submissions, 0);
     const peak = data.reduce(
@@ -92,9 +109,9 @@ const SubmissionsTrend = ({ data, range, buckets }: Props) => {
                 {/* one hero figure, not three competing ones — the selected window's
                     count is the headline, peak and average support it */}
                 <div className="ana-trend__hero">
-                    <p className="ana-trend__eyebrow">{selected?.caption ?? "in view"}</p>
+                    <p className="ana-trend__eyebrow">{scope.caption}</p>
                     <p className="ana-trend__headline">
-                        {formatIndianNumber(selected?.count ?? totalSubmissions)}
+                        {formatIndianNumber(totalResponses)}
                     </p>
                     <p className="ana-trend__heroLbl">responses</p>
                 </div>
@@ -104,14 +121,14 @@ const SubmissionsTrend = ({ data, range, buckets }: Props) => {
                         <dt>Peak</dt>
                         <dd>
                             {formatIndianNumber(peak.submissions)}
-                            <span>{peak.date ? tickFormatter(peak.date, range) : "—"}</span>
+                            <span>{peak.date ? tickFormatter(peak.date, scope) : "—"}</span>
                         </dd>
                     </div>
                     <div className="ana-stat">
-                        <dt>{range === "24h" ? "Hourly avg" : "Daily avg"}</dt>
+                        <dt>{isHourly ? "Hourly avg" : "Daily avg"}</dt>
                         <dd>
                             {formatIndianNumber(dailyAverage)}
-                            <span>per {range === "24h" ? "hour" : "day"}</span>
+                            <span>per {isHourly ? "hour" : "day"}</span>
                         </dd>
                     </div>
                 </dl>
@@ -148,7 +165,7 @@ const SubmissionsTrend = ({ data, range, buckets }: Props) => {
                         />
                         <XAxis
                             dataKey="date"
-                            tickFormatter={(value: string) => tickFormatter(value, range)}
+                            tickFormatter={(value: string) => tickFormatter(value, scope)}
                             tickLine={false}
                             axisLine={false}
                             minTickGap={28}
@@ -162,7 +179,7 @@ const SubmissionsTrend = ({ data, range, buckets }: Props) => {
                         />
                         <Tooltip
                             cursor={{ stroke: "var(--rule-strong)", strokeWidth: 1 }}
-                            content={<TrendTooltip range={range} colors={colors} />}
+                            content={<TrendTooltip scope={scope} colors={colors} />}
                         />
 
                         {/* views sit underneath — the larger number, drawn first so it never hides submissions */}

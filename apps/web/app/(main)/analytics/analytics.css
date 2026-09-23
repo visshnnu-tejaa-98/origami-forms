@@ -60,6 +60,19 @@
 .db-shell .ana-head {
   display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;
 }
+/* sits above the title so the heading keeps its own line and brush stroke */
+.db-shell .ana-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 10px; padding: 6px 10px 6px 6px;
+  background: none; border: 0; border-radius: 8px;
+  color: var(--ink-3); font-size: 0.86rem; font-weight: 500;
+  cursor: pointer;
+  transition: background 200ms, color 200ms;
+}
+.db-shell .ana-back:hover {
+  background: var(--bg-sunken);
+  color: var(--ink-1);
+}
 .db-shell .ana-head__title h1 {
   position: relative; display: inline-block;
   font-family: var(--font-hand); font-size: 2.6rem; line-height: 1; margin: 0; color: var(--ink-1);
@@ -72,44 +85,51 @@
   border-radius: 50% 50% 60% 40% / 80% 30% 70% 20%;
   opacity: 0.3; transform: rotate(-1.2deg);
 }
-.db-shell .ana-head__title .sub {
-  color: var(--ink-3); font-size: 0.92rem; font-style: italic; margin: 6px 0 0;
-}
 .db-shell .ana-head__controls {
   margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
 
-/* ====== FORM PICKER ====== */
-.db-shell .ana-picker { position: relative; }
-.db-shell .ana-picker__trigger {
+/* ====== SCOPE TAG ====== */
+/* A tied-on paper tag, not a control: the leading edge is notched and a hole is
+   punched through it. Nothing here opens, so nothing here wears a chevron. */
+.db-shell .ana-scope {
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap; margin-top: 10px;
+}
+.db-shell .ana-scope__tag {
+  position: relative;
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--surface-card); border: 1px solid var(--rule-line);
-  border-radius: 11px 8px 12px 9px / 9px 12px 8px 11px; padding: 8px 12px; cursor: pointer;
-  font-family: var(--font-body); font-size: 0.86rem; font-weight: 600; color: var(--ink-1);
-  box-shadow: var(--shadow-paper-1);
-  transition: border-color 160ms;
+  padding: 7px 14px 7px 24px;
+  background: var(--surface-sticky);
+  border: 1px solid var(--rule-line);
+  border-radius: 4px 12px 12px 4px / 4px 14px 14px 4px;
+  /* the notch — the angled edge a luggage tag is cut with */
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
+  font-size: 0.9rem; font-weight: 600; color: var(--ink-1);
+  transform: rotate(-0.6deg);
 }
-.db-shell .ana-picker__trigger:hover { border-color: var(--rule-strong); }
-.db-shell .ana-picker__label {
-  max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.db-shell .ana-scope__tag.is-global { background: var(--bg-elevated); }
+.db-shell .ana-scope__tag svg { flex: none; color: var(--accent-deep); }
+/* the punched hole the string would pass through */
+.db-shell .ana-scope__hole {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--bg); box-shadow: inset 0 0 0 1px var(--rule-strong);
 }
-.db-shell .ana-picker__menu {
-  position: absolute; top: calc(100% + 6px); left: 0; z-index: 20;
-  min-width: 280px; margin: 0; padding: 6px; list-style: none;
-  background: var(--surface-card); border: 1px solid var(--rule-line);
-  border-radius: var(--r-md); box-shadow: var(--shadow-paper-3);
+.db-shell .ana-scope__name {
+  max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.db-shell .ana-picker__item {
-  display: flex; align-items: center; gap: 9px; width: 100%;
-  padding: 9px 10px; border: 0; border-radius: 8px; cursor: pointer;
-  background: transparent; text-align: left;
-  font-family: var(--font-body); font-size: 0.86rem; color: var(--ink-2);
+
+.db-shell .ana-scope__note {
+  font-size: 0.86rem; font-style: italic; color: var(--ink-3);
 }
-.db-shell .ana-picker__item:hover { background: var(--bg-elevated); color: var(--ink-1); }
-.db-shell .ana-picker__item.active { background: var(--accent-soft); color: var(--accent-deep); font-weight: 600; }
-.db-shell .ana-picker__item > span:nth-child(2) {
-  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.db-shell .ana-scope__back {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.84rem; font-weight: 600; color: var(--ink-3);
+  text-decoration: none; border-bottom: 1px dashed var(--rule-strong);
+  padding-bottom: 1px; transition: color 160ms, border-color 160ms;
 }
+.db-shell .ana-scope__back:hover { color: var(--accent-deep); border-color: var(--accent); }
 
 /* ====== SEGMENTED RANGE CONTROL ====== */
 .db-shell .ana-seg {
@@ -409,10 +429,11 @@
   font-family: var(--font-hand); font-size: 1.15rem; line-height: 1.3;
   color: var(--accent-deep); flex: none;
 }
-/* the question itself is the thing being read — it outranks the option labels */
+/* the question itself is the thing being read — it outranks everything in the card */
 .db-shell .ana-field__label {
   flex: 1; min-width: 0; margin: 0;
-  font-size: 1.08rem; font-weight: 600; line-height: 1.4; color: var(--ink-1);
+  font-size: 1.24rem; font-weight: 600; line-height: 1.32;
+  letter-spacing: -0.01em; color: var(--ink-1);
 }
 .db-shell .ana-field__head .o-badge { flex: none; margin-top: 2px; }
 
@@ -425,9 +446,49 @@
 .db-shell .ana-field__meta b { color: var(--ink-1); font-weight: 600; }
 .db-shell .ana-field__meta .skipped b { color: var(--ink-2); }
 
+/* ---- answered vs skipped: one crease ---- */
+/* A single fold line. The answered share is creased flat; the remainder carries on
+   as the dashed score line of a fold that was never made, so the split reads
+   without a second bar, a legend or a colour key. */
+.db-shell .ana-rate { margin-top: 14px; }
+
+.db-shell .ana-rate__crease {
+  display: block; height: 3px; border-radius: 999px;
+  /* the un-creased remainder: a perforated score line */
+  background-image: repeating-linear-gradient(
+    90deg, var(--ink-5) 0 5px, transparent 5px 10px
+  );
+}
+.db-shell .ana-rate__crease .fold {
+  display: block; height: 100%; border-radius: 999px;
+  background: var(--ana-c1);
+  transition: width 280ms ease;
+}
+
+.db-shell .ana-rate__line {
+  display: flex; align-items: baseline; gap: 8px;
+  margin: 9px 0 0; font-size: 0.84rem; color: var(--ink-3);
+}
+.db-shell .ana-rate__line b {
+  font-family: var(--font-hand); font-weight: 600;
+  font-size: 1.3rem; line-height: 1; color: var(--ink-1);
+}
+.db-shell .ana-rate__skip { margin-left: auto; color: var(--ink-4); }
+
+/* hero: same two elements, just a larger hand for the headline figure */
+.db-shell .ana-rate--hero { margin-top: 18px; }
+.db-shell .ana-rate--hero .ana-rate__line b { font-size: 2.4rem; }
+.db-shell .ana-rate--hero .ana-rate__line { margin-top: 12px; }
+
+.db-shell .ana-rate__none {
+  margin: 14px 0 0; font-size: 0.84rem; font-style: italic; color: var(--ink-4);
+}
+
 .db-shell .ana-options {
-  margin: 14px 0 0; padding: 0; list-style: none;
+  margin: 16px 0 0; padding: 16px 0 0; list-style: none;
   display: flex; flex-direction: column; gap: 13px;
+  /* creased away from the meter above */
+  border-top: 1px dashed var(--rule-line);
 }
 /* label over bar, so a narrow card gives the bar its full width */
 .db-shell .ana-option { display: flex; flex-direction: column; gap: 5px; }
@@ -457,25 +518,6 @@
 .db-shell .ana-field__head .o-badge svg { flex: none; opacity: 0.8; }
 
 /* ====== FREE-ENTRY FIELD BODY ====== */
-/* Short text, email, a file upload: no option split to chart, so the card gives
-   its room to the one thing that can be judged — how many of the people who
-   reached the question actually filled it in. Same bar as the options above, so
-   the two kinds of card read as one family. */
-.db-shell .ana-field__rate {
-  display: flex; flex-direction: column; gap: 8px;
-  margin-top: 16px;
-}
-.db-shell .ana-field__rate-top { display: flex; align-items: baseline; gap: 9px; }
-.db-shell .ana-field__rate-pct {
-  flex: none;
-  font-family: var(--font-hand); font-size: 2rem; line-height: 0.9; color: var(--ink-1);
-}
-.db-shell .ana-field__rate-lbl {
-  flex: 1; min-width: 0;
-  font-size: 0.8rem; line-height: 1.35; color: var(--ink-3);
-}
-.db-shell .ana-field__rate .ana-bar { height: 10px; }
-
 /* the reason this card has no chart, said once and quietly */
 .db-shell .ana-field__note {
   margin: 2px 0 0;
@@ -545,6 +587,25 @@
 }
 .db-shell .ana-hint__art { color: var(--accent-deep); opacity: 0.7; flex: none; }
 
+/* Underlined by hand rather than by the browser: a dashed rule sits better under
+   the hand font than a solid one, and matches .ana-scope__back on the same page.
+   It keeps the hint's inherited size and face — the link is a word in the
+   sentence, not a control bolted into it. */
+.db-shell .ana-hint__link {
+  color: var(--accent-deep); text-decoration: none;
+  border-bottom: 1px dashed var(--accent);
+  padding-bottom: 1px;
+  transition: color 160ms, border-color 160ms, background 160ms;
+}
+.db-shell .ana-hint__link:hover {
+  color: var(--ink-1);
+  border-bottom-color: var(--ink-3);
+  background: var(--accent-soft);
+}
+.db-shell .ana-hint__link:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px;
+}
+
 /* ====== SKELETONS ====== */
 .db-shell .ana-sk { display: flex; flex-direction: column; gap: 22px; }
 
@@ -559,7 +620,7 @@
 }
 @media (max-width: 720px) {
   .db-shell .ana-head__controls { margin-left: 0; width: 100%; }
-  .db-shell .ana-picker__label { max-width: 150px; }
+  .db-shell .ana-scope__name { max-width: 180px; }
   .db-shell .ana-panel { padding: 18px 16px; }
   /* the band stacks rather than squeezing three columns into a phone width */
   .db-shell .ana-trend__meta {
@@ -570,5 +631,6 @@
   .db-shell .ana-trend__stats { padding-left: 0; border-left: 0; }
   .db-shell .ana-trend__meta .ana-legend { justify-self: start; }
   .db-shell .ana-field { padding: 16px; }
-  .db-shell .ana-field__label { font-size: 1rem; }
+  .db-shell .ana-field__label { font-size: 1.12rem; }
+  .db-shell .ana-rate--hero .ana-rate__line b { font-size: 2rem; }
 }

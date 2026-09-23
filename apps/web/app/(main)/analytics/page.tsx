@@ -7,15 +7,25 @@ import AnalyticsHeader from "./components/AnalyticsHeader";
 import { defaultScope } from "./constants";
 import type { Scope } from "./types";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import FormStats from "../components/FormStats";
 import { PaperCrane } from "../components/origami-art";
 import { AnalyticsPageSkeleton } from "./skeletons";
 import { useGetAnalytics } from "~/hooks/use-analytics";
-import { formatCompletionTime, formatIndianNumber, hydrateAnswerBreakdown, hydratedCityStats, hydratedCountryStats, hydrateDeviceStats } from "~/app/utils";
+import {
+    formatCompletionTime,
+    formatIndianNumber,
+    hydrateAnswerBreakdown,
+    hydrateTrend,
+    hydratedCityStats,
+    hydratedCountryStats,
+    hydrateDeviceStats,
+} from "~/app/utils";
 import { GetAnalyticsInputSchemaType } from "@repo/services/analytics/model";
 import DeviceBreakdown from "./components/DeviceBreakdown";
 import GeoBreakdown from "./components/GeoBreakdown";
 import FieldBreakdown from "./components/FieldBreakdown";
+import SubmissionsTrend from "./components/SubmissionsTrend";
 
 const Analytics = () => {
     const [scope, setScope] = useState<Scope>(defaultScope);
@@ -25,8 +35,8 @@ const Analytics = () => {
         id: searchParams.get("formId") ?? undefined,
     };
 
-    const formName = formAnalytics.title ? formAnalytics.title : "All forms";
-    const isGlobal = !formAnalytics.title;
+    const isGlobal = !formAnalytics.id;
+    const formName = isGlobal ? "All forms" : formAnalytics.title || "Untitled form";
 
     const {
         analytics: analyticsData,
@@ -74,7 +84,17 @@ const Analytics = () => {
         );
     }
 
-    const { totalResponses, completionRate, avgTimeCompletion, totalViews, deviceStats, countryStats, cityStats, answerBreakdownAnalytics } = analyticsData.analytics;
+    const {
+        totalResponses,
+        completionRate,
+        avgTimeCompletion,
+        totalViews,
+        deviceStats,
+        countryStats,
+        cityStats,
+        answerBreakdownAnalytics,
+        trend,
+    } = analyticsData.analytics;
 
     const devices = hydrateDeviceStats(deviceStats);
     const countries = hydratedCountryStats(countryStats)
@@ -82,6 +102,7 @@ const Analytics = () => {
 
 
     const fields = hydrateAnswerBreakdown(answerBreakdownAnalytics);
+    const trendPoints = hydrateTrend(trend);
 
     return (
         <div className="ana-page">
@@ -97,6 +118,8 @@ const Analytics = () => {
                 totalViews={formatIndianNumber(totalViews)}
             />
 
+            <SubmissionsTrend data={trendPoints} scope={scope} totalResponses={totalResponses} />
+
             <section className="ana-split">
                 <DeviceBreakdown devices={devices} />
                 <GeoBreakdown countries={countries} cities={cities} />
@@ -110,7 +133,11 @@ const Analytics = () => {
                         <PaperCrane size={34} />
                     </span>
                     <p>
-                        Pick a single form above to see how each question was answered.
+                        This is every form folded together.{" "}
+                        <Link className="ana-hint__link" href="/forms">
+                            Pick a single form
+                        </Link>{" "}
+                        to see how each question was answered.
                     </p>
                 </aside>
             )}
@@ -119,82 +146,3 @@ const Analytics = () => {
 };
 
 export default Analytics;
-
-// "use client";
-
-// import React, { useState } from "react";
-// import "./analytics.css";
-// import { PaperCrane } from "../components/origami-art";
-// import AnalyticsDecorations from "./components/AnalyticsDecorations";
-// import AnalyticsHeader from "./components/AnalyticsHeader";
-// import SubmissionsTrend from "./components/SubmissionsTrend";
-// import DeviceBreakdown from "./components/DeviceBreakdown";
-// import GeoBreakdown from "./components/GeoBreakdown";
-// import FieldBreakdown from "./components/FieldBreakdown";
-// import { ALL_FORMS, DEFAULT_RANGE } from "./constants";
-// import {
-//     MOCK_FORMS,
-//     getChoiceFields,
-//     getCities,
-//     getCountries,
-//     getDevices,
-//     getResponseBuckets,
-//     getTrend,
-// } from "./mock-data";
-// import type { RangeKey, ScopeKey } from "./types";
-// import Stats from "../dashboard/components/Stats";
-
-// const Analytics = () => {
-
-//     const [scope, setScope] = useState<ScopeKey>(ALL_FORMS);
-//     const [range, setRange] = useState<RangeKey>(DEFAULT_RANGE);
-
-//     const buckets = getResponseBuckets(scope);
-//     const trend = getTrend(scope, range);
-//     const devices = getDevices(scope);
-//     const countries = getCountries(scope);
-//     const cities = getCities(scope);
-//     const choiceFields = getChoiceFields(scope);
-
-//     const isGlobal = scope === ALL_FORMS;
-
-//     return (
-//         <div className="ana-page">
-//             <AnalyticsDecorations />
-
-//             <AnalyticsHeader
-//                 forms={MOCK_FORMS}
-//                 scope={scope}
-//                 setScope={setScope}
-//                 range={range}
-//                 setRange={setRange}
-//             />
-
-//             <Stats />
-
-//             {/* the card has no window control of its own — the header range drives it */}
-//             <SubmissionsTrend data={trend} range={range} buckets={buckets} />
-
-//             <section className="ana-split">
-//                 <DeviceBreakdown devices={devices} />
-//                 <GeoBreakdown countries={countries} cities={cities} />
-//             </section>
-
-//             {/* a workspace roll-up has no single field list, so this panel is form-scoped */}
-//             {!isGlobal && choiceFields.length > 0 && <FieldBreakdown fields={choiceFields} />}
-
-//             {isGlobal && (
-//                 <aside className="ana-hint">
-//                     <span className="ana-hint__art" aria-hidden>
-//                         <PaperCrane size={34} />
-//                     </span>
-//                     <p>
-//                         Pick a single form above to see how each question was answered.
-//                     </p>
-//                 </aside>
-//             )}
-//         </div>
-//     );
-// };
-
-// export default Analytics;

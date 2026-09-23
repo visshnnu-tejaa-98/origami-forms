@@ -43,6 +43,7 @@ export const responseSchema = z.object({
     email: z.string().email().nullish().describe("email of the user who submitted the response"),
     status: z.enum(RESPONSE_STATUS).describe("status of the response"),
     logoUrl: z.string().url().nullish().describe("logo of the form"),
+    formId: z.string().uuid().describe("id of the form to which this response belongs"),
     formTitle: z.string().describe("title of the form to which this response belongs"),
     submittedAt: z.string().datetime().nullish().describe("date and time of when the response was submitted"),
     completionTimeInSec: z.number().int().nonnegative().nullish().describe("time in seconds it took to complete the response"),

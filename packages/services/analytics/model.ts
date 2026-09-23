@@ -114,6 +114,14 @@ export const getAnalyticsOutputSchema = z.object({
             }).describe("number of responses from each country, ordered by count")
         ).optional().nullable().describe("number of responses from each country, ordered by count"),
 
+        trend: z.array(
+            z.object({
+                date: z.string().describe("ISO timestamp of the bucket's start"),
+                submissions: z.number().int().nonnegative().describe("responses submitted inside this bucket"),
+                views: z.number().int().nonnegative().describe("views recorded inside this bucket"),
+            }).describe("one time bucket of the trend line")
+        ).describe("responses and views over the scope's window, one row per bucket, empty buckets included"),
+
         answerBreakdownAnalytics: z.array(
             z.object({
                 questionTitle: z.string().describe("text of the question"),

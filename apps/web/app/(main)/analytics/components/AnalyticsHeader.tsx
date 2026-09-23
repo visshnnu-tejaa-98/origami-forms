@@ -1,43 +1,36 @@
 "use client";
 
 import React from "react";
-import { Icon } from "../../components/icons";
+import { useRouter } from "next/navigation";
 import { SCOPES } from "../constants";
+import ScopeRibbon from "./ScopeRibbon";
+import { Icon } from "../../components/icons";
 import type { Scope } from "../types";
 
 type Props = {
-    scope: Scope
+    scope: Scope;
     setScope: (scope: Scope) => void;
     isGlobal: boolean;
-    formName: string
+    formName: string;
 };
 
 const AnalyticsHeader = ({ scope, setScope, formName, isGlobal }: Props) => {
+    const router = useRouter();
 
     return (
         <header className="ana-head">
             <div className="ana-head__title">
+                {!isGlobal && (
+                    <button type="button" className="ana-back" onClick={() => router.back()}>
+                        <Icon name="arrow-left" size={15} />
+                        <span>Back</span>
+                    </button>
+                )}
                 <h1>Analytics</h1>
-                <p className="sub">
-                    {isGlobal
-                        ? "Every form in your workspace, folded into one view."
-                        : "One form, question by question."}
-                </p>
+                <ScopeRibbon formName={formName} isGlobal={isGlobal} />
             </div>
 
             <div className="ana-head__controls">
-                <div className="ana-picker">
-                    <button
-                        type="button"
-                        className="ana-picker__trigger"
-                        aria-haspopup="listbox"
-                    >
-                        <Icon name={"forms"} size={15} />
-                        <span className="ana-picker__label">{formName}</span>
-                        <Icon name="chevron" size={14} />
-                    </button>
-                </div>
-
                 <div className="ana-seg" role="group" aria-label="Time range">
                     {SCOPES.map((option) => (
                         <button
