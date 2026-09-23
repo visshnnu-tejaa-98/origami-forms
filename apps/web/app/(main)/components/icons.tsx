@@ -49,6 +49,7 @@ export type IconName =
     | 'layers'
     | 'drag'
     | 'phone'
+    | 'desktop'
     | 'link'
     | 'upload'
     | 'toggle'
@@ -226,6 +227,12 @@ const paths: Record<IconName, React.ReactNode> = {
         </>
     ),
     phone: <path d="M7 3h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM10.5 17.5h3" />,
+    desktop: (
+        <>
+            <rect x="3" y="4" width="18" height="12" rx="1.5" />
+            <path d="M12 16v3M8.5 19h7" />
+        </>
+    ),
     link: (
         <>
             <path d="M10 13.5a3.5 3.5 0 0 0 5 0l3-3a3.5 3.5 0 0 0-5-5l-1.2 1.2" />

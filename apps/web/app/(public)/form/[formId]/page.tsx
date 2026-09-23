@@ -147,15 +147,15 @@ const PublicFormPage = () => {
         );
     }
 
-    // if (isUserAlreadyFilledForm) {
-    //     return shell(
-    //         <PublicFormState
-    //             icon="clip"
-    //             title="You have already submitted this form."
-    //             description="You cannot submit the form more than once."
-    //         />,
-    //     );
-    // }
+    if (isUserAlreadyFilledForm && process.env.NODE_ENV === "production") {
+        return shell(
+            <PublicFormState
+                icon="clip"
+                title="You have already submitted this form."
+                description="You cannot submit the form more than once."
+            />,
+        );
+    }
 
     return <PublicFormScreen form={publicForm} />;
 };

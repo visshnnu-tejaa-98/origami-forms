@@ -75,12 +75,15 @@ Each entry of \`responses\` has the shape:
 | \`email\` | string \\| null | Respondent's email, absent for anonymous submissions. |
 | \`status\` | enum | \`partial\` or \`completed\`. |
 | \`logoUrl\` | string \\| null | Logo of the form the response belongs to. |
+| \`formId\` | string (uuid) | Id of the form the response belongs to. |
 | \`formTitle\` | string | Title of the form the response belongs to. |
 | \`submittedAt\` | string (date-time) \\| null | When the response was submitted; \`null\` while still \`partial\`. |
 | \`completionTimeInSec\` | number \\| null | Seconds the respondent spent completing the form. |
 | \`answers\` | array | One \`{ fieldId, fieldType, fieldLabel, value, order }\` entry per live form field, ordered by \`order\`, with \`value: null\` where the field was not answered. |
+| \`metaData\` | object \\| null | Respondent context captured at submission: \`{ city, country, device, browser }\`. Every key is individually nullish, and the whole object is \`null\` on responses recorded before it was collected. |
 
-Respondent telemetry stored on the response (IP, city, device, referrer) is never included.
+\`metaData\` is the only respondent telemetry returned — the raw IP address is never stored
+or exposed, and there is no referrer field.
 
 ### Errors
 
@@ -116,16 +119,21 @@ filters — it always reports over the requester's full visible set.
 ### Flow
 
 1. The requester's role is resolved to determine admin access.
-2. Responses are scoped to non-deleted forms; a non-admin is further scoped to forms they created.
-3. The statuses of the matching responses are counted, and the total is counted alongside them.
+2. Responses are scoped to non-deleted forms, and soft-deleted responses are excluded;
+   a non-admin is further scoped to forms they created.
+3. The matching rows are fetched and their statuses tallied in application code rather
+   than aggregated in SQL, so the cost grows with the number of responses in scope.
 
 ### Response
 
-Returns \`{ completed, partial, totalItems }\`, where:
+Returns \`{ completed, partial }\`, where:
 
 - \`completed\` — number of responses with status \`completed\`;
-- \`partial\` — number of responses with status \`partial\`;
-- \`totalItems\` — total number of responses in scope.
+- \`partial\` — number of responses with status \`partial\`.
+
+There is no \`totalItems\` field; a caller that needs the total adds the two counts. Note
+that \`completed + partial\` is the full count only while those remain the only two
+statuses in \`RESPONSE_STATUS\`.
 
 ### Errors
 
@@ -159,12 +167,15 @@ though it were never submitted.
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| \`userId\` | string (uuid) | Yes | Id of the user whose submission is being checked. |
+| \`requesterId\` | string (uuid) | Yes | Id of the user whose submission is being checked. Supplied from the session, not the client. |
 | \`formId\` | string (uuid) | Yes | Id of the form to check against. |
+
+The check is always against the caller's own submissions — there is no parameter for
+asking about a third party.
 
 ### Flow
 
-1. A single response is looked up matching both \`userId\` and \`formId\`, excluding
+1. A single response is looked up matching both \`requesterId\` and \`formId\`, excluding
    soft-deleted rows.
 2. Only the response id is selected, and the lookup stops at the first match.
 
@@ -181,7 +192,7 @@ form, \`false\` otherwise.
 
 ### Errors
 
-- **Validation** — \`userId\` or \`formId\` is missing or is not a valid uuid.
+- **Validation** — \`requesterId\` or \`formId\` is missing or is not a valid uuid.
 `,
         },
     };

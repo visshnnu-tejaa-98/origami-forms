@@ -64,7 +64,7 @@ const FormsList = () => {
                     if (isDraft) {
                         router.push(`/builder?id=${f.id}`)
                     } else {
-                        router.push(`/responses?search=${f.title}`)
+                        router.push(`/analytics?formId=${f.id}&title=${f.title}`)
                     }
                 }
                 return <div key={f.id} className={`form-row ${f.tint}`} onClick={onClick}>

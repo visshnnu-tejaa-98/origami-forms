@@ -9,11 +9,11 @@ const SummaryInfo = () => {
         <section className="grid-cols">
             <div>
                 <FormsList />
-                {/* <ChartPanel /> */}
+                <ChartPanel />
             </div>
             <aside>
                 <Activities />
-                {/* <PinnedNotes /> */}
+                <PinnedNotes />
             </aside>
         </section>
     )

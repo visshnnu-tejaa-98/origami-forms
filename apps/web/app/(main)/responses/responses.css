@@ -205,6 +205,11 @@
   background: var(--accent-soft); color: var(--accent-deep); border-color: var(--accent);
   font-family: var(--font-hand); font-size: 1.05rem;
 }
+/* the skipped stretch of pages — a mark, not a control */
+.db-shell .rsp-pager .pager-gap {
+  width: 20px; display: grid; place-items: center;
+  color: var(--ink-3); font-size: 0.9rem; user-select: none;
+}
 .db-shell .rsp-pager .pager-btn .flip { transform: rotate(180deg); }
 
 /* ====== EMPTY STATE (list) ====== */
@@ -279,6 +284,27 @@
   padding: 12px 18px;
   background: var(--surface-card);
   border-bottom: 1px solid var(--rule-line);
+}
+
+/* sits at the far edge of the strip, tied to the form the response belongs to */
+.db-shell .rsp-form-strip__analytics {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  margin-left: auto;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--ink-3);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 200ms, color 200ms;
+}
+
+.db-shell .rsp-form-strip__analytics:hover {
+  background: var(--bg-sunken);
+  color: var(--ink-1);
 }
 
 .db-shell .rsp-form-strip .logo {

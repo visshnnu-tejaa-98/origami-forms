@@ -5,7 +5,6 @@ import {
     text,
     integer,
     jsonb,
-    varchar,
 } from "drizzle-orm/pg-core";
 import { formFields, forms } from "./forms";
 import { responseStatusEnum } from "./enum";
@@ -15,6 +14,7 @@ import { users } from "./user";
 
 export type FormMetadata = {
     country?: string | null;
+    countryCode?: string | null;
     city?: string | null;
     device?: string | null,
     browser?: string | null,

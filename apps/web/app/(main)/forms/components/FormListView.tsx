@@ -6,10 +6,12 @@ import { Form } from "../../types";
 import { useDeleteForm } from "~/hooks/use-form";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import { CardIcon } from "./FormsContent";
+import { useRouter } from "next/navigation";
 
 const FromListView = ({ forms }: { forms: Form[] }) => {
     const { deleteFormAsync } = useDeleteForm()
     const [pendingDelete, setPendingDelete] = useState<Form | null>(null);
+    const router = useRouter()
 
     const confirmDelete = () => {
         if (!pendingDelete) return;
@@ -38,12 +40,24 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                     const builderLink = `/builder/${f.id}?from=list`
                     const previewLink = `/builder/${f.id}/preview?from=list`
                     const publicLink = `/form/${f.id}`
+                    const analyticsLink = `/analytics?formId=${f.id}&title=${encodeURIComponent(f.title)}`;
+
+                    const onClick = (e: React.MouseEvent<HTMLElement>) => {
+                        if ((e.target as HTMLElement).closest("a, button, [aria-disabled]")) return;
+
+                        if (isDraft) {
+                            router.push(builderLink)
+                        } else {
+                            router.push(analyticsLink)
+                        }
+                    }
 
                     return (
                         <div
                             key={f.id}
                             className={`otable-row ${f.tint}${f.pinned ? " is-pinned" : ""}`}
                             role="row"
+                            onClick={onClick}
                         >
                             <div className="c-form">
                                 <CardIcon logoUrl={f.logoUrl} icon={f.icon} isLogoExists={isLogoExists} />
@@ -117,9 +131,9 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                                             <Icon name="link" size={15} />
                                         </span>
                                     )}
-                                    <button className="tool" title="Share link" aria-label="Share">
+                                    {/* <button className="tool" title="Share link" aria-label="Share">
                                         <Icon name="share" size={15} />
-                                    </button>
+                                    </button> */}
                                     <button
                                         className="tool"
                                         title="Delete"

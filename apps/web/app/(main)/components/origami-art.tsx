@@ -70,6 +70,22 @@ export const PaperCrane = ({ size = 40, className }: ArtProps) => (
   </svg>
 );
 
+/* An unfolded sheet with nothing written on it — the "no data yet" mark.
+   The creases are dashed rather than solid so the sheet reads as flattened-out
+   and blank, not as a fold that simply lost its lines. */
+export const BlankSheet = ({ size = 40, className }: ArtProps) => (
+  <svg {...base(size, className)}>
+    {/* the sheet, with one dog-eared corner so it is paper and not a card */}
+    <path d="M11 7 H31 L37 13 V41 H11 Z" fill="currentColor" fillOpacity="0.1" />
+    <path d="M11 7 H31 L37 13 V41 H11 Z" />
+    <path d="M31 7 V13 H37" />
+    {/* the crease cross of a sheet that was folded and opened again */}
+    <path d="M24 13 V41 M11 27 H37" strokeDasharray="3 3" opacity="0.45" />
+    {/* two faint rules where the writing would have been */}
+    <path d="M16 20 H26 M16 34 H28" opacity="0.3" />
+  </svg>
+);
+
 /* A folded paper star / ninja-star fold. */
 export const PaperStar = ({ size = 40, className }: ArtProps) => (
   <svg {...base(size, className)}>

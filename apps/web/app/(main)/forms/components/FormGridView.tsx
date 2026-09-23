@@ -6,10 +6,12 @@ import { Form } from "../../types";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import { useDeleteForm } from "~/hooks/use-form";
 import { CardIcon } from "./FormsContent";
+import { useRouter } from "next/navigation";
 
 const FormGridView = ({ forms }: { forms: Form[] }) => {
     const [pendingDelete, setPendingDelete] = useState<Form | null>(null);
     const { deleteFormAsync } = useDeleteForm();
+    const router = useRouter()
 
     const confirmDelete = () => {
         if (!pendingDelete) return;
@@ -29,10 +31,22 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
                     const builderLink = `/builder/${f.id}?from=list`;
                     const previewLink = `/builder/${f.id}/preview?from=list`;
                     const publicLink = `/form/${f.id}`;
+                    const analyticsLink = `/analytics?formId=${f.id}&title=${encodeURIComponent(f.title)}`;
+
+                    const onClick = (e: React.MouseEvent<HTMLElement>) => {
+                        // let the footer links/buttons (edit, preview, live link, delete)
+                        // handle their own clicks instead of navigating the whole card
+                        if ((e.target as HTMLElement).closest("a, button, [aria-disabled]")) return;
+
+                        if (isDraft) {
+                            router.push(builderLink)
+                        } else {
+                            router.push(analyticsLink)
+                        }
+                    }
 
                     return (
-                        <article key={f.id} className={`form-card ${f.tint}${isDraft ? " is-draft" : ""}`}>
-                            {/* washi tape holding the sheet + a folded dog-ear corner */}
+                        <article key={f.id} className={`form-card ${f.tint}${isDraft ? " is-draft" : ""}`} onClick={onClick}>
                             <span className={`o-tape card-tape ${TAPE[Number(idx) % TAPE.length]}`} aria-hidden />
                             <span className="fold" aria-hidden />
 
@@ -101,9 +115,9 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
                                         <Icon name="link" size={15} />
                                     </span>
                                 )}
-                                <button className="icon-act" title="Share link" aria-label="Share">
+                                {/* <button className="icon-act" title="Share link" aria-label="Share">
                                     <Icon name="share" size={15} />
-                                </button>
+                                </button> */}
                                 <button
                                     className="icon-act"
                                     title="Delete"

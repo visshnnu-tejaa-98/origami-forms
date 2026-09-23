@@ -533,6 +533,7 @@ export const responseMetaDataSchema = z.object({
     device: z.string().nullable().optional().describe("device used to submit the form"),
     browser: z.string().nullable().optional().describe("browser used to submit the form"),
     country: z.string().nullable().optional().describe("country of the respondent"),
+    countryCode: z.string().nullable().optional().describe("country code of the respondent"),
     city: z.string().nullable().optional().describe("city of the respondent"),
 }).describe("metadata of the respondent")
 

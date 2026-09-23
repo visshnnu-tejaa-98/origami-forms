@@ -2,6 +2,19 @@ import React from "react";
 import { Icon } from "./icons";
 import type { PaginationProps } from "../types";
 
+const WINDOW_SIZE = 5;
+
+const pageWindow = (currentPage: number, totalPages: number) => {
+    const size = Math.min(WINDOW_SIZE, totalPages);
+    const half = Math.floor(size / 2);
+
+    let start = currentPage - half;
+    if (start < 1) start = 1;
+    if (start + size - 1 > totalPages) start = totalPages - size + 1;
+
+    return Array.from({ length: size }, (_, i) => start + i);
+};
+
 const Pagination = ({
     data,
     pageOptions,
@@ -11,6 +24,11 @@ const Pagination = ({
 }: Omit<PaginationProps, "showPagination">) => {
     if (!data || !pageOptions) return null;
     const { rangeStart, rangeEnd, currentPage, totalPages } = pageOptions;
+
+    const pages = pageWindow(currentPage, totalPages);
+    const hasPagesBefore = (pages[0] ?? 1) > 1;
+    const hasPagesAfter = (pages[pages.length - 1] ?? totalPages) < totalPages;
+
     return (
         <nav className={className} aria-label="Pagination">
             <span className="pager-info">
@@ -32,7 +50,12 @@ const Pagination = ({
                         <Icon name="chevron" size={15} className="flip" /> Prev
                     </button>
                 )}
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                {hasPagesBefore && (
+                    <span className="pager-gap" aria-hidden>
+                        …
+                    </span>
+                )}
+                {pages.map((n) => (
                     <button
                         key={n}
                         className={`pager-num${n === currentPage ? " active" : ""}`}
@@ -42,6 +65,11 @@ const Pagination = ({
                         {n}
                     </button>
                 ))}
+                {hasPagesAfter && (
+                    <span className="pager-gap" aria-hidden>
+                        …
+                    </span>
+                )}
                 {data.hasNextPage && (
                     <button
                         className="pager-btn"
