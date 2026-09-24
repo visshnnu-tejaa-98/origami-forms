@@ -91,6 +91,17 @@ export type FormIconPickerProps = {
   formId?: string;
 };
 
+export type DropEdge = "before" | "after";
+
+export type BlockDragProps = {
+  draggable: true;
+  className: string;
+  onDragStart: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  onDragEnd: () => void;
+};
+
 export type FormCanvasProps = {
   form: BuilderForm;
   setTitle: (title: string) => void;
@@ -102,6 +113,7 @@ export type FormCanvasProps = {
   addField: (type: BlockType) => void;
   removeField: (id: string) => void;
   duplicateField: (id: string) => void;
+  moveField: (sourceId: string, targetId: string, edge: DropEdge) => void;
 };
 
 export type QuestionBlockProps = {
@@ -111,6 +123,7 @@ export type QuestionBlockProps = {
   onSelect: () => void;
   onDuplicate: () => void;
   onRemove: () => void;
+  drag: BlockDragProps;
 };
 
 export type InspectorProps = {

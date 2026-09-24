@@ -603,6 +603,55 @@
   display: inline-flex;
 }
 
+/* ----- reordering ----- */
+/* the block left behind while it is being carried */
+.db-shell .q-block.is-dragging,
+.db-shell .page-break.is-dragging,
+.db-shell .canvas-heading.is-dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+/* the crease the block would drop into — drawn on the block under the pointer */
+.db-shell .drop-before,
+.db-shell .drop-after {
+  position: relative;
+}
+
+.db-shell .drop-before::after,
+.db-shell .drop-after::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.db-shell .drop-before::after {
+  top: -6px;
+}
+
+.db-shell .drop-after::after {
+  bottom: -6px;
+}
+
+/* the page break already paints its own ::after rule, so its marker is a border */
+.db-shell .page-break.drop-before::after,
+.db-shell .page-break.drop-after::after {
+  content: none;
+}
+
+.db-shell .page-break.drop-before {
+  box-shadow: 0 -2px 0 var(--accent);
+}
+
+.db-shell .page-break.drop-after {
+  box-shadow: 0 2px 0 var(--accent);
+}
+
 .db-shell .q-block .drag:hover {
   color: var(--ink-2);
 }

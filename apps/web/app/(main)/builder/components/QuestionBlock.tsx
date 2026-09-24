@@ -6,12 +6,11 @@ import FieldPreview from "./FieldPreview";
 import HelpTip from "./HelpTip";
 
 const QuestionBlock = (props: QuestionBlockProps) => {
-  const { field, index, selected, onSelect, onDuplicate, onRemove } = props;
+  const { field, index, selected, onSelect, onDuplicate, onRemove, drag } = props;
   const meta = BLOCK_META[field.type];
-
   return (
     <div
-      className={`q-block${selected ? " selected" : ""}`}
+      {...drag}
       onClick={onSelect}
       role="button"
       tabIndex={0}

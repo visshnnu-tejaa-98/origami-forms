@@ -29,6 +29,7 @@ const BuilderPage = () => {
     addField,
     updateField,
     duplicateField,
+    moveField,
     removeField,
     saveAsDraft,
     saveAndPublish,
@@ -66,6 +67,7 @@ const BuilderPage = () => {
             addField={addField}
             removeField={removeField}
             duplicateField={duplicateField}
+            moveField={moveField}
           />
         </main>
 
