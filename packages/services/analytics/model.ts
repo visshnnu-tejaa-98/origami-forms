@@ -1,4 +1,4 @@
-import { ANALYTICS_EVENT_TYPES, DRAFTED, FORM_ANALYTICS_SCOPE, PUBLISHED, SUBMITTED, VIEWED, WEEK } from "@repo/database/constants"
+import { ANALYTICS_EVENT_TYPES, DRAFTED, FORM_ANALYTICS_SCOPE, FORM_STATUS_OPTIONS, PUBLISHED, SUBMITTED, VIEWED, WEEK } from "@repo/database/constants"
 import { z } from "zod"
 import { isoDateSchema, submitRealTimePublicResponseSchema } from "../form/model";
 
@@ -70,6 +70,12 @@ export const getAnalyticsOutputSchema = z.object({
     success: z.boolean().describe("whether the analytics were retrieved successfully"),
     message: z.string().describe("success or error message"),
     analytics: z.object({
+        form: z.object({
+            id: z.string().uuid().describe("id of the form"),
+            title: z.string().describe("title of the form"),
+            status: z.enum(FORM_STATUS_OPTIONS).describe("status of the form"),
+        }).nullish().describe("the form the report is scoped to, null when every form is folded together"),
+
         currentScope: z.enum(FORM_ANALYTICS_SCOPE).describe("scope of the analytics"),
         startDate: z.coerce.date().describe("start date of the analytics"),
         endDate: z.coerce.date().describe("end date of the analytics"),

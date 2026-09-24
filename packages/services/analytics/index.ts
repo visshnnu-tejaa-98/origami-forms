@@ -259,6 +259,14 @@ export default class AnalyticsService {
         };
         const bucketInterval = TREND_BUCKET[scope] ?? "1 day";
 
+        const scopedFormQuery = formId
+            ? db
+                .select({ id: forms.id, title: forms.title, status: forms.status })
+                .from(forms)
+                .where(condition)
+                .limit(1)
+            : Promise.resolve([]);
+
         const totalFormsQuery = db.$count(forms, condition)
         const totalResponsesQuery = db
             .select({ total: count() })
@@ -506,7 +514,8 @@ export default class AnalyticsService {
             cityStats,
             answerBreakdown,
             submissionsTrend,
-            viewsTrend
+            viewsTrend,
+            scopedForm
         ] = await Promise.all([
             totalFormsQuery,
             totalResponsesQuery,
@@ -520,7 +529,8 @@ export default class AnalyticsService {
             cityStatsQuery,
             answerBreakdownRawQuery,
             submissionsTrendQuery,
-            viewsTrendQuery
+            viewsTrendQuery,
+            scopedFormQuery
         ]);
 
 
@@ -598,6 +608,7 @@ export default class AnalyticsService {
             success: true,
             message: "Analytics retrieved successfully",
             analytics: {
+                form: scopedForm[0] ?? null,
                 currentScope: scope,
                 startDate,
                 endDate,

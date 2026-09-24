@@ -231,6 +231,7 @@ period** — the previous-window bounds are reported but not yet used.
 
 | Field | Type | Description |
 | --- | --- | --- |
+| \`form\` | object \\| null | \`{ id, title, status }\` of the form the report is scoped to, resolved under the same visibility rules as the counts. \`null\` on the workspace roll-up, which has no single form to describe. |
 | \`currentScope\` | enum | Echo of the requested \`scope\`. |
 | \`startDate\` / \`endDate\` | date \\| null | Bounds of the selected window; \`startDate\` is \`null\` for \`lifetime\`. |
 | \`lastScope\` / \`lastScopeStartDate\` / \`lastScopeEndDate\` | — | The equivalent preceding window, for labelling only. |
