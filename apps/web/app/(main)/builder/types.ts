@@ -60,6 +60,7 @@ export type BuilderForm = Omit<CreateFormInputModel, "fields"> & {
   fields: BuilderField[];
   expiresAt?: string | null;
   logoUrl?: string | null;
+  status: string;
 };
 
 export type FormSettings = Pick<BuilderForm, "visibility" | "maxSubmissions" | "expiresAt">;
@@ -73,10 +74,12 @@ export type FormSettingsProps = {
 
 export type TopbarProps = {
   title: string;
+  status: string;
   setTitle: (title: string) => void;
   saveAsDraft: () => void;
   saveAndPublish: () => void;
   preview: () => void;
+  archiveForm?: () => void;
 };
 
 export type FieldPaletteProps = {

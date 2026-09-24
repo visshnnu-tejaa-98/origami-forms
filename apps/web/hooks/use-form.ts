@@ -65,6 +65,7 @@ export function useUpdateForm() {
         onSuccess: (_result, variables) => {
             utils.forms.getAllForms.invalidate();
             utils.forms.getFormById.invalidate({ formId: variables.formId });
+            utils.forms.formsStats.invalidate();
         },
     });
 

@@ -202,6 +202,7 @@ export const toBuilderForm = (form: SavedForm): BuilderForm => ({
     maxSubmissions: form.maxSubmissions ?? undefined,
     expiresAt: form.expiresAt ?? null,
     logoUrl: form.logoUrl ?? undefined,
+    status: form.status,
     fields: form.fields.map(toBuilderField),
 });
 

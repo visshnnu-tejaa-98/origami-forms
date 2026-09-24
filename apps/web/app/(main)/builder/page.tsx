@@ -46,6 +46,7 @@ const BuilderPage = () => {
     <div className="builder-studio">
       <Topbar
         title={form?.title}
+        status={form?.status}
         setTitle={setTitle}
         saveAsDraft={saveAsDraft}
         saveAndPublish={saveAndPublish}

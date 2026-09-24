@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LAYOUT_TYPES,
   PAGE_BREAK,
@@ -20,6 +20,7 @@ import { blankField, uid } from "~/app/(main)/utils";
 import { toast } from "~/components/origami/toast";
 import { useCreateForm, useUpdateForm } from "./use-form";
 import { useRouter } from "next/navigation";
+import { ARCHIVED } from "@repo/database/constants";
 
 /** a saved field carries its database id; a block added in this session carries a local
  *  `q-xxxx` one. only the former identifies a row the server should update */
@@ -171,6 +172,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
       maxSubmissions: form.maxSubmissions ?? null,
       expiresAt: form.expiresAt ?? null,
       logoUrl: form.logoUrl ?? null,
+      status: form.status,
       fields: form.fields.map(({ id, ...field }) =>
         SAVED_ID.test(id) ? { ...field, id } : field
       ),
@@ -179,7 +181,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   );
 
   const save = useCallback(
-    async (status?: typeof PUBLISHED, options?: { redirect?: boolean; silent?: boolean }) => {
+    async (status?: typeof PUBLISHED | typeof ARCHIVED, options?: { redirect?: boolean; silent?: boolean }) => {
       const { redirect = true, silent = false } = options ?? {};
       // the schema demands a title and at least one field — say so before the round trip
       if (form.title.trim() === "") {
@@ -193,13 +195,15 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
 
       try {
         if (formId) {
+          console.log({ form: form.status, status })
           const result = await updateFormAsync({ formId, ...toUpdatePayload(), status });
           if (!result.success) {
             toast.error(result.message);
             return;
           }
           savedPrint.current = fingerprint(form);
-          if (!silent) toast.success(status === PUBLISHED ? "Form published." : "Changes saved.");
+          if (!silent) toast.success(status === PUBLISHED ? "Form published." : status === ARCHIVED ? "Form archived." : "Changes saved.");
+          if (redirect) router.replace("/forms");
           return result.formData;
         }
 
@@ -208,7 +212,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
         const saved = await createFormAsync({ ...toCreatePayload(), status: status ?? DRAFT });
 
         savedPrint.current = fingerprint(form);
-        if (!silent) toast.success(status === PUBLISHED ? "Form published." : "Draft saved.");
+        if (!silent) toast.success(status === PUBLISHED ? "Form published." : status === ARCHIVED ? "Form archived." : "Draft saved.");
+
         if (redirect) router.replace("/forms");
         return saved;
       } catch (error) {
@@ -223,6 +228,11 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   const saveAndPublish = useCallback(() => {
     save(PUBLISHED)
   }, [save]);
+
+
+  const archiveForm = useCallback(() => {
+    save(ARCHIVED)
+  }, [save])
 
   const preview = useCallback(async () => {
     if (formId && fingerprint(form) === savedPrint.current) {
@@ -256,6 +266,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     removeField,
     saveAsDraft,
     saveAndPublish,
+    archiveForm,
     preview,
   };
 }
