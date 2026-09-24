@@ -25,6 +25,7 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
                 {forms.map((f, idx) => {
                     const badge = STATUS_BADGE[f.status];
                     const isDraft = f.status === "draft";
+                    const isArchived = f.status === "archived"
                     const isLive = f.status === "published";
                     const isLogoExists = !!f.logoUrl;
 
@@ -88,8 +89,8 @@ const FormGridView = ({ forms }: { forms: Form[] }) => {
 
                             {/* actions */}
                             <div className="card-foot">
-                                <Link className="o-btn o-btn--sm" href={builderLink}>
-                                    <Icon name="edit" size={13} /> {isDraft ? "Continue folding" : "Edit"}
+                                <Link className="o-btn o-btn--sm" href={isArchived ? analyticsLink : builderLink}>
+                                    <Icon name={isArchived ? "analytics" : "edit"} size={13} /> {isDraft ? "Continue folding" : !isArchived ? "Edit" : "View"}
                                 </Link>
                                 <span className="foot-spacer" />
                                 <Link className="icon-act" title="Preview" aria-label="Preview" href={previewLink}>
