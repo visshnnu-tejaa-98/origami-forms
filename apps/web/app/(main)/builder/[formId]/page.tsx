@@ -36,6 +36,7 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
     removeField,
     saveAsDraft,
     saveAndPublish,
+    archiveForm,
     preview,
   } = useBuilder(seed, formId);
 
@@ -49,9 +50,11 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
     <div className="builder-studio">
       <Topbar
         title={form?.title}
+        status={form?.status}
         setTitle={setTitle}
         saveAsDraft={saveAsDraft}
         saveAndPublish={saveAndPublish}
+        archiveForm={archiveForm}
         preview={preview}
       />
 
