@@ -5,6 +5,7 @@ import type {
   FieldTypeMeta,
   OptionFieldBlock,
 } from "./types";
+import { DRAFT } from "../constants";
 
 export const FIELD_TYPES = [
   { key: "short_text", label: "Short text", icon: "text", tint: "accent" },
@@ -72,6 +73,7 @@ export const SEED_FORM: BuilderForm = {
   title: "",
   description: "",
   visibility: "unlisted",
+  status: DRAFT,
   fields: [],
 };
 
