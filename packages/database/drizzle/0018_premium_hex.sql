@@ -1,0 +1,2 @@
+CREATE TYPE "public"."template_field_type" AS ENUM('short_text', 'long_text', 'email', 'number', 'phone', 'url', 'date', 'single_select', 'multi_select', 'check_box', 'radio', 'rating', 'file_upload', 'page_break', 'heading');--> statement-breakpoint
+CREATE TYPE "public"."template_status" AS ENUM('draft', 'published', 'archived');

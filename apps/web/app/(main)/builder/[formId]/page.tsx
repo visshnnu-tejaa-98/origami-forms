@@ -32,6 +32,7 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
     addField,
     updateField,
     duplicateField,
+    moveField,
     removeField,
     saveAsDraft,
     saveAndPublish,
@@ -72,6 +73,7 @@ const BuilderStudio = ({ seed, formId }: { seed: BuilderForm; formId: string }) 
             addField={addField}
             removeField={removeField}
             duplicateField={duplicateField}
+            moveField={moveField}
           />
         </main>
 

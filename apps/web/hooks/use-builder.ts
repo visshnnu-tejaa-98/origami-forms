@@ -11,6 +11,7 @@ import type {
   BlockType,
   BuilderField,
   BuilderForm,
+  DropEdge,
   FieldPatch,
   FormSettingsPatch,
   MutationPayloadShape,
@@ -103,6 +104,22 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
       fields.splice(at + 1, 0, copy);
       setSelectedId(copy.id);
       return { ...f, fields };
+    });
+  }, []);
+
+  const moveField = useCallback((sourceId: string, targetId: string, edge: DropEdge) => {
+    if (sourceId === targetId) return;
+
+    setForm((f) => {
+      const source = f.fields.find((field) => field.id === sourceId);
+      if (!source) return f;
+
+      const rest = f.fields.filter((field) => field.id !== sourceId);
+      const at = rest.findIndex((field) => field.id === targetId);
+      if (at === -1) return f;
+
+      rest.splice(edge === "after" ? at + 1 : at, 0, source);
+      return { ...f, fields: rest.map((field, index) => ({ ...field, order: index })) };
     });
   }, []);
 
@@ -235,6 +252,7 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     addField,
     updateField,
     duplicateField,
+    moveField,
     removeField,
     saveAsDraft,
     saveAndPublish,
