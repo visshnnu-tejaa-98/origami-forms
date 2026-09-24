@@ -34,6 +34,7 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                 {forms.map((f: Form) => {
                     const badge = STATUS_BADGE[f.status];
                     const isDraft = f.status === "draft";
+                    const isArchived = f.status === "archived"
                     const isLive = f.status === "published";
                     const isLogoExists = !!f.logoUrl;
 
@@ -97,11 +98,11 @@ const FromListView = ({ forms }: { forms: Form[] }) => {
                                 <span className="row-tools">
                                     <Link
                                         className="tool"
-                                        title={isDraft ? "Continue editing" : "Edit"}
-                                        aria-label="Edit"
-                                        href={builderLink}
+                                        title={isDraft ? "Continue editing" : !isArchived ? "Edit" : "View"}
+                                        aria-label={isDraft ? "Continue editing" : !isArchived ? "Edit" : "View"}
+                                        href={isArchived ? analyticsLink : builderLink}
                                     >
-                                        <Icon name="edit" size={15} />
+                                        <Icon name={!isArchived ? "edit" : "analytics"} size={15} />
                                     </Link>
                                     <Link
                                         className="tool"
