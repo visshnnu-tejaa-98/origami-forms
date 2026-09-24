@@ -6,15 +6,17 @@ import { SCOPES } from "../constants";
 import ScopeRibbon from "./ScopeRibbon";
 import { Icon } from "../../components/icons";
 import type { Scope } from "../types";
+import type { Status } from "../../types";
 
 type Props = {
     scope: Scope;
     setScope: (scope: Scope) => void;
     isGlobal: boolean;
     formName: string;
+    formStatus?: Status | null;
 };
 
-const AnalyticsHeader = ({ scope, setScope, formName, isGlobal }: Props) => {
+const AnalyticsHeader = ({ scope, setScope, formName, isGlobal, formStatus }: Props) => {
     const router = useRouter();
 
     return (
@@ -27,7 +29,7 @@ const AnalyticsHeader = ({ scope, setScope, formName, isGlobal }: Props) => {
                     </button>
                 )}
                 <h1>Analytics</h1>
-                <ScopeRibbon formName={formName} isGlobal={isGlobal} />
+                <ScopeRibbon formName={formName} isGlobal={isGlobal} formStatus={formStatus} />
             </div>
 
             <div className="ana-head__controls">

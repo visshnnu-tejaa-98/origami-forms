@@ -94,6 +94,7 @@ const Analytics = () => {
         cityStats,
         answerBreakdownAnalytics,
         trend,
+        form: scopedForm,
     } = analyticsData.analytics;
 
     const devices = hydrateDeviceStats(deviceStats);
@@ -108,7 +109,13 @@ const Analytics = () => {
         <div className="ana-page">
             <AnalyticsDecorations />
 
-            <AnalyticsHeader scope={scope} setScope={setScope} isGlobal={isGlobal} formName={formName} />
+            <AnalyticsHeader
+                scope={scope}
+                setScope={setScope}
+                isGlobal={isGlobal}
+                formName={scopedForm?.title || formName}
+                formStatus={scopedForm?.status}
+            />
 
             <FormStats
                 totalResponses={formatIndianNumber(totalResponses)}
