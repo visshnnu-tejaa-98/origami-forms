@@ -96,7 +96,7 @@ export const listTemplatesOutputSchema = z.object({
     templates: z.array(
         createTemplateOutputSchema
             .omit({ fields: true, deletedAt: true })
-            .extend({ views: z.number().int().nonnegative().describe("view count of the template") }),
+            .extend({ likes: z.number().int().nonnegative().describe("view count of the template") }),
     ),
     page: z.number().int().nonnegative().describe("current page number"),
     pageSize: z.number().int().nonnegative().describe("page size"),
@@ -120,7 +120,6 @@ export type GetTemplateByIdProps = z.infer<typeof getTemplateByIdInputSchema>;
 
 export const getTemplateByIdOutputSchema = createTemplateOutputSchema.extend({
     likes: z.number().describe("like count of the template"),
-
 });
 
 export type GetTemplateByIdOutputSchemaType = z.infer<typeof getTemplateByIdOutputSchema>

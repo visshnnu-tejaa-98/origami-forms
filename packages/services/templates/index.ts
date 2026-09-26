@@ -260,7 +260,7 @@ export default class TemplateService {
         return row;
     }
 
-    public async updateForm(payload: UpdateTemplateInputSchema) {
+    public async updateTemplate(payload: UpdateTemplateInputSchema) {
         const { templateId, requesterId, title, description, logoUrl, status, fields } = payload;
 
         const template = await this.getTemplateById({ templateId, requesterId });
@@ -272,8 +272,7 @@ export default class TemplateService {
                 return {
                     success: false,
                     message: "Cannot move published form to draft when there are submissions",
-                    formData: null,
-                    realTime: null,
+                    templateData: null,
                 };
             }
         }
@@ -296,8 +295,7 @@ export default class TemplateService {
             return {
                 success: false,
                 message: "No changes to update",
-                formData: null,
-                realTime: null,
+                templateData: null,
             };
         }
 
