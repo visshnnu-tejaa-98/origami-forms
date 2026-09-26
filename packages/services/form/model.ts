@@ -16,24 +16,9 @@ import {
     ANALYTICS_EVENT_TYPES,
 } from "@repo/database/constants";
 import { z } from "zod";
+import { isoDateSchema, optionsSchema } from "../common/model";
 
 // TODO: Replace all the output schemas with nullish / nullable instead of optional
-
-export const slugSchema = z
-    .string()
-    .min(3)
-    .max(255)
-    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "slug must be lowercase kebab-case, e.g. my-feedback-form");
-
-export const optionsSchema = z.object({
-    id: z.string().min(1).max(64),
-    label: z.string().min(1).max(255).describe("label for the option"),
-    value: z.string().min(1).max(255).describe("value for the option"),
-});
-
-export const isoDateSchema = z.coerce.date()
-    .transform((val) => val.toISOString())
-    .pipe(z.string().datetime());
 
 export const layoutField = {
     type: z.enum(LAYOUT_FIELD_TYPES),

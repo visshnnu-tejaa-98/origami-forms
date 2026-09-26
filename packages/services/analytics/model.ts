@@ -1,6 +1,7 @@
 import { ANALYTICS_EVENT_TYPES, DRAFTED, FORM_ANALYTICS_SCOPE, FORM_STATUS_OPTIONS, PUBLISHED, SUBMITTED, VIEWED, WEEK } from "@repo/database/constants"
 import { z } from "zod"
-import { isoDateSchema, submitRealTimePublicResponseSchema } from "../form/model";
+import { submitRealTimePublicResponseSchema } from "../form/model";
+import { isoDateSchema } from "../common/model";
 
 export const pushActivityInputSchema = z.object({
     requesterId: z.string().uuid().describe("id of the user performing the activity"),

@@ -87,14 +87,14 @@ export const templateRelations = relations(templates, ({ one, many }) => ({
 }))
 
 export const templateFieldRelations = relations(templateFields, ({ one }) => ({
-    form: one(templates, {
+    template: one(templates, {
         fields: [templateFields.templateId],
         references: [templates.id]
     }),
 }))
 
 export const templateLikesRelations = relations(likes, ({ one }) => ({
-    form: one(templates, {
+    template: one(templates, {
         fields: [likes.templateId],
         references: [templates.id]
     })

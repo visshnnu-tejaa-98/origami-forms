@@ -55,7 +55,6 @@ import {
 } from "@repo/database/constants";
 import crypto from "node:crypto";
 import UserService from "../user";
-// import { FormDraftedEvent } from "../socket";
 
 export function slugify(input: string): string {
     const cleanSlug = input
@@ -71,7 +70,7 @@ export function slugify(input: string): string {
     return `${cleanSlug}-${suffix}`;
 }
 
-function generateLabelKey() {
+export function generateLabelKey() {
     return crypto.randomUUID();
 }
 
@@ -79,7 +78,7 @@ export default class FormService {
 
     private readonly userService = new UserService();
 
-    private buildFieldRow(field: CreateFormInputModel["fields"][number], formId: string, order: number): Omit<InsertFormField, "labelKey"> {
+    public buildFieldRow(field: CreateFormInputModel["fields"][number], formId: string, order: number): Omit<InsertFormField, "labelKey"> {
         const row: Omit<InsertFormField, "labelKey"> = {
             formId: formId,
             type: field.type,
@@ -219,8 +218,6 @@ export default class FormService {
             views,
             and(eq(views.formId, form.id), isNull(views.deletedAt)),
         );
-
-        console.log(JSON.stringify({ ...form, views: viewCount }, null, 2))
 
         return { ...form, views: viewCount }
     }
