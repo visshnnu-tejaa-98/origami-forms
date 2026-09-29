@@ -84,17 +84,25 @@ const listTemplatesMeta = ({ getPathFn, tags }: TemplateMetaInputProps): OpenApi
             description: `
 ### Overview
 
-Returns a paginated list of non-deleted templates with optional filtering, searching and
-sorting. Admins see all templates; regular users see only the templates they created.
-Fields are not included in the list payload; a per-template like count is.
+Returns a paginated list of non-deleted templates with optional searching and sorting.
+Which templates are in scope depends on \`scope\`:
+
+| \`scope\` | Returns |
+| --- | --- |
+| \`mine\` (default) | The requester's own templates, in any status. Admins included — \`mine\` means mine. |
+| \`library\` | Every **published** template folded by *someone else*. The requester's own are excluded — they are on \`mine\`. |
+
+Fields are not included in the list payload; a like count, a field count, the creator and
+an \`isOwn\` flag are.
 
 ### Query Parameters
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| \`requesterId\` | string (uuid) | Yes | Id of the requesting user (admins see all templates). |
+| \`requesterId\` | string (uuid) | Yes | Id of the requesting user. Scopes \`mine\` for every role. |
+| \`scope\` | enum | No | \`mine\` or \`library\`. Defaults to \`mine\`. |
 | \`search\` | string | No | Case-insensitive partial match against the template title (1–255 characters). |
-| \`status\` | enum | No | One of \`draft\`, \`published\`, \`archived\`. A direct column match. |
+| \`status\` | enum | No | One of \`draft\`, \`published\`, \`archived\`. A direct column match. **Ignored when \`scope\` is \`library\`**, which is published-only by definition. |
 | \`sortBy\` | enum | No | One of \`createdAt\`, \`updatedAt\`, \`title\`, \`status\`. Defaults to \`updatedAt\`. |
 | \`sortOrder\` | enum | No | \`asc\` or \`desc\`. Defaults to \`desc\`. |
 | \`page\` | number | No | 1-indexed page number. Defaults to \`1\`. |
@@ -108,9 +116,18 @@ split \`published\` against, because a template never stops being usable.
 Returns \`{ templates, page, pageSize, totalItems, totalPages, hasNextPage, hasPrevPage }\`,
 where \`totalItems\` is the count of all templates matching the same filters.
 
-Each entry carries a \`likes\` count — non-deleted \`template_likes\` rows for that template,
-all-time and not narrowed by any filter above. The counts are gathered in one grouped
-query over the page, so a template with no likes reports \`0\` rather than being omitted.
+Each entry carries:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| \`likes\` | number | Non-deleted \`template_likes\` rows for that template, all-time and not narrowed by any filter above. |
+| \`fieldCount\` | number | Non-deleted fields on the template — how much work the pattern saves. |
+| \`isOwn\` | boolean | Whether the requester folded it. Always \`false\` on \`library\`, which excludes the requester's own. |
+| \`creator\` | object \\| null | \`{ id, firstName, lastName, avatarUrl }\` of whoever folded it. |
+
+The like and field counts are each gathered in one grouped query over the page, so a
+template with none reports \`0\` rather than being omitted, and the creator is joined in
+the same query as the rows.
 `,
         },
     };
@@ -128,8 +145,11 @@ const getTemplateByIdMeta = ({ getPathFn, tags }: TemplateMetaInputProps): OpenA
 ### Overview
 
 Fetches a single, non-deleted template by id along with its non-deleted fields, ordered by
-the field \`order\`. Access is scoped by role: an admin can read any template, while a
-regular user can only read templates they created.
+the field \`order\`.
+
+A **published** template is in the shared library, so any authenticated user may read it.
+A \`draft\` or \`archived\` template stays with its creator. Admins may read any template in
+any status.
 
 ### Path / Query Parameters
 
@@ -141,22 +161,28 @@ regular user can only read templates they created.
 ### Flow
 
 1. The requester's role is resolved to determine admin access.
-2. A non-admin query is scoped to \`creatorId === requesterId\`; an admin query is not.
+2. A non-admin query matches on \`creatorId === requesterId\` **or** \`status === published\`;
+   an admin query is not narrowed at all.
 3. Soft-deleted templates and soft-deleted fields are excluded.
 4. A second query counts the template's live \`template_likes\` rows. It is a \`COUNT\` rather
    than a join, so a popular template does not drag those rows into the payload.
 
 ### Response
 
-Returns the template with its \`fields\` array (ordered by \`order\`) plus a \`likes\` count, or
-\`null\` when no matching template exists or the requester is not allowed to see it.
+Returns the template with its \`fields\` array (ordered by \`order\`), or \`null\` when no
+matching template exists or the requester is not allowed to see it.
 
 | Field | Type | Description |
 | --- | --- | --- |
 | \`likes\` | number | Count of non-deleted \`template_likes\` rows for this template, all-time. |
+| \`isOwn\` | boolean | Whether the requester folded it. \`false\` for a library pattern someone else shared. |
+| \`creator\` | object \\| null | \`{ id, firstName, lastName, avatarUrl }\` of whoever folded it. |
+
+Reading a published template does **not** grant any right to change it — *Update a template*
+and *Delete a template* still require ownership (or admin).
 
 \`null\` covers both "no such template" and "not permitted"; the two are deliberately
-indistinguishable so a non-owner cannot probe for the existence of a template id.
+indistinguishable so nobody can probe for the existence of an unshared template id.
 `,
         },
     };
@@ -225,8 +251,60 @@ template data is returned.
 ### Errors
 
 - **Template not found** — no matching, non-deleted template for this requester.
+- **Unauthorized** — the template is published and therefore readable, but belongs to
+  someone else; only its creator (or an admin) may edit it (\`success: false\`).
 - **Blocked transition** — moving a \`published\` template back to \`draft\` is rejected (\`success: false\`).
 - **No changes to update** — the body carried no updatable field and no \`fields\` array (\`success: false\`).
+`,
+        },
+    };
+};
+
+const useTemplateMeta = ({ getPathFn, tags }: TemplateMetaInputProps): OpenApiMetaConfig => {
+    const pathType = getPathFn() as `/${string}`;
+    return {
+        openapi: {
+            method: POST,
+            path: pathType,
+            tags: tags ?? ["Template"],
+            summary: "Fold a new form from a template",
+            description: `
+### Overview
+
+Copies a template's fields into a brand-new **draft** form owned by the requester. The
+template itself is untouched, and the new form has no further link back to it — later edits
+to the pattern do not reach forms already folded from it.
+
+Any **published** template may be used, whoever folded it. An unshared template can only be
+used by its own creator.
+
+### Request Body
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| \`templateId\` | string (uuid) | Yes | Id of the template to fold from. |
+| \`requesterId\` | string (uuid) | Yes | Id of the requesting user, who owns the new form. |
+| \`title\` | string | No | Title for the new form (2–255 characters). Defaults to the template's title. |
+
+### Flow
+
+1. The template is read under the same visibility rules as *Get a template by id*.
+2. Its live fields are copied in \`order\`, each getting a freshly generated \`labelKey\` —
+   nothing is shared with the template's own rows.
+3. A form is created through the same path as *Create a form*: \`status: draft\`,
+   \`visibility: unlisted\`, owned by the requester, with the template's title, description
+   and logo carried over.
+
+### Response
+
+Returns \`{ success, message, formId }\`. On success \`formId\` is the new draft form's id —
+send the caller to the builder for it.
+
+### Errors
+
+- **Template not found** — no matching, non-deleted template the requester can see (\`success: false\`).
+- **Not shared** — the template is a draft or archived and belongs to someone else (\`success: false\`).
+- **Empty template** — the template has no live fields, so there is nothing to fold (\`success: false\`).
 `,
         },
     };
@@ -282,5 +360,6 @@ export {
     listTemplatesMeta,
     getTemplateByIdMeta,
     updateTemplateMeta,
+    useTemplateMeta,
     deleteTemplateMeta,
 };

@@ -1,36 +1,56 @@
-
-
-import { createTemplateInputModel, createTemplateOutputSchema, deleteTemplateInputSchema, deleteTemplateOutputSchema, getTemplateByIdInputSchema, getTemplateByIdOutputSchema, listTemplatesInputSchema, listTemplatesOutputSchema, updateTemplateInputSchema, updateTemplateOutputSchema } from "@repo/services/templates/model";
-import { createTemplateMeta, deleteTemplateMeta, getTemplateByIdMeta, listTemplatesMeta, updateTemplateMeta } from "@repo/services/templates/meta";
+import {
+    createTemplateInputModel,
+    createTemplateOutputSchema,
+    deleteTemplateInputSchema,
+    deleteTemplateOutputSchema,
+    getTemplateByIdInputSchema,
+    getTemplateByIdOutputSchema,
+    listTemplatesInputSchema,
+    listTemplatesOutputSchema,
+    updateTemplateInputSchema,
+    updateTemplateOutputSchema,
+    useTemplateInputSchema,
+    useTemplateOutputSchema,
+} from "@repo/services/templates/model";
+import {
+    createTemplateMeta,
+    deleteTemplateMeta,
+    getTemplateByIdMeta,
+    listTemplatesMeta,
+    updateTemplateMeta,
+    useTemplateMeta,
+} from "@repo/services/templates/meta";
 import { protectedProcedure, router } from "../../trpc";
 import { templateService } from "../../services";
 
 const TAGS = ["Templates"];
 
-
 export const templatesRouter = router({
     createTemplate: protectedProcedure
-        .meta(createTemplateMeta({
-            getPathFn: () => "/create-template",
-            tags: TAGS
-        }))
+        .meta(
+            createTemplateMeta({
+                getPathFn: () => "/create-template",
+                tags: TAGS,
+            }),
+        )
         .input(createTemplateInputModel.omit({ creatorId: true }))
-        .output(createTemplateOutputSchema).mutation(
-            async ({ input, ctx }) => {
-                const result = await templateService.createTemplate({ ...input, creatorId: ctx.userId });
+        .output(createTemplateOutputSchema)
+        .mutation(async ({ input, ctx }) => {
+            const result = await templateService.createTemplate({ ...input, creatorId: ctx.userId });
 
-                if (!result) {
-                    throw new Error("Something went wrong while creating template");
-                }
-
-                return result;
+            if (!result) {
+                throw new Error("Something went wrong while creating template");
             }
-        ),
+
+            return result;
+        }),
     getAllTemplates: protectedProcedure
-        .meta(listTemplatesMeta({
-            getPathFn: () => "/all-templates",
-            tags: TAGS
-        }))
+        .meta(
+            listTemplatesMeta({
+                getPathFn: () => "/all-templates",
+                tags: TAGS,
+            }),
+        )
         .input(listTemplatesInputSchema.omit({ requesterId: true }))
         .output(listTemplatesOutputSchema)
         .query(async ({ input, ctx }) => {
@@ -44,10 +64,12 @@ export const templatesRouter = router({
         }),
 
     getTemplateById: protectedProcedure
-        .meta(getTemplateByIdMeta({
-            getPathFn: () => "/template/:templateId",
-            tags: TAGS,
-        }))
+        .meta(
+            getTemplateByIdMeta({
+                getPathFn: () => "/template/:templateId",
+                tags: TAGS,
+            }),
+        )
         .input(getTemplateByIdInputSchema.omit({ requesterId: true }))
         .output(getTemplateByIdOutputSchema)
         .query(async ({ input, ctx }) => {
@@ -61,10 +83,12 @@ export const templatesRouter = router({
         }),
 
     updateTemplate: protectedProcedure
-        .meta(updateTemplateMeta({
-            getPathFn: () => "/template/update/:templateId",
-            tags: TAGS,
-        }))
+        .meta(
+            updateTemplateMeta({
+                getPathFn: () => "/template/update/:templateId",
+                tags: TAGS,
+            }),
+        )
         .input(updateTemplateInputSchema.omit({ requesterId: true }))
         .output(updateTemplateOutputSchema)
         .mutation(async ({ input, ctx }) => {
@@ -77,11 +101,32 @@ export const templatesRouter = router({
             return result;
         }),
 
+    useTemplate: protectedProcedure
+        .meta(
+            useTemplateMeta({
+                getPathFn: () => "/template/use/:templateId",
+                tags: TAGS,
+            }),
+        )
+        .input(useTemplateInputSchema.omit({ requesterId: true }))
+        .output(useTemplateOutputSchema)
+        .mutation(async ({ input, ctx }) => {
+            const result = await templateService.useTemplate({ ...input, requesterId: ctx.userId });
+
+            if (!result) {
+                throw new Error("Something went wrong while folding a form from the template");
+            }
+
+            return result;
+        }),
+
     deleteTemplate: protectedProcedure
-        .meta(deleteTemplateMeta({
-            getPathFn: () => "/template/delete/:templateId",
-            tags: TAGS,
-        }))
+        .meta(
+            deleteTemplateMeta({
+                getPathFn: () => "/template/delete/:templateId",
+                tags: TAGS,
+            }),
+        )
         .input(deleteTemplateInputSchema.omit({ requesterId: true }))
         .output(deleteTemplateOutputSchema)
         .mutation(async ({ input, ctx }) => {

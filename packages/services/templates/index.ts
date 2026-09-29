@@ -9,18 +9,25 @@ import db, {
     InsertTemplateField,
     isNull,
     likes,
+    ne,
+    or,
+    sql,
     templateFields,
     templates,
+    users,
 } from "@repo/database";
 import UserService from "../user";
 import {
     CreateTemplateInputModel,
     DeleteTemplateProps,
     GetTemplateByIdProps,
+    LIBRARY,
     ListTemplatesProps,
     UpdateTemplateInputSchema,
+    UseTemplateProps,
 } from "./model";
 import FormService, { generateLabelKey, slugify } from "../form";
+import { CreateFormInputModel } from "../form/model";
 import {
     ARCHIVED,
     CHECK_BOX,
@@ -29,6 +36,7 @@ import {
     PUBLISHED,
     RADIO,
     SINGLE_SELECT,
+    UNLISTED,
 } from "@repo/database/constants";
 
 export default class TemplateService {
@@ -73,76 +81,79 @@ export default class TemplateService {
     }
 
     public async listTemplates(payload: ListTemplatesProps) {
-        const { requesterId, search, status, sortBy, sortOrder, page, pageSize } = payload;
+        const { requesterId, scope, search, status, sortBy, sortOrder, page, pageSize } = payload;
 
-        const isAdmin = await this.userService.isAdmin(requesterId);
+        const isLibrary = scope === LIBRARY;
 
         const conditions = [isNull(templates.deletedAt)];
 
-        if (!isAdmin) conditions.push(eq(templates.creatorId, requesterId));
+        if (isLibrary) {
+            conditions.push(eq(templates.status, PUBLISHED));
+            conditions.push(ne(templates.creatorId, requesterId));
+        } else {
+            conditions.push(eq(templates.creatorId, requesterId));
+
+            if (status) conditions.push(eq(templates.status, status));
+        }
 
         if (search) conditions.push(ilike(templates.title, `%${search}%`));
 
-        if (status) {
-            switch (status) {
-                case "published":
-                    conditions.push(eq(templates.status, "published"));
-                    break;
-
-                case "draft":
-                case "archived":
-                    conditions.push(eq(templates.status, status));
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
         const condition = and(...conditions);
+
+        const likeCounts = db
+            .select({ templateId: likes.templateId, total: count().as("like_total") })
+            .from(likes)
+            .where(isNull(likes.deletedAt))
+            .groupBy(likes.templateId)
+            .as("like_counts");
+
+        const likeCount = sql<number>`coalesce(${likeCounts.total}, 0)`;
 
         const sortColumns = {
             createdAt: templates.createdAt,
             updatedAt: templates.updatedAt,
             title: templates.title,
             status: templates.status,
+            likes: likeCount,
         } as const;
 
         const sortColumn = sortColumns[sortBy];
-        const orderBy = sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
+        const direction = sortOrder === "asc" ? asc : desc;
+
+        const orderBy =
+            sortBy === "likes"
+                ? [direction(sortColumn), desc(templates.updatedAt)]
+                : [direction(sortColumn)];
 
         const [rows, totalItems] = await Promise.all([
-            db.query.templates.findMany({
-                where: condition,
-                orderBy,
-                limit: pageSize,
-                offset: (page - 1) * pageSize,
-            }),
+            db
+                .select({
+                    template: templates,
+                    likes: likeCount,
+                    creator: {
+                        id: users.id,
+                        firstName: users.firstName,
+                        lastName: users.lastName,
+                        avatarUrl: users.avatarUrl,
+                    },
+                })
+                .from(templates)
+                .leftJoin(likeCounts, eq(likeCounts.templateId, templates.id))
+                .leftJoin(users, eq(users.id, templates.creatorId))
+                .where(condition)
+                .orderBy(...orderBy)
+                .limit(pageSize)
+                .offset((page - 1) * pageSize),
             db.$count(templates, condition),
         ]);
 
-        const likeCounts = rows.length
-            ? await db
-                .select({ templateId: likes.templateId, total: count() })
-                .from(likes)
-                .where(
-                    and(
-                        inArray(
-                            likes.templateId,
-                            rows.map((form) => form.id),
-                        ),
-                        isNull(likes.deletedAt),
-                    ),
-                )
-                .groupBy(likes.templateId)
-            : [];
-
-        const likesByTemplates = new Map(likeCounts.map((row) => [row.templateId, Number(row.total)]));
         const totalPages = Math.ceil(totalItems / pageSize);
         return {
-            templates: rows.map((template) => ({
-                ...template,
-                likes: likesByTemplates.get(template.id) ?? 0,
+            templates: rows.map((row) => ({
+                ...row.template,
+                likes: Number(row.likes),
+                isOwn: row.template.creatorId === requesterId,
+                creator: row.creator?.id ? row.creator : null,
             })),
             page,
             pageSize,
@@ -158,13 +169,13 @@ export default class TemplateService {
 
         const isAdmin = await this.userService.isAdmin(requesterId);
 
-        const condition = !isAdmin
-            ? and(
+        const condition = isAdmin
+            ? and(eq(templates.id, templateId), isNull(templates.deletedAt))
+            : and(
                 eq(templates.id, templateId),
-                eq(templates.creatorId, requesterId),
                 isNull(templates.deletedAt),
-            )
-            : and(eq(templates.id, templateId), isNull(templates.deletedAt));
+                or(eq(templates.creatorId, requesterId), eq(templates.status, PUBLISHED)),
+            );
 
         const template = await db.query.templates.findFirst({
             where: condition,
@@ -172,6 +183,9 @@ export default class TemplateService {
                 fields: {
                     where: isNull(templateFields.deletedAt),
                     orderBy: asc(templateFields.order),
+                },
+                creator: {
+                    columns: { id: true, firstName: true, lastName: true, avatarUrl: true },
                 },
             },
         });
@@ -183,7 +197,78 @@ export default class TemplateService {
             and(eq(likes.templateId, templateId), isNull(likes.deletedAt)),
         );
 
-        return { ...template, likes: likesCount };
+        return {
+            ...template,
+            likes: likesCount,
+            isOwn: template.creatorId === requesterId,
+            creator: template.creator ?? null,
+        };
+    }
+
+    public async useTemplate(payload: UseTemplateProps) {
+        const { templateId, requesterId, title } = payload;
+
+        const template = await this.getTemplateById({ templateId, requesterId });
+
+        if (!template) {
+            return {
+                success: false,
+                message: "Template not found",
+                formId: null,
+            };
+        }
+
+        if (!template.isOwn && template.status !== PUBLISHED) {
+            return {
+                success: false,
+                message: "This template has not been shared",
+                formId: null,
+            };
+        }
+
+        const fields = template.fields.map((field) => ({
+            type: field.type,
+            label: field.label,
+            description: field.description,
+            placeholder: field.placeholder,
+            helpText: field.helpText,
+            required: field.required,
+            order: field.order,
+            validation: field.validation,
+            options: field.options,
+            defaultValue: field.defaultValue,
+        })) as CreateFormInputModel["fields"];
+
+        if (fields.length === 0) {
+            return {
+                success: false,
+                message: "This template has no fields to fold from",
+                formId: null,
+            };
+        }
+
+        const form = await this.formService.createForm(requesterId, {
+            title: title ?? template.title,
+            description: template.description ?? undefined,
+            logoUrl: template.logoUrl ?? undefined,
+            visibility: UNLISTED,
+            status: DRAFT,
+            fields,
+        } as CreateFormInputModel);
+
+        if (!form) {
+            return {
+                success: false,
+                message: "Could not fold a form from this template",
+                formId: null,
+            };
+        }
+
+        return {
+            success: true,
+            message: "Form created from template",
+            formId: form.id,
+        };
     }
 
     public async deleteTemplate(payload: DeleteTemplateProps) {
@@ -266,6 +351,16 @@ export default class TemplateService {
         const template = await this.getTemplateById({ templateId, requesterId });
 
         if (!template) throw new Error("Template not found");
+
+        const isAdmin = await this.userService.isAdmin(requesterId);
+
+        if (!isAdmin && template.creatorId !== requesterId) {
+            return {
+                success: false,
+                message: "You are not authorized to edit this template",
+                templateData: null,
+            };
+        }
 
         if (status && status !== template.status) {
             if (template.status === PUBLISHED && status === DRAFT) {

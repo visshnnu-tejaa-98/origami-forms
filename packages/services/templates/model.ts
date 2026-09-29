@@ -73,14 +73,21 @@ export const LIST_TEMPLATES_SORT_FIELDS = [
     "updatedAt",
     "title",
     "status",
+    "likes",
 ] as const;
+
+export const MINE = "mine";
+export const LIBRARY = "library";
+
+export const TEMPLATE_SCOPES = [MINE, LIBRARY] as const;
 
 export const listTemplatesInputSchema = z.object({
     requesterId: z.string().uuid().describe("id of the requesting user (admins see all templates)"),
+    scope: z.enum(TEMPLATE_SCOPES).optional().default(MINE).describe("own shelf, or the library of what other people have shared"),
     search: z.string().trim().min(1).max(255).optional().describe("search term matched against the title"),
     status: z.enum(TEMPLATE_STATUS_OPTIONS)
         .optional()
-        .describe("filter by one or more statuses"),
+        .describe("filter by one or more statuses; ignored in the library, which is published-only"),
 
     sortBy: z.enum(LIST_TEMPLATES_SORT_FIELDS).optional().default("updatedAt").describe("column to sort by"),
     sortOrder: z.enum(["asc", "desc"]).optional().default("desc").describe("sort direction"),
@@ -92,11 +99,22 @@ export type ListTemplatesProps = z.infer<typeof listTemplatesInputSchema>;
 export type ListTemplatesInput = z.input<typeof listTemplatesInputSchema>;
 
 
+export const templateCreatorSchema = z.object({
+    id: z.string().uuid().describe("id of the creator"),
+    firstName: z.string().describe("creator's first name"),
+    lastName: z.string().nullish().describe("creator's last name"),
+    avatarUrl: z.string().nullish().describe("creator's avatar"),
+});
+
 export const listTemplatesOutputSchema = z.object({
     templates: z.array(
         createTemplateOutputSchema
             .omit({ fields: true, deletedAt: true })
-            .extend({ likes: z.number().int().nonnegative().describe("view count of the template") }),
+            .extend({
+                likes: z.number().int().nonnegative().describe("like count of the template"),
+                isOwn: z.boolean().describe("whether the requester folded this template"),
+                creator: templateCreatorSchema.nullish().describe("who folded it"),
+            }),
     ),
     page: z.number().int().nonnegative().describe("current page number"),
     pageSize: z.number().int().nonnegative().describe("page size"),
@@ -120,9 +138,30 @@ export type GetTemplateByIdProps = z.infer<typeof getTemplateByIdInputSchema>;
 
 export const getTemplateByIdOutputSchema = createTemplateOutputSchema.extend({
     likes: z.number().describe("like count of the template"),
+    isOwn: z.boolean().describe("whether the requester folded this template"),
+    creator: templateCreatorSchema.nullish().describe("who folded it"),
 });
 
 export type GetTemplateByIdOutputSchemaType = z.infer<typeof getTemplateByIdOutputSchema>
+
+
+// use a template — fold a new form from it
+
+export const useTemplateInputSchema = z.object({
+    requesterId: z.string().uuid().describe("id of the requesting user, who owns the new form"),
+    templateId: z.string().uuid().describe("templateId of the template to fold from"),
+    title: z.string().trim().min(2).max(255).optional().describe("title for the new form; defaults to the template's"),
+});
+
+export type UseTemplateProps = z.infer<typeof useTemplateInputSchema>;
+
+export const useTemplateOutputSchema = z.object({
+    success: z.boolean().describe("whether a form was created"),
+    message: z.string().describe("success or error message"),
+    formId: z.string().uuid().nullable().describe("id of the new draft form, null on failure"),
+});
+
+export type UseTemplateOutputSchemaType = z.infer<typeof useTemplateOutputSchema>;
 
 
 // update Template
