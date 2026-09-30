@@ -86,9 +86,6 @@ const TemplateDetail = ({ summary, scope, onClose, onCreate }: TemplateDetailPro
                     </span>
                     <h3>Nothing open</h3>
                     <p>Pick a pattern on the left and every question it holds unfolds here.</p>
-                    <button type="button" className="o-btn o-btn--sm" onClick={onCreate}>
-                        <Icon name="plus" size={13} /> New template
-                    </button>
                 </div>
             </aside>
         );

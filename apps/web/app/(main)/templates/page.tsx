@@ -83,7 +83,6 @@ const Templates = () => {
         templatesData,
         listTemplatesIsError,
         listTemplatesIsPending,
-        listTemplatesIsFetching,
         refetchTemplates,
     } = useListTemplates({
         scope,

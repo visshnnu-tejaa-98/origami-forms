@@ -97,21 +97,19 @@
   margin-bottom: 8px;
   padding: 5px 11px 5px 8px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 8px;
   background: transparent;
   cursor: pointer;
   font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--ink-3);
-  transition: background var(--transition-snap), color var(--transition-snap),
-    border-color var(--transition-snap), transform var(--transition-snap);
+  transition: background 200ms, color 200ms;
 }
+/* the same hover as the analytics and builder back buttons */
 .db-shell .tpl-back:hover {
-  background: var(--surface-card);
-  border-color: var(--rule-line);
+  background: var(--bg-sunken);
   color: var(--ink-1);
-  transform: translateX(-2px);
 }
 .db-shell .tpl-back:focus-visible { outline: 0; box-shadow: var(--glow-focus); }
 .db-shell .tpl-head .sub {
