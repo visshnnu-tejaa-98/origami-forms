@@ -82,6 +82,7 @@ const PublicFormScreen = ({ form }: { form: PublicForm }) => {
                         flow={flow}
                         title={form.title}
                         description={form.description}
+                        logoUrl={form?.logoUrl}
                         submitting={submitResponseIsPending}
                         brand={<BrandCreditsLogo />}
                     />

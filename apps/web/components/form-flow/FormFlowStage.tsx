@@ -13,6 +13,7 @@ const FormFlowStage = ({
     flow,
     title,
     description,
+    logoUrl,
     submitting = false,
     status,
     brand,
@@ -64,6 +65,7 @@ const FormFlowStage = ({
                             mode={mode}
                             flow={flow}
                             next={next}
+                            logoUrl={logoUrl}
                         />
                     )}
 
