@@ -75,10 +75,12 @@ export type FormSettingsProps = {
 export type TopbarProps = {
   title: string;
   status: string;
+  asTemplate?: boolean;
   setTitle: (title: string) => void;
   saveAsDraft: () => void;
   saveAndPublish: () => void;
   preview: () => void;
+  previewDraft?: () => void;
   archiveForm?: () => void;
 };
 

@@ -19,6 +19,7 @@ import type {
 import { blankField, uid } from "~/app/(main)/utils";
 import { toast } from "~/components/origami/toast";
 import { useCreateForm, useUpdateForm } from "./use-form";
+import { useCreateTemplate, useUpdateTemplate } from "./use-template";
 import { useRouter } from "next/navigation";
 import { ARCHIVED } from "@repo/database/constants";
 
@@ -32,18 +33,29 @@ const DRAFT = "draft" as const;
 /** a cheap structural fingerprint — enough to tell "nothing changed since the last save" */
 const fingerprint = (form: BuilderForm) => JSON.stringify(form);
 
-export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
+/** the builder writes a form by default; `asTemplate` sends the same canvas to the template shelf */
+export function useBuilder(
+  seed: BuilderForm = SEED_FORM,
+  formId?: string,
+  options?: { asTemplate?: boolean; templateId?: string }
+) {
+  const asTemplate = options?.asTemplate ?? false;
+
   const [form, setForm] = useState<BuilderForm>(seed);
   const [selectedId, setSelectedId] = useState<string | null>(
     seed.fields.find((f) => !LAYOUT_TYPES.includes(f.type))?.id ?? null
   );
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
 
   const savedPrint = useRef(fingerprint(seed));
+  const templateId = useRef<string | null>(options?.templateId ?? null);
 
   const { createFormAsync } = useCreateForm()
   const { updateFormAsync } = useUpdateForm()
+  const { createTemplateAsync } = useCreateTemplate()
+  const { updateTemplateAsync } = useUpdateTemplate()
 
   const router = useRouter()
 
@@ -164,6 +176,18 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     [form]
   );
 
+  const toTemplatePayload = useCallback(
+    () => ({
+      title: form.title,
+      ...(form.description ? { description: form.description } : {}),
+      ...(form.logoUrl ? { logoUrl: form.logoUrl } : {}),
+      fields: form.fields.map(({ id, ...field }) =>
+        SAVED_ID.test(id) ? { ...field, id } : field
+      ),
+    }),
+    [form]
+  );
+
   const toUpdatePayload = useCallback(
     () => ({
       title: form.title,
@@ -183,9 +207,10 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   const save = useCallback(
     async (status?: typeof PUBLISHED | typeof ARCHIVED, options?: { redirect?: boolean; silent?: boolean }) => {
       const { redirect = true, silent = false } = options ?? {};
+      const noun = asTemplate ? "template" : "form";
       // the schema demands a title and at least one field — say so before the round trip
       if (form.title.trim() === "") {
-        toast.error("Give the form a title before saving.");
+        toast.error(`Give the ${noun} a title before saving.`);
         return;
       }
       if (form.fields.length === 0) {
@@ -194,6 +219,40 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
       }
 
       try {
+        // a template has no draft/publish round trip of its own yet — it is written once,
+        // then edited from the templates page
+        if (asTemplate) {
+          const payload = toTemplatePayload();
+
+          if (templateId.current) {
+            const result = await updateTemplateAsync({
+              templateId: templateId.current,
+              ...payload,
+              description: form.description ?? null,
+              logoUrl: form.logoUrl || null,
+              status: status ?? DRAFT,
+            });
+            if (!result.success) {
+              toast.error(result.message);
+              return;
+            }
+            savedPrint.current = fingerprint(form);
+            if (!silent) toast.success(status === PUBLISHED ? "Template shared." : "Changes saved.");
+
+            if (redirect) router.replace("/templates");
+            return result.templateData;
+          }
+
+          const saved = await createTemplateAsync({ ...payload, status: status ?? DRAFT });
+          templateId.current = saved.id;
+
+          savedPrint.current = fingerprint(form);
+          if (!silent) toast.success(status === PUBLISHED ? "Template shared." : "Template saved.");
+
+          if (redirect) router.replace("/templates");
+          return saved;
+        }
+
         if (formId) {
           console.log({ form: form.status, status })
           const result = await updateFormAsync({ formId, ...toUpdatePayload(), status });
@@ -217,10 +276,22 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
         if (redirect) router.replace("/forms");
         return saved;
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Could not save the form.");
+        toast.error(error instanceof Error ? error.message : `Could not save the ${noun}.`);
       }
     },
-    [form, formId, router, createFormAsync, toCreatePayload, toUpdatePayload, updateFormAsync]
+    [
+      asTemplate,
+      form,
+      formId,
+      router,
+      createFormAsync,
+      createTemplateAsync,
+      updateTemplateAsync,
+      toCreatePayload,
+      toTemplatePayload,
+      toUpdatePayload,
+      updateFormAsync,
+    ]
   );
 
   const saveAsDraft = useCallback(() => save(), [save]);
@@ -235,6 +306,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
   }, [save])
 
   const preview = useCallback(async () => {
+    if (asTemplate) return;
+
     if (formId && fingerprint(form) === savedPrint.current) {
       router.push(`/builder/${formId}/preview`);
       return;
@@ -244,9 +317,18 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     if (!saved) return;
 
     router.push(`/builder/${formId ?? saved.id}/preview`);
-  }, [form, formId, router, save]);
+  }, [asTemplate, form, formId, router, save]);
+
+  const previewDraft = useCallback(async () => {
+    const saved = await save(undefined, { redirect: false });
+    if (!saved) return;
+    setPreviewing(true);
+  }, [save]);
+
+  const closePreview = useCallback(() => setPreviewing(false), []);
 
   return {
+    asTemplate,
     form,
     stats,
     selectedId,
@@ -268,5 +350,8 @@ export function useBuilder(seed: BuilderForm = SEED_FORM, formId?: string) {
     saveAndPublish,
     archiveForm,
     preview,
+    previewing,
+    previewDraft,
+    closePreview,
   };
 }

@@ -6,7 +6,7 @@ import { CardIcon } from "../../forms/components/FormsContent";
 import { PaperStar } from "../../components/origami-art";
 import { useDeleteTemplate, useTemplateById } from "~/hooks/use-template";
 import { TEMPLATE_STATUS_BADGE, estimatedTimeToCompleteForm, hash } from "../../utils";
-import { TINTS } from "../../constants";
+import { PUBLISHED, TINTS } from "../../constants";
 import { BLOCK_META, LAYOUT_TYPES, OPTION_TYPES } from "../../builder/constants";
 import { TemplateDetailProps, TemplateField } from "../types";
 import { TemplateDetailSkeleton } from "../skeletons";
@@ -14,6 +14,8 @@ import { useTemplateAsForm } from "../useTemplaateAsForm";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import { Template } from "../../types";
 import { toast } from "~/components/origami/toast-store";
+import { DRAFT } from "@repo/database/constants";
+import { useRouter } from "next/navigation";
 
 /** the options column is loose jsonb — an unset list arrives as `{}` rather than `[]` */
 const optionsOf = (field: TemplateField) =>
@@ -71,6 +73,7 @@ const LayoutMark = ({ field }: { field: TemplateField }) => (
 );
 
 const TemplateDetail = ({ summary, scope, onClose, onCreate }: TemplateDetailProps) => {
+    const router = useRouter()
     const { toForm, isLoading } = useTemplateAsForm();
     const { deleteTemplateAsync } = useDeleteTemplate()
     const [pendingDelete, setPendingDelete] = useState<Template | null>(null)
@@ -194,7 +197,7 @@ const TemplateDetail = ({ summary, scope, onClose, onCreate }: TemplateDetailPro
             </div>
 
             <div className="tpl-detail-foot">
-                <button
+                {summary.status === PUBLISHED && <button
                     type="button"
                     className="o-btn o-btn--accent o-btn--block"
                     disabled={folding || !usable}
@@ -202,7 +205,15 @@ const TemplateDetail = ({ summary, scope, onClose, onCreate }: TemplateDetailPro
                 >
                     <Icon name={folding ? "refresh" : "crane"} size={14} />
                     {folding ? "Folding…" : "Use this template"}
-                </button>
+                </button>}
+                {summary.isOwn && summary.status === DRAFT && <button
+                    type="button"
+                    className="o-btn o-btn--accent o-btn--block"
+                    onClick={() => router.push(`/builder/${summary.id}?type=template`)}
+                >
+                    <Icon name="edit" size={14} />
+                    Edit
+                </button>}
                 <span className="tpl-detail-foot__note">
                     Copies these {fieldCount === 1 ? "question" : `${fieldCount} questions`} into a
                     new draft form and opens the builder.

@@ -18,6 +18,7 @@ import {
     LIBRARY,
     LIKES_SORT,
     MINE,
+    TEMPLATE,
     TEMPLATE_SCOPE_VALUES,
     TEMPLATE_SORT_VALUES,
     TEMPLATE_TAB_VALUES,
@@ -143,7 +144,7 @@ const Templates = () => {
         setParams({ tab: null, sort: null, order: null, page: null, search: null });
     }, [setParams]);
 
-    const onCreate = useCallback(() => router.push("/builder"), [router]);
+    const onCreate = useCallback(() => router.push(`/builder?type=${TEMPLATE}`), [router]);
 
     if (listTemplatesIsPending && !templatesData) {
         return (

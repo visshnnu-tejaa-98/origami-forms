@@ -92,6 +92,9 @@ export const EMPTY_COPY: Record<Status | typeof ALL, { title: string; descriptio
 
 export const MINE = "mine";
 export const LIBRARY = "library";
+
+export const BUILDER_TYPE_PARAM = "type";
+export const TEMPLATE = "template";
 export const TEMPLATE_SCOPE_VALUES = [MINE, LIBRARY] as const;
 
 export const TEMPLATE_TAB_VALUES = [ALL, DRAFT, PUBLISHED, ARCHIVED] as const;
