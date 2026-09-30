@@ -1,17 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import "./builder.css";
 import "./preview.css";
 import { useBuilder } from "~/hooks/use-builder";
+import { BUILDER_TYPE_PARAM, TEMPLATE } from "../constants";
 import CanvasHead from "./components/CanvasHead";
 import FieldPalette from "./components/FieldPalette";
 import FormCanvas from "./components/FormCanvas";
 import Inspector from "./components/Inspector";
 import Topbar from "./components/Topbar";
+import PreviewScreen from "./[formId]/preview/components/PreviewScreen";
+import type { Status } from "../types";
 
-const BuilderPage = () => {
-  const [previewing, setPreviewing] = useState(false);
+const Builder = () => {
+  const searchParams = useSearchParams();
+
+  const asTemplate = searchParams.get(BUILDER_TYPE_PARAM) === TEMPLATE;
 
   const {
     form,
@@ -33,8 +39,11 @@ const BuilderPage = () => {
     removeField,
     saveAsDraft,
     saveAndPublish,
-    preview
-  } = useBuilder();
+    preview,
+    previewing,
+    previewDraft,
+    closePreview,
+  } = useBuilder(undefined, undefined, { asTemplate });
 
   const formSettings = {
     visibility: form.visibility,
@@ -47,13 +56,16 @@ const BuilderPage = () => {
       <Topbar
         title={form?.title}
         status={form?.status}
+        asTemplate={asTemplate}
         setTitle={setTitle}
         saveAsDraft={saveAsDraft}
         saveAndPublish={saveAndPublish}
         preview={preview}
+        previewDraft={previewDraft}
       />
 
       <div className="b-main">
+
         <FieldPalette addField={addField} openSettings={openSettings} settingsOpen={settingsOpen} />
 
         <main className="b-center">
@@ -84,8 +96,17 @@ const BuilderPage = () => {
         />
       </div>
 
+      {previewing && (
+        <PreviewScreen form={form} status={form.status as Status} onClose={closePreview} />
+      )}
     </div>
   );
 };
+
+const BuilderPage = () => (
+  <Suspense fallback={<div className="builder-studio" />}>
+    <Builder />
+  </Suspense>
+);
 
 export default BuilderPage;

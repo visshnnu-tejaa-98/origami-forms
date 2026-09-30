@@ -184,9 +184,7 @@ export const blankField = (type: BlockType): BuilderField => {
 type SavedForm = RouterOutputs["forms"]["getFormById"];
 type ApiField = SavedForm["fields"][number];
 
-/** a saved field becomes a canvas block: the database id *is* the block id, so a field
- *  keeps its identity across an edit and the server can tell an update from an insert */
-const toBuilderField = (field: ApiField): BuilderField => {
+const toBuilderField = (field: Omit<ApiField, "formId">): BuilderField => {
     const block = {
         id: field.id,
         type: field.type,
@@ -229,6 +227,18 @@ export const toBuilderForm = (form: SavedForm): BuilderForm => ({
     logoUrl: form.logoUrl ?? undefined,
     status: form.status,
     fields: form.fields.map(toBuilderField),
+});
+
+type SavedTemplate = RouterOutputs["templates"]["getTemplateById"];
+
+export const toBuilderTemplate = (template: SavedTemplate): BuilderForm => ({
+    title: template.title,
+    description: template.description ?? "",
+    visibility: "unlisted",
+    expiresAt: null,
+    logoUrl: template.logoUrl ?? undefined,
+    status: template.status,
+    fields: template.fields.map(toBuilderField),
 });
 
 export const estimatedTimeToCompleteForm = (fields: number) => {
