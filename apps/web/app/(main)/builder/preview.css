@@ -687,6 +687,21 @@
   animation: paperFloat 5s ease-in-out infinite;
 }
 
+/* a brand logo stands in for the crane, and keeps the crane's float */
+.db-shell .pv-logo {
+  display: block;
+  width: auto;
+  max-width: 220px;
+  max-height: 72px;
+  margin: 0 auto 14px;
+  /* padding: 8px; */
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  box-shadow: inset 0 0 0 1px var(--rule-line), var(--shadow-paper-2);
+  object-fit: contain;
+  animation: paperFloat 5s ease-in-out infinite;
+}
+
 .db-shell .pv-num-row {
   display: flex;
   align-items: center;
@@ -1530,6 +1545,7 @@
   .db-shell .pv-card,
   .db-shell .pv-screen,
   .db-shell .pv-mascot,
+  .db-shell .pv-logo,
   .db-shell .pv-deco {
     animation: none;
   }

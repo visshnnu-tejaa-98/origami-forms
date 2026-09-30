@@ -27,6 +27,7 @@ type Props<TTab extends string, TSort extends string> = ToolbarProps<TTab, TSort
     tabs: readonly ToolbarTab<TTab>[];
     sorts: readonly ToolbarSort<TSort>[];
     showViewToggle?: boolean;
+    showTabs?: boolean;
     onRefresh?: () => void;
     refreshing?: boolean;
     classNames?: ToolbarClassNames;
@@ -44,6 +45,7 @@ const Toolbar = <TTab extends string = Status | SelectionAll, TSort extends stri
     tabs,
     sorts,
     showViewToggle = true,
+    showTabs = true,
     onRefresh,
     refreshing = false,
     classNames,
@@ -59,20 +61,22 @@ const Toolbar = <TTab extends string = Status | SelectionAll, TSort extends stri
 
     return (
         <div className={cls.toolbar}>
-            <div className={cls.tabs}>
-                {tabs.map((t) => (
-                    <button
-                        key={t.key}
-                        className={`${cls.tab}${tab === t.key ? " active" : ""}`}
-                        onClick={() => setTab(t.key)}
-                        aria-pressed={tab === t.key}
-                    >
-                        <Icon name={t.icon} size={14} />
-                        {t.label}
-                        {t.count !== undefined && <span className="tab-count">{t.count}</span>}
-                    </button>
-                ))}
-            </div>
+            {showTabs && (
+                <div className={cls.tabs}>
+                    {tabs.map((t) => (
+                        <button
+                            key={t.key}
+                            className={`${cls.tab}${tab === t.key ? " active" : ""}`}
+                            onClick={() => setTab(t.key)}
+                            aria-pressed={tab === t.key}
+                        >
+                            <Icon name={t.icon} size={14} />
+                            {t.label}
+                            {t.count !== undefined && <span className="tab-count">{t.count}</span>}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             <span className="spacer" />
 

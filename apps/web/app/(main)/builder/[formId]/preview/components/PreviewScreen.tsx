@@ -36,6 +36,7 @@ const PreviewScreen = ({ form, status, onClose }: PreviewScreenProps) => {
         mode="preview"
         flow={flow}
         title={form.title}
+        logoUrl={form?.logoUrl!}
         description={form.description}
         status={status}
       />

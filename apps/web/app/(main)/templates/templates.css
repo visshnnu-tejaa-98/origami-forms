@@ -1,0 +1,953 @@
+/* ============================================================
+   TEMPLATES · the shelf of patterns
+   Two panes, the same shape as the responses page: a scanning
+   table on the left, one pattern unfolded on the right. Your own
+   patterns are the page; the library is a second view of the same
+   two panes, reached by the invite and left by the back crumb.
+
+   Renders inside the (main) shell (shell.css), on the Origami
+   tokens (origami.css). Shimmer atoms (.sk, .sk-shimmer) and the
+   shared empty state (.forms-empty) come from shell.css; the sort
+   chips and refresh button from components/toolbar.css.
+   ============================================================ */
+
+/* ====== PAGE FRAME ====== */
+/* The shell's <main> is the scroll container, so the detail pane sticks
+   rather than owning its own viewport-height column. */
+.db-shell .tpl-page {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 26px;
+  align-items: start;
+}
+
+.db-shell .tpl-list-pane {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+/* ====== FLOATING DECO ====== */
+.db-shell .tpl-deco {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.db-shell .tpl-deco .td { position: absolute; }
+.db-shell .tpl-deco .td-sheet {
+  top: 18px;
+  left: 42%;
+  color: var(--indigo-deep);
+  opacity: 0.1;
+  transform: rotate(-8deg);
+  animation: paperFloat 8s ease-in-out infinite;
+}
+.db-shell .tpl-deco .td-star {
+  bottom: 14%;
+  left: 5%;
+  color: var(--highlighter-deep);
+  opacity: 0.14;
+  animation: paperFloat 9s 0.5s ease-in-out infinite;
+}
+
+/* ====== HEADER ====== */
+.db-shell .tpl-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.db-shell .tpl-head__id { min-width: 0; }
+.db-shell .tpl-head h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-hand);
+  font-size: 2.6rem;
+  line-height: 1;
+  margin: 0;
+  color: var(--ink-1);
+}
+
+/* the library's title takes a tile, so the page you travelled to announces itself as a
+   different kind of place from your own shelf */
+.db-shell .tpl-head__ic {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 11px;
+  background: var(--lavender-soft);
+  color: var(--lavender-deep);
+}
+
+/* ====== THE WAY BACK ======
+   Above the title, not beside it: it is where you came from, not a peer of where you
+   are. Styled as a crumb rather than a button so it does not compete with the page's
+   own action on the right. */
+.db-shell .tpl-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 5px 11px 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  transition: background 200ms, color 200ms;
+}
+/* the same hover as the analytics and builder back buttons */
+.db-shell .tpl-back:hover {
+  background: var(--bg-sunken);
+  color: var(--ink-1);
+}
+.db-shell .tpl-back:focus-visible { outline: 0; box-shadow: var(--glow-focus); }
+.db-shell .tpl-head .sub {
+  color: var(--ink-3);
+  font-size: 0.92rem;
+  font-style: italic;
+  margin-top: 6px;
+}
+.db-shell .tpl-head .head-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* search — the same object as on the forms and responses pages */
+.db-shell .tpl-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-line);
+  border-radius: 10px;
+  padding: 7px 12px;
+  width: 232px;
+  flex: none;
+  color: var(--ink-3);
+}
+.db-shell .tpl-search input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  color: var(--ink-1);
+}
+.db-shell .tpl-search input::placeholder { color: var(--ink-4); }
+.db-shell .tpl-search .search-clear {
+  border: 0;
+  background: var(--bg-sunken);
+  color: var(--ink-3);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  padding: 0;
+  flex: none;
+  transition: background 160ms, color 160ms;
+}
+.db-shell .tpl-search .search-clear:hover {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+/* ============================================================
+   THE LIBRARY INVITE · the one door to other people's patterns
+   The shelves are not peer tabs, so the library has to be
+   offered rather than merely labelled. It sits under your own
+   patterns: you scan what you have, then are asked whether you
+   want someone else's.
+   ============================================================ */
+.db-shell .tpl-invite {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 13px 16px;
+  background: var(--surface-card);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--r-lg);
+  transition: border-color var(--transition-snap), box-shadow var(--transition-snap);
+  margin-bottom: 20px;
+}
+.db-shell .tpl-invite:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-paper-1);
+}
+
+.db-shell .tpl-invite__art {
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--highlighter-deep);
+  opacity: 0.75;
+  animation: paperFloat 7s ease-in-out infinite;
+}
+
+.db-shell .tpl-invite__txt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.db-shell .tpl-invite__txt strong {
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ink-1);
+}
+.db-shell .tpl-invite__txt span {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+
+.db-shell .tpl-invite__cta { flex: none; }
+
+/* When your shelf is bare this is the only thing worth clicking, so it stops being a
+   footnote: centred, on tinted paper, at the size of a real offer. */
+.db-shell .tpl-invite--primary {
+  flex-direction: column;
+  text-align: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 30px 24px 32px;
+  background: var(--accent-soft);
+  border-style: solid;
+  border-color: var(--accent);
+}
+.db-shell .tpl-invite--primary .tpl-invite__txt { align-items: center; }
+.db-shell .tpl-invite--primary .tpl-invite__txt strong { font-size: 1.7rem; }
+.db-shell .tpl-invite--primary .tpl-invite__txt span {
+  color: var(--ink-2);
+  max-width: 44ch;
+  line-height: 1.5;
+}
+
+/* ====== TOOLBAR (status pills + sort) ====== */
+.db-shell .tpl-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.db-shell .tpl-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.db-shell .tpl-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding: 6px 13px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 160ms, color 160ms, border-color 160ms;
+}
+.db-shell .tpl-tab:hover { background: var(--bg-elevated); color: var(--ink-1); }
+.db-shell .tpl-tab.active {
+  background: var(--surface-card);
+  color: var(--ink-1);
+  border-color: var(--rule-line);
+  box-shadow: var(--shadow-paper-1);
+}
+.db-shell .tpl-tab .tab-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink-3);
+  background: var(--bg-sunken);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.db-shell .tpl-tab.active .tab-count {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.db-shell .tpl-toolbar .spacer { margin-left: auto; }
+
+/* ============================================================
+   TABLE · one row per pattern
+   ============================================================ */
+.db-shell .tpl-table {
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-paper-2);
+  transition: opacity var(--transition-snap);
+}
+
+/* a refetch keeps the rows it has and only lets them fade, so paging and
+   sorting never collapse the table to a skeleton */
+.db-shell .tpl-table.is-fetching { opacity: 0.55; pointer-events: none; }
+
+/* washi tape peeking off the top-right corner */
+.db-shell .tpl-table .tpl-table-tape {
+  top: -11px;
+  right: 42px;
+  left: auto;
+  margin-left: 0;
+  transform: rotate(7deg);
+  z-index: 4;
+  background-color: rgba(183, 167, 215, 0.82);
+}
+
+.db-shell .tpl-th,
+.db-shell .tpl-tr {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2.1fr) minmax(0, 1fr)  62px minmax(0, 0.9fr) 26px;
+  gap: 14px;
+  align-items: center;
+  padding: 11px 16px;
+}
+
+.db-shell .tpl-th {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--rule-line);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.db-shell .tpl-th .ta-end { text-align: right; }
+
+.db-shell .tpl-tr {
+  border-bottom: 1px dashed var(--rule-line);
+  cursor: pointer;
+  transition: background 160ms;
+  outline: none;
+}
+.db-shell .tpl-tr:last-child {
+  border-bottom: 0;
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+.db-shell .tpl-tr:hover { background: var(--bg-elevated); }
+.db-shell .tpl-tr:focus-visible { box-shadow: var(--glow-focus) inset; }
+
+/* the open pattern gets an accent rail, like a bookmark in the shelf */
+.db-shell .tpl-tr.selected { position: relative; background: var(--accent-soft); }
+.db-shell .tpl-tr.selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+}
+
+/* an archived pattern is still there, just faded out of the way */
+.db-shell .tpl-tr.is-archived .c-pattern .title { color: var(--ink-3); }
+.db-shell .tpl-tr.is-archived .ic { opacity: 0.6; }
+
+/* col: pattern identity */
+.db-shell .tpl-tr .c-pattern {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+.db-shell .tpl-tr .c-pattern .txt { min-width: 0; }
+.db-shell .tpl-tr .c-pattern .title {
+  display: block;
+  font-weight: 600;
+  color: var(--ink-1);
+  font-size: 0.92rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.db-shell .tpl-tr .c-pattern .sub {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* icon tiles — shared with the forms card, redeclared here because this
+   route does not pull in forms.css */
+.db-shell .tpl-page .ic {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+}
+.db-shell .tpl-page .tint-ic {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.db-shell .tpl-page .k2 .tint-ic { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .tpl-page .k3 .tint-ic { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .tpl-page .k4 .tint-ic { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .tpl-page .k5 .tint-ic { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .tpl-page .k6 .tint-ic { background: var(--indigo-soft); color: var(--indigo-deep); }
+.db-shell .tpl-page .ic--logo {
+  overflow: hidden;
+  padding: 0;
+  background: var(--bg-elevated);
+  box-shadow: inset 0 0 0 1px var(--rule-line);
+}
+.db-shell .tpl-page .ic--logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* col: value cells */
+.db-shell .tpl-tr .cell { min-width: 0; }
+.db-shell .tpl-tr .cell.ta-end { text-align: right; }
+.db-shell .tpl-tr .cell .o-badge { font-size: 0.64rem; padding: 3px 8px; }
+.db-shell .tpl-tr .cell .n {
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  color: var(--ink-1);
+}
+.db-shell .tpl-tr .cell .dash { color: var(--ink-4); }
+.db-shell .tpl-tr .cell .when {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* col: who folded it (library only) */
+.db-shell .tpl-by {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.db-shell .tpl-by__av {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-hand);
+  font-size: 0.86rem;
+  font-weight: 600;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.db-shell .tpl-by__av.t-k2 { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .tpl-by__av.t-k3 { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .tpl-by__av.t-k4 { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .tpl-by__av.t-k5 { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .tpl-by__av.t-k6 { background: var(--indigo-soft); color: var(--indigo-deep); }
+.db-shell .tpl-by__txt {
+  font-size: 0.82rem;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* col: the owner's tools. They rest at half strength and come up on hover,
+   so a row of icons does not compete with the titles being scanned. */
+.db-shell .tpl-tr .c-actions { display: flex; justify-content: flex-end; }
+.db-shell .tpl-tr .row-tools {
+  display: inline-flex;
+  gap: 4px;
+  opacity: 0.45;
+  transition: opacity var(--transition-snap);
+}
+.db-shell .tpl-tr:hover .row-tools,
+.db-shell .tpl-tr:focus-within .row-tools,
+.db-shell .tpl-tr.selected .row-tools { opacity: 1; }
+
+.db-shell .tpl-tr .row-tools .tool {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--rule-line);
+  border-radius: 8px;
+  background: var(--surface-card);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color 140ms, background 140ms, border-color 140ms, transform 140ms;
+}
+.db-shell .tpl-tr .row-tools .tool:hover {
+  color: var(--ink-1);
+  border-color: var(--rule-strong);
+  transform: translateY(-1px);
+}
+.db-shell .tpl-tr .row-tools .tool--danger:hover {
+  color: var(--danger);
+  border-color: var(--coral);
+  background: var(--coral-soft);
+}
+.db-shell .tpl-tr .tool-none { color: var(--ink-5); font-size: 0.8rem; }
+
+.db-shell .tpl-tr .chev {
+  color: var(--ink-4);
+  display: flex;
+  justify-content: flex-end;
+}
+.db-shell .tpl-tr:hover .chev { color: var(--ink-2); }
+
+/* the empty and error states sit inside the taped table, under the header row */
+.db-shell .tpl-table .forms-empty {
+  padding: 48px 24px 52px;
+  margin: 0 auto;
+  max-width: 44ch;
+}
+
+/* ====== PAGINATION ====== */
+.db-shell .tpl-pager {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--rule-line);
+}
+.db-shell .tpl-pager .pager-info { font-size: 0.84rem; color: var(--ink-3); }
+.db-shell .tpl-pager .pager-info strong { color: var(--ink-1); font-weight: 700; }
+.db-shell .tpl-pager .pager-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.db-shell .tpl-pager .pager-btn,
+.db-shell .tpl-pager .pager-num {
+  border: 1px solid var(--rule-line);
+  background: var(--bg-elevated);
+  color: var(--ink-2);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  font-weight: 600;
+  border-radius: 9px;
+  transition: color 160ms, border-color 160ms, background 160ms;
+}
+.db-shell .tpl-pager .pager-btn {
+  padding: 6px 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.db-shell .tpl-pager .pager-num { width: 32px; height: 32px; display: grid; place-items: center; }
+.db-shell .tpl-pager .pager-btn:hover:not(:disabled),
+.db-shell .tpl-pager .pager-num:hover { color: var(--ink-1); border-color: var(--rule-strong); }
+.db-shell .tpl-pager .pager-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.db-shell .tpl-pager .pager-num.active {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  border-color: var(--accent);
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+}
+.db-shell .tpl-pager .pager-gap {
+  width: 20px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  font-size: 0.9rem;
+  user-select: none;
+}
+.db-shell .tpl-pager .pager-btn .flip { transform: rotate(180deg); }
+
+/* ============================================================
+   DETAIL PANE · one pattern, unfolded into its questions
+   The pane is a column: a sticky head, the questions scrolling
+   between, and the one action pinned to the bottom so "use this"
+   is reachable without scrolling a long pattern back up.
+   ============================================================ */
+.db-shell .tpl-detail-pane {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  /* the shell's <main> pads 28px top / 80px bottom */
+  max-height: calc(100vh - 44px);
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-paper-2);
+  overflow: hidden;
+}
+
+.db-shell .tpl-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  padding: 14px 16px;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--rule-line);
+}
+.db-shell .tpl-detail-head .id-block { flex: 1; min-width: 0; }
+.db-shell .tpl-detail-head .nm {
+  font-family: var(--font-hand);
+  font-size: 1.45rem;
+  line-height: 1.15;
+  color: var(--ink-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.db-shell .tpl-detail-head .meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  color: var(--ink-3);
+  min-width: 0;
+}
+.db-shell .tpl-detail-head .meta .o-badge { font-size: 0.6rem; padding: 2px 7px; }
+.db-shell .tpl-detail-head .dot-sep { color: var(--ink-4); }
+.db-shell .tpl-detail-head .actions { display: flex; gap: 4px; flex: none; }
+.db-shell .tpl-detail-head .actions button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--rule-line);
+  border-radius: 8px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color 140ms, background 140ms, border-color 140ms;
+}
+.db-shell .tpl-detail-head .actions button:hover {
+  background: var(--bg-elevated);
+  color: var(--ink-1);
+  border-color: var(--rule-strong);
+}
+
+.db-shell .tpl-detail-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 16px 20px;
+}
+
+.db-shell .tpl-detail-blurb {
+  margin: 0 0 14px;
+  font-size: 0.86rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* meta grid — the figures the pattern is judged on before it is used */
+.db-shell .tpl-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  background: var(--surface-card);
+  border: 1px dashed var(--rule-line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+.db-shell .tpl-meta .item { font-size: 0.72rem; color: var(--ink-3); min-width: 0; }
+.db-shell .tpl-meta .item b {
+  display: block;
+  color: var(--ink-1);
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the rule that opens the question list */
+.db-shell .tpl-qs-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.db-shell .tpl-qs-rule .lbl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.db-shell .tpl-qs-rule .line { flex: 1; height: 1px; background: var(--rule-line); }
+
+/* ====== ONE QUESTION ====== */
+.db-shell .tpl-q {
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 9px;
+}
+.db-shell .tpl-q__lbl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.db-shell .tpl-q .type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  letter-spacing: 0.02em;
+}
+.db-shell .tpl-q .type-pill.t-k2 { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .tpl-q .type-pill.t-k3 { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .tpl-q .type-pill.t-k4 { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .tpl-q .type-pill.t-k5 { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .tpl-q .type-pill.t-k6 { background: var(--indigo-soft); color: var(--indigo-deep); }
+
+/* "required" is a property of the question, so it reads as a mark on the
+   label line rather than as another badge competing with the type */
+.db-shell .tpl-q__req {
+  margin-left: auto;
+  flex: none;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--coral-deep);
+}
+
+.db-shell .tpl-q__q {
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--ink-1);
+  font-size: 0.89rem;
+  line-height: 1.4;
+}
+.db-shell .tpl-q__desc {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-3);
+  line-height: 1.45;
+}
+.db-shell .tpl-q__ph {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  color: var(--ink-4);
+}
+.db-shell .tpl-q__opts {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+}
+.db-shell .tpl-q__opts span {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--bg-sunken);
+  color: var(--ink-2);
+  font-size: 0.74rem;
+}
+.db-shell .tpl-q__opts span.is-more { color: var(--ink-4); font-style: italic; }
+
+/* a heading or page break — structure, not a question */
+.db-shell .tpl-mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 10px;
+  color: var(--ink-3);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.db-shell .tpl-mark span:not(.tpl-mark__rule) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.db-shell .tpl-mark__rule { flex: 1; height: 1px; background: var(--rule-strong); }
+.db-shell .tpl-mark--page-break { color: var(--indigo-deep); }
+.db-shell .tpl-mark--page-break .tpl-mark__rule {
+  background: repeating-linear-gradient(
+    to right,
+    var(--rule-strong) 0 6px,
+    transparent 6px 12px
+  );
+  height: 2px;
+}
+
+/* the question list's own waiting and failure states */
+.db-shell .tpl-qs-empty,
+.db-shell .tpl-qs-error {
+  text-align: center;
+  padding: 28px 18px;
+  color: var(--ink-3);
+  border: 1px dashed var(--rule-line);
+  border-radius: 12px;
+}
+.db-shell .tpl-qs-empty p,
+.db-shell .tpl-qs-error p {
+  margin: 8px auto 12px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  max-width: 28ch;
+}
+
+/* ====== FOOT · the one action ====== */
+.db-shell .tpl-detail-foot {
+  flex: none;
+  padding: 12px 16px 14px;
+  background: var(--surface-card);
+  border-top: 1px solid var(--rule-line);
+}
+.db-shell .tpl-detail-foot__note {
+  display: block;
+  margin-top: 7px;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--ink-4);
+  line-height: 1.45;
+}
+
+/* ====== EMPTY STATE (detail) ====== */
+.db-shell .tpl-detail-empty { text-align: center; padding: 60px 22px; }
+.db-shell .tpl-detail-empty .art {
+  color: var(--highlighter-deep);
+  opacity: 0.6;
+  display: inline-block;
+  animation: paperFloat 7s ease-in-out infinite;
+}
+.db-shell .tpl-detail-empty h3 {
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  color: var(--ink-1);
+  margin: 10px 0 6px;
+}
+.db-shell .tpl-detail-empty p {
+  font-size: 0.86rem;
+  color: var(--ink-3);
+  line-height: 1.5;
+  margin: 0 auto 16px;
+  max-width: 26ch;
+}
+
+/* ====== SKELETON SHAPES (mirror the real row) ====== */
+.db-shell .tpl-page .sk-ic { width: 46px; height: 46px; flex: none; border-radius: 13px; }
+.db-shell .tpl-page .sk-ic-sm { width: 40px; height: 40px; flex: none; border-radius: 11px; }
+.db-shell .tpl-page .sk-dot { width: 28px; height: 28px; border-radius: 8px; }
+.db-shell .tpl-tr.sk-row { cursor: default; }
+.db-shell .tpl-tr.sk-row::before { content: none; }
+.db-shell .tpl-tr.sk-row .c-actions { gap: 4px; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1460px) {
+  .db-shell .tpl-page { grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; }
+  .db-shell .tpl-th,
+  .db-shell .tpl-tr {
+    grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr) 76px minmax(0, 0.9fr) 104px 26px;
+  }
+  .db-shell .tpl-th .col-likes,
+  .db-shell .tpl-tr .cell.col-likes { display: none; }
+}
+
+/* Two panes stop paying for themselves once the table is squeezed — below
+   this the detail drops under the list and the columns come back. */
+@media (max-width: 1240px) {
+  .db-shell .tpl-page { grid-template-columns: minmax(0, 1fr); }
+  .db-shell .tpl-detail-pane {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    order: 2;
+  }
+  .db-shell .tpl-detail-body { overflow: visible; }
+  .db-shell .tpl-th,
+  .db-shell .tpl-tr {
+    grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr) 76px 62px minmax(0, 0.9fr) 104px 26px;
+  }
+  .db-shell .tpl-th .col-likes,
+  .db-shell .tpl-tr .cell.col-likes { display: block; }
+  .db-shell .tpl-meta { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 980px) {
+  .db-shell .tpl-th,
+  .db-shell .tpl-tr {
+    grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr) 76px 104px 26px;
+  }
+  .db-shell .tpl-th .col-likes,
+  .db-shell .tpl-tr .cell.col-likes,
+  .db-shell .tpl-th .col-updated,
+  .db-shell .tpl-tr .cell.col-updated { display: none; }
+}
+
+@media (max-width: 760px) {
+  .db-shell .tpl-th,
+  .db-shell .tpl-tr {
+    grid-template-columns: minmax(0, 1fr) 104px 26px;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+  .db-shell .tpl-th .col-by,
+  .db-shell .tpl-tr .cell.col-by,
+  .db-shell .tpl-th .col-q,
+  .db-shell .tpl-tr .cell.col-q { display: none; }
+  .db-shell .tpl-deco { display: none; }
+  .db-shell .tpl-head .head-actions { width: 100%; }
+  .db-shell .tpl-search { width: 100%; }
+  .db-shell .tpl-meta { grid-template-columns: 1fr 1fr; }
+  /* the invite stacks: art, then the ask, then the button at full width */
+  .db-shell .tpl-invite { flex-direction: column; text-align: center; }
+  .db-shell .tpl-invite__txt { align-items: center; }
+  .db-shell .tpl-invite__cta { width: 100%; justify-content: center; }
+  .db-shell .tpl-head h1 { font-size: 2.2rem; }
+}

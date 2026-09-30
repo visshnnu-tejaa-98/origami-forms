@@ -45,6 +45,7 @@ export type FormFlowStageProps = {
     mode: FlowMode;
     flow: FormFlow;
     title: string;
+    logoUrl: string | null;
     description?: string | null;
     submitting?: boolean;
     status?: string;
@@ -70,6 +71,7 @@ export type PublicFormHeaderProps = {
 export type CoverTypeProps = {
     title: string;
     description?: string | null;
+    logoUrl: string | null;
     questions: FlowQuestion[];
     estimatedTime: string;
     mode: FlowMode;

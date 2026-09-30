@@ -3,7 +3,7 @@ import { Icon, IconName } from '../../components/icons'
 import { EmptyScreenProps } from '../../types'
 
 const EmptyTemplate = (props: EmptyScreenProps) => {
-    const { title, description, icon, cta, onClick } = props
+    const { title, description, icon, cta, ctaIcon = "plus", onClick } = props
     return (
         <div className="forms-empty">
             <span className="art">
@@ -12,7 +12,7 @@ const EmptyTemplate = (props: EmptyScreenProps) => {
             <h3>{title}</h3>
             <p>{description}</p>
             <button type="button" className="o-btn o-btn--accent o-btn--lg" onClick={onClick}>
-                <Icon name="plus" size={15} /> {cta}
+                <Icon name={ctaIcon} size={15} /> {cta}
             </button>
         </div>
     )

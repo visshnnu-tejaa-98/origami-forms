@@ -9,12 +9,16 @@ import { HeadingTypeProps, InputFieldTypeProps, PageBreakTypeProps, ReviewTypePr
 
 
 const CoverType = (props: CoverTypeProps) => {
-    const { title, description, estimatedTime, questions, next } = props;
+    const { title, description, estimatedTime, questions, next, logoUrl } = props;
     return (
         <div className="pv-centered">
-            <span className="pv-mascot">
-                <Icon name="crane" size={72} />
-            </span>
+            {logoUrl ? (
+                <img className="pv-logo" src={logoUrl} alt="" />
+            ) : (
+                <span className="pv-mascot">
+                    <Icon name="crane" size={72} />
+                </span>
+            )}
             <h1 className="pv-title">{title}</h1>
             {description && <p className="pv-help">{description}</p>}
             <div className="pv-actions pv-actions--center">
