@@ -1,6 +1,6 @@
 import { RouterOutputs } from "@repo/trpc/client";
 import { ICONS, TINTS } from "./constants";
-import { PageOptions, Status } from "./types";
+import { PageOptions, Status, Template, TemplateStatus } from "./types";
 import { relativeTime } from "../utils";
 import { BlockType, BuilderField, BuilderForm, LayoutType, NumberFieldValidation } from "./builder/types";
 import {
@@ -50,6 +50,31 @@ export const toUiForm = (f: ApiForm) => ({
     pinned: false,
     description: f.description ?? "",
     logoUrl: f.logoUrl ?? ""
+});
+
+export const TEMPLATE_STATUS_BADGE: Record<TemplateStatus, { cls: string; label: string }> = {
+    published: { cls: "o-badge--matcha", label: "shared" },
+    draft: { cls: "o-badge--sakura", label: "draft" },
+    archived: { cls: "o-badge--ghost", label: "archived" },
+};
+
+type ApiTemplate = RouterOutputs["templates"]["getAllTemplates"]["templates"][number];
+
+export const toUiTemplate = (t: ApiTemplate): Template => ({
+    id: t.id,
+    title: t.title,
+    slug: t.slug,
+    icon: ICONS[hash(t.id) % ICONS.length]!,
+    tint: TINTS[hash(t.id) % TINTS.length]!,
+    status: t.status,
+    likes: t.likes,
+    isOwn: t.isOwn,
+    author: t.creator ? `${t.creator.firstName} ${t.creator.lastName ?? ""}`.trim() : null,
+    authorAvatarUrl: t.creator?.avatarUrl ?? null,
+    description: t.description ?? "",
+    logoUrl: t.logoUrl ?? "",
+    edited: t.updatedAt ? relativeTime(t.updatedAt) : "just now",
+    created: t.createdAt ? relativeTime(t.createdAt) : null,
 });
 
 export const updatePageOptions = (props: PageOptions) => {

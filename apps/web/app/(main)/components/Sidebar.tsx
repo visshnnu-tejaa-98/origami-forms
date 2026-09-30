@@ -24,6 +24,7 @@ const workspace: NavItem[] = [
   { href: "/forms", icon: "forms", label: "My forms", },
   { href: "/responses", icon: "mail", label: "Responses" },
   { href: "/analytics", icon: "analytics", label: "Analytics" },
+  { href: "/templates", icon: "templates", label: "Templates" },
 ];
 
 const library: NavItem[] = [

@@ -4,11 +4,15 @@ import {
     ALL,
     ARCHIVED,
     ASC,
+    CREATED_AT,
     DESC,
     DRAFT,
     EXPIRED,
     GRID,
+    LIBRARY,
+    LIKES_SORT,
     LIST,
+    MINE,
     PUBLISHED,
     SUBMISSION_COUNT,
     TITLE_SORT,
@@ -32,6 +36,42 @@ export type Form = {
     pinned: boolean;
     description: string;
     logoUrl: string
+};
+
+export type TemplateStatus = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED;
+
+export type TemplateTab = TemplateStatus | SelectionAll;
+
+export type TemplateSortField =
+    | typeof UPDATED_AT
+    | typeof TITLE_SORT
+    | typeof CREATED_AT
+    | typeof LIKES_SORT;
+
+export type TemplateScope = typeof MINE | typeof LIBRARY;
+
+export type TemplateCreator = {
+    id: string;
+    firstName: string;
+    lastName?: string | null;
+    avatarUrl?: string | null;
+};
+
+export type Template = {
+    id: string;
+    title: string;
+    slug: string;
+    icon: IconName;
+    tint: string; // k1..k6
+    status: TemplateStatus;
+    likes: number;
+    isOwn: boolean;
+    author: string | null;
+    authorAvatarUrl: string | null;
+    description: string;
+    logoUrl: string;
+    edited: string | null;
+    created: string | null;
 };
 
 export type PageOptions = {
@@ -100,6 +140,7 @@ export type EmptyScreenProps = {
     description: string,
     icon: IconName,
     cta: string,
+    ctaIcon?: IconName,
     onClick: () => void
 }
 
