@@ -25,6 +25,7 @@ const workspace: NavItem[] = [
   { href: "/responses", icon: "mail", label: "Responses" },
   { href: "/analytics", icon: "analytics", label: "Analytics" },
   { href: "/templates", icon: "templates", label: "Templates" },
+  { href: "/ai", icon: "sparkles", label: "AI Assist" },
 ];
 
 const library: NavItem[] = [

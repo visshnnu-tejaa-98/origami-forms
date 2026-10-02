@@ -4,14 +4,22 @@
    canvas state. Built on the Origami tokens (origami.css).
    ============================================================ */
 
+/* opened from the builder it covers the editing canvas, but stops at the sidebar
+   so the shell's navigation stays reachable — the left edge tracks the sidebar
+   column, rail mode included */
 .db-shell .pv-screen {
   position: fixed;
-  inset: 0;
+  inset: 0 0 0 var(--sidebar-w);
   z-index: 40;
   display: grid;
   grid-template-columns: 280px 1fr;
   background: var(--bg);
   animation: pvFade 240ms ease;
+  transition: left var(--rail-ease);
+}
+
+.db-shell--rail .pv-screen {
+  left: var(--sidebar-rail-w);
 }
 
 /* on its own route the preview is the page, so it sits in the shell's pane
@@ -1538,6 +1546,14 @@
   .db-shell .pv-deco.d-crane-2,
   .db-shell .pv-stack {
     display: none;
+  }
+}
+
+/* the shell drops the sidebar at this width, so the overlay takes the full pane */
+@media (max-width: 720px) {
+  .db-shell .pv-screen,
+  .db-shell--rail .pv-screen {
+    left: 0;
   }
 }
 

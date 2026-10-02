@@ -9,7 +9,7 @@ import FormFlowStage from "~/components/form-flow/FormFlowStage";
 import { useFormFlow } from "~/components/form-flow/useFormFlow";
 import { buildSteps } from "~/components/form-flow/flow";
 
-const PreviewScreen = ({ form, status, onClose }: PreviewScreenProps) => {
+const PreviewScreen = ({ form, status, onClose, asPage = false }: PreviewScreenProps) => {
   const steps = useMemo(
     () => buildSteps(form.fields, (block) => block as FieldBlock),
     [form.fields],
@@ -18,7 +18,10 @@ const PreviewScreen = ({ form, status, onClose }: PreviewScreenProps) => {
   const flow = useFormFlow({ steps, mode: "preview", onClose });
 
   return (
-    <div className="pv-screen pv-screen--page" aria-label="Form preview">
+    <div
+      className={`pv-screen${asPage ? " pv-screen--page" : ""}`}
+      aria-label="Form preview"
+    >
       <PreviewCanvas />
 
       {/* ===== SIDE RAIL ===== */}

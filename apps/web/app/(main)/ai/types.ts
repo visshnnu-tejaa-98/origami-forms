@@ -1,0 +1,59 @@
+import type { IconName } from "../components/icons";
+import type { Tint } from "../builder/types";
+
+export type ForgeKind = "form" | "template";
+
+export type ForgeStage = "compose" | "drafting" | "review";
+
+export type AiHeaderProps = {
+    stage: ForgeStage;
+    startOver: () => void
+}
+
+export type PromptForgeProps = {
+    prompt: string
+    kind: ForgeKind
+    onPromptChange: (prompt: string) => void
+    onKindChange: (kind: ForgeKind) => void
+    onGenerate: () => void
+}
+
+export type DraftReviewProps = {
+    draft: DraftPreview
+    onDiscard: () => void
+    onRefine: () => void
+}
+
+export type DraftField = {
+    id: string;
+    type: string;
+    label: string;
+    helpText?: string;
+    required?: boolean;
+    options?: string[];
+};
+
+export type DraftPreview = {
+    title: string;
+    description?: string;
+    kind: ForgeKind;
+    prompt: string;
+    fields: DraftField[];
+};
+
+export type RecentDraft = {
+    id: string;
+    title: string;
+    kind: ForgeKind;
+    questions: number;
+    when: string;
+};
+
+export type Example = {
+    id: string;
+    title: string;
+    blurb: string;
+    prompt: string;
+    icon: IconName;
+    tint: Tint;
+};

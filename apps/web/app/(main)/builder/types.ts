@@ -186,6 +186,7 @@ export type PreviewScreenProps = {
   form: BuilderForm;
   status: Status | "pending",
   onClose: () => void;
+  asPage?: boolean;
 };
 
 export type NumberFieldValidation = {
