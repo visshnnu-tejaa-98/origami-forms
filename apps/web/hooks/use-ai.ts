@@ -57,7 +57,6 @@ export function useAi() {
         try {
             const schema = kind === "form" ? aiFormSchema : aiTemplateSchema;
             const res = process.env.NODE_ENV === "production" ? await generateTemplateOrForm({ prompt, kind, schema }) : dummyAPIData;
-            // const res = process.env.NODE_ENV !== "production" ? await generateTemplateOrForm({ prompt, kind, schema }) : dummyAPIData;
 
             if (!res) {
                 throw new Error(`Something went wrong in generating the ${kind}. Please try again`);

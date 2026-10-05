@@ -44,12 +44,12 @@ export default class TemplateService {
 
     private formService = new FormService();
 
-    public async createTemplate(templateData: CreateTemplateInputModel) {
+    public async createTemplate(creatorId: string, templateData: CreateTemplateInputModel) {
         return db.transaction(async (tx) => {
             const [template] = await tx
                 .insert(templates)
                 .values({
-                    creatorId: templateData.creatorId,
+                    creatorId,
                     title: templateData.title,
                     description: templateData.description,
                     logoUrl: templateData.logoUrl,
