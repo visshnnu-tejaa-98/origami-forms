@@ -1,9 +1,9 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  DEFAULT_FORM_TEMPLATE,
   LAYOUT_TYPES,
   PAGE_BREAK,
-  SEED_FORM,
   hasOptions,
   isFieldBlock,
 } from "~/app/(main)/builder/constants";
@@ -22,6 +22,7 @@ import { useCreateForm, useUpdateForm } from "./use-form";
 import { useCreateTemplate, useUpdateTemplate } from "./use-template";
 import { useRouter } from "next/navigation";
 import { ARCHIVED } from "@repo/database/constants";
+import { BuilderFormProps } from "~/app/(main)/types";
 
 /** a saved field carries its database id; a block added in this session carries a local
  *  `q-xxxx` one. only the former identifies a row the server should update */
@@ -33,24 +34,27 @@ const DRAFT = "draft" as const;
 /** a cheap structural fingerprint — enough to tell "nothing changed since the last save" */
 const fingerprint = (form: BuilderForm) => JSON.stringify(form);
 
-/** the builder writes a form by default; `asTemplate` sends the same canvas to the template shelf */
+/** the builder writes a form by default; `isTemplate` sends the same canvas to the template shelf */
 export function useBuilder(
-  seed: BuilderForm = SEED_FORM,
-  formId?: string,
-  options?: { asTemplate?: boolean; templateId?: string }
+  {
+    seed,
+    formId,
+    isTemplate,
+    templateId,
+  }: BuilderFormProps
 ) {
-  const asTemplate = options?.asTemplate ?? false;
-
-  const [form, setForm] = useState<BuilderForm>(seed);
+  const asTemplate = isTemplate ?? false;
+  const initial = seed ?? DEFAULT_FORM_TEMPLATE;
+  const [form, setForm] = useState<BuilderForm>(initial);
   const [selectedId, setSelectedId] = useState<string | null>(
-    seed.fields.find((f) => !LAYOUT_TYPES.includes(f.type))?.id ?? null
+    initial.fields.find((f) => !LAYOUT_TYPES.includes(f.type))?.id ?? null
   );
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [previewing, setPreviewing] = useState(false);
 
-  const savedPrint = useRef(fingerprint(seed));
-  const templateId = useRef<string | null>(options?.templateId ?? null);
+  const savedPrint = useRef(fingerprint(initial));
+  const templateIdRef = useRef<string | null>(templateId ?? null);
 
   const { createFormAsync } = useCreateForm()
   const { updateFormAsync } = useUpdateForm()
@@ -170,7 +174,9 @@ export function useBuilder(
     (): MutationPayloadShape => ({
       ...form,
       expiresAt: form.expiresAt ? new Date(form.expiresAt) : undefined,
-      status: form.status ? form.status : null,
+      logoUrl: form.logoUrl ?? undefined,
+      maxSubmissions: form.maxSubmissions ?? undefined,
+      status: form.status ?? DRAFT,
       fields: form.fields.map(({ id: _id, ...field }) => field),
     }),
     [form]
@@ -224,9 +230,9 @@ export function useBuilder(
         if (asTemplate) {
           const payload = toTemplatePayload();
 
-          if (templateId.current) {
+          if (templateIdRef.current) {
             const result = await updateTemplateAsync({
-              templateId: templateId.current,
+              templateId: templateIdRef.current,
               ...payload,
               description: form.description ?? null,
               logoUrl: form.logoUrl || null,
@@ -244,7 +250,7 @@ export function useBuilder(
           }
 
           const saved = await createTemplateAsync({ ...payload, status: status ?? DRAFT });
-          templateId.current = saved.id;
+          templateIdRef.current = saved.id;
 
           savedPrint.current = fingerprint(form);
           if (!silent) toast.success(status === PUBLISHED ? "Template shared." : "Template saved.");

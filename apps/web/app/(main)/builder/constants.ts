@@ -69,7 +69,7 @@ export const FORM_VISIBILITY: { key: BuilderForm["visibility"]; label: string }[
   { key: "authenticated", label: "Authenticated · registered users only" }
 ];
 
-export const SEED_FORM: BuilderForm = {
+export const DEFAULT_FORM_TEMPLATE: BuilderForm = {
   title: "",
   description: "",
   visibility: "unlisted",

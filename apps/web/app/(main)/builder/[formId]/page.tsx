@@ -11,24 +11,23 @@ import { toBuilderForm, toBuilderTemplate } from "../../utils";
 import { BUILDER_TYPE_PARAM, TEMPLATE } from "../../constants";
 import PreviewScreen from "./preview/components/PreviewScreen";
 import type { Status } from "../../types";
+import type { BuilderForm } from "../types";
 import CanvasHead from "../components/CanvasHead";
 import FieldPalette from "../components/FieldPalette";
 import FormCanvas from "../components/FormCanvas";
 import Inspector from "../components/Inspector";
 import Topbar from "../components/Topbar";
 import { Icon } from "../../components/icons";
-import type { BuilderForm } from "../types";
 
 const BuilderStudio = ({
-  seed,
   id,
   asTemplate,
+  seed,
 }: {
-  seed: BuilderForm;
   id: string;
   asTemplate: boolean;
+  seed: BuilderForm;
 }) => {
-
   const {
     form,
     stats,
@@ -55,9 +54,12 @@ const BuilderStudio = ({
     previewDraft,
     closePreview,
   } = useBuilder(
-    seed,
-    asTemplate ? undefined : id,
-    asTemplate ? { asTemplate, templateId: id } : undefined
+    {
+      seed,
+      formId: !asTemplate ? id : undefined,
+      isTemplate: asTemplate ?? undefined,
+      templateId: asTemplate ? id : undefined
+    }
   );
 
   const formSettings = {
@@ -160,7 +162,7 @@ const EditBuilder = () => {
     );
   }
 
-  return <BuilderStudio seed={seed} id={formId} asTemplate={asTemplate} />;
+  return <BuilderStudio id={formId} asTemplate={asTemplate} seed={seed} />;
 };
 
 /** useSearchParams needs a boundary above it */
