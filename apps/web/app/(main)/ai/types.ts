@@ -1,9 +1,12 @@
 import type { IconName } from "../components/icons";
 import type { Tint } from "../builder/types";
+import { ZodObject } from "zod";
 
 export type ForgeKind = "form" | "template";
 
 export type ForgeStage = "compose" | "drafting" | "review";
+
+export type InputRoleType = "user" | "system" | "assistant" | "tool";
 
 export type AiHeaderProps = {
     stage: ForgeStage;
@@ -57,3 +60,15 @@ export type Example = {
     icon: IconName;
     tint: Tint;
 };
+
+export type InputRole = {
+    role: InputRoleType
+    content: string
+}
+
+export type GenerateTemplateOrFormProps = {
+    prompt: string;
+    kind: ForgeKind;
+    schema: ZodObject
+    model?: string;
+}

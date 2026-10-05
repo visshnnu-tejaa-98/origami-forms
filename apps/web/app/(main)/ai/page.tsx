@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './ai.css'
 import AiDecorations from './components/AiDecorations'
 import PromptForge from './components/PromptForge'
@@ -10,6 +10,11 @@ import DraftingState from './components/DraftingState'
 import DraftReview from './components/DraftReview'
 import type { DraftPreview, ForgeKind, ForgeStage } from './types'
 import AiHeader from './components/AiHeader'
+import { useCreateTemplate } from '~/hooks/use-template'
+import { toast } from '~/components/origami/toast'
+import { BuilderForm } from '../builder/types'
+import { dummyAPIData } from './constants'
+import { toBuilderTemplateFromAIAssist } from '../utils'
 
 const SAMPLE_DRAFT = (prompt: string, kind: ForgeKind): DraftPreview => ({
     kind,
@@ -46,15 +51,41 @@ const AiPage = () => {
     const [prompt, setPrompt] = useState<string>("")
     const [kind, setKind] = useState<ForgeKind>('form')
     const [draft, setDraft] = useState<DraftPreview | null>(null)
-
-    const generate = () => {
-        const asked = prompt.trim()
-        if (!asked) return
+    const [seed, setSeed] = useState<BuilderForm | undefined>(undefined)
+    /** id of the saved draft, so the review stage can hand off to the builder */
+    const [templateId, setTemplateId] = useState<string | null>(null)
+    const { createTemplateAsync } = useCreateTemplate()
+    const generate = async () => {
         setStage('drafting')
-        window.setTimeout(() => {
-            setDraft(SAMPLE_DRAFT(asked, kind))
+        try {
+            const res = dummyAPIData
+
+            if (!res) {
+                throw new Error(`Something went wrong in generating the ${kind}. Please try again`)
+            }
+
+            const sanitisedSeed = toBuilderTemplateFromAIAssist(res)
+            setSeed(sanitisedSeed)
+
+            // the generated field ids are local `q-xxxx` ones; the server mints its own
+            const saved = await createTemplateAsync({
+                title: sanitisedSeed.title,
+                description: sanitisedSeed.description,
+                fields: sanitisedSeed.fields.map(({ id, ...field }) => field),
+                status: 'draft',
+            })
+
+            setTemplateId(saved.id)
             setStage('review')
-        }, 1600)
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : `Could not generate the ${kind}.`)
+            setStage('compose')
+        }
+
+        // window.setTimeout(() => {
+        //     setDraft(SAMPLE_DRAFT(prompt.trim(), kind))
+
+        // }, 1600)
     }
 
     const backToCompose = () => {

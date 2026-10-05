@@ -2,6 +2,7 @@ import { CreateFormInputModel, LayoutFieldType } from "@repo/services/form/model
 import { IconName } from "../components/icons";
 import { Status } from "../types";
 import { FlowQuestion, FlowStep } from "~/components/form-flow/types";
+import { CreateTemplateInputModel } from "@repo/services/templates/model";
 
 type CreateFormInputType = CreateFormInputModel["fields"][number];
 
@@ -62,6 +63,11 @@ export type BuilderForm = Omit<CreateFormInputModel, "fields"> & {
   logoUrl?: string | null;
   status: string;
 };
+
+export type BuilderTemplate = Omit<CreateTemplateInputModel, "fields" | "creatorId"> & {
+  fields: BuilderField[];
+  status: string;
+}
 
 export type FormSettings = Pick<BuilderForm, "visibility" | "maxSubmissions" | "expiresAt">;
 

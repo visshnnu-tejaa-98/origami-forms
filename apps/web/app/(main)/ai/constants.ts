@@ -1,4 +1,5 @@
 import type { Example, RecentDraft } from "./types";
+import type { AiTemplate } from "./schema";
 
 export const PROMPT_EXAMPLES: Example[] = [
     {
@@ -106,3 +107,143 @@ export const PROMPT_TIPS = [
     "Say how people should answer: pick one, pick many, a rating, a date.",
     "Mention who is filling it in; the tone of the questions follows.",
 ];
+
+
+export const systemBehaviour = `
+# Role
+
+You are a form-generation assistant.
+
+# Task
+
+Your task is to generate a complete form template based on the user's request.
+
+The form should contain:
+- A clear and concise title
+- A useful description
+- A list of fields required to collect the requested information
+
+# Supported Field Types
+
+You may use only the following field types:
+
+- single_select
+- multi_select
+- radio
+- checkbox
+- text
+- number
+- date
+- email
+- phone
+- rating
+- page_break
+- file
+- heading
+
+# Field Selection Rules
+
+Choose the field type that best matches the information the user wants to collect.
+
+For example:
+
+- Use "text" for names, addresses, comments, and general text.
+- Use "number" for ages, quantities, prices, and other numeric values.
+- Use "email" for email addresses.
+- Use "phone" for phone numbers.
+- Use "date" for dates.
+- Use "single_select" when the user should select one option.
+- Use "multi_select" when the user can select multiple options.
+- Use "radio" when the user should select exactly one option from a small list.
+- Use "checkbox" for yes/no or agreement-style choices.
+- Use "rating" for satisfaction or rating questions.
+- Use "file" when the user needs to upload a file.
+- Use "page_break" when the form should be divided into multiple pages.
+- Use "heading" when the form should be divided into multiple pages.
+
+
+# Guidelines
+
+- Only generate fields relevant to the user's request.
+- Do not generate unnecessary fields.
+- Make reasonable assumptions when the user's request is not completely specific.
+- Mark a field as required only when the information is important for the purpose of the form.
+- For select, radio, checkbox, and multi-select fields, generate appropriate options.
+- Keep labels clear and concise.
+- Keep descriptions helpful but short.
+- Do not invent unrelated information.
+- Do not place heading and page_break side by side.
+- Do not place two headings side by side.
+
+# Output
+
+Return the form according to the provided structured output schema.`
+
+
+
+
+export const dummyAPIData: AiTemplate = {
+    "title": "Customer Feedback Form",
+    "description": "We appreciate your feedback following your recent purchase. Please take a moment to share your thoughts with us.",
+    "fields": [
+        {
+            "type": "rating",
+            "label": "Overall Rating",
+            "description": "Please rate your experience with us from 1 to 5, with 5 being the best.",
+            "helpText": "Select a rating between 1 and 5.",
+            "required": true,
+            "order": 1,
+            "placeholder": null,
+            "defaultValue": null,
+            "validation": null,
+            "options": null
+        },
+        {
+            "type": "long_text",
+            "label": "What Did You Like?",
+            "description": "Please share what you enjoyed about your purchase or experience.",
+            "helpText": "Your feedback helps us know what's working well for us.",
+            "required": false,
+            "order": 2,
+            "placeholder": "Enter your thoughts here...",
+            "defaultValue": null,
+            "validation": null,
+            "options": null
+        },
+        {
+            "type": "long_text",
+            "label": "What Could We Do Better?",
+            "description": "We value constructive criticism. Please let us know how we can improve.",
+            "helpText": "Your suggestions are crucial for our growth.",
+            "required": false,
+            "order": 3,
+            "placeholder": "Enter your thoughts here...",
+            "defaultValue": null,
+            "validation": null,
+            "options": null
+        },
+        {
+            "type": "radio",
+            "label": "Would You Recommend Us?",
+            "description": "Would you recommend our products/services to others?",
+            "helpText": "Select one option below.",
+            "required": true,
+            "order": 4,
+            "placeholder": null,
+            "defaultValue": null,
+            "validation": null,
+            "options": [
+                {
+                    "id": "yes",
+                    "label": "Yes",
+                    "value": "yes"
+                },
+                {
+                    "id": "no",
+                    "label": "No",
+                    "value": "no"
+                }
+            ]
+        }
+    ]
+}

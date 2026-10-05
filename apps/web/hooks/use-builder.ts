@@ -335,6 +335,7 @@ export function useBuilder(
     selectedField,
     selectedIndex,
     settingsOpen,
+    previewing,
     selectField,
     openSettings,
     setTitle,
@@ -350,7 +351,6 @@ export function useBuilder(
     saveAndPublish,
     archiveForm,
     preview,
-    previewing,
     previewDraft,
     closePreview,
   };
