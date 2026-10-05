@@ -2,8 +2,14 @@ import { CreateFormInputModel, LayoutFieldType } from "@repo/services/form/model
 import { IconName } from "../components/icons";
 import { Status } from "../types";
 import { FlowQuestion, FlowStep } from "~/components/form-flow/types";
+import { CreateTemplateInputModel } from "@repo/services/templates/model";
+import { ARCHIVED, AUTHENTICATED, DRAFTED, EXPIRED, PUBLIC, PUBLISHED, UNLISTED } from "@repo/database/constants";
 
 type CreateFormInputType = CreateFormInputModel["fields"][number];
+
+export type VisibilityType = typeof PUBLIC | typeof UNLISTED | typeof AUTHENTICATED
+
+export type StatusType = typeof DRAFTED | typeof PUBLISHED | typeof ARCHIVED | typeof EXPIRED
 
 export type FieldType = Exclude<CreateFormInputType, { type: LayoutType }>["type"];
 
@@ -55,13 +61,21 @@ export type MutationPayloadShape = Omit<CreateFormInputModel, "expiresAt"> & {
   expiresAt?: Date | null;
 };
 
+export type BuilderForm = {
+  title: string,
+  description?: string,
+  logoUrl?: string | null,
+  status: Status
+  visibility: VisibilityType,
+  maxSubmissions?: number | null,
+  expiresAt?: string | null,
+  fields: BuilderField[]
+}
 
-export type BuilderForm = Omit<CreateFormInputModel, "fields"> & {
+export type BuilderTemplate = Omit<CreateTemplateInputModel, "fields" | "creatorId"> & {
   fields: BuilderField[];
-  expiresAt?: string | null;
-  logoUrl?: string | null;
   status: string;
-};
+}
 
 export type FormSettings = Pick<BuilderForm, "visibility" | "maxSubmissions" | "expiresAt">;
 
@@ -186,6 +200,7 @@ export type PreviewScreenProps = {
   form: BuilderForm;
   status: Status | "pending",
   onClose: () => void;
+  asPage?: boolean;
 };
 
 export type NumberFieldValidation = {

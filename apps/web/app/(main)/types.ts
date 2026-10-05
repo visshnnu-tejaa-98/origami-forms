@@ -19,6 +19,7 @@ import {
     UPDATED_AT,
 } from "./constants";
 import { UserSettingsType } from "../store/user-store";
+import { BuilderForm } from "./builder/types";
 
 export type Status = typeof DRAFT | typeof PUBLISHED | typeof ARCHIVED | typeof EXPIRED
 
@@ -168,4 +169,11 @@ export type FormStatsProps = {
     formatCompletionTime: (time: number) => string,
     avgTimeCompletion: number,
     totalViews: string,
+}
+
+export type BuilderFormProps = {
+    seed?: BuilderForm,
+    formId?: string,
+    isTemplate: boolean,
+    templateId?: string,
 }

@@ -527,3 +527,31 @@
   .db-shell .sb-theme__knob,
   .db-shell .sb-theme__side { transition: none; }
 }
+
+/* ====== SEGMENTED CONTROL ======
+   Shared chrome: the dashboard's chart panel and the AI prompt composer both
+   use it, so it lives with the layout rather than with either page. */
+/* segmented control */
+.db-shell .seg {
+  display: inline-flex;
+  background: var(--bg-sunken);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 2px;
+}
+.db-shell .seg button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding: 4px 10px;
+  border-radius: 7px;
+}
+.db-shell .seg button.active {
+  background: var(--surface-card);
+  color: var(--ink-1);
+  box-shadow: var(--shadow-paper-1);
+}

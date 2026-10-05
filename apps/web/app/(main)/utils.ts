@@ -2,7 +2,15 @@ import { RouterOutputs } from "@repo/trpc/client";
 import { ICONS, TINTS } from "./constants";
 import { PageOptions, Status, Template, TemplateStatus } from "./types";
 import { relativeTime } from "../utils";
-import { BlockType, BuilderField, BuilderForm, LayoutType, NumberFieldValidation } from "./builder/types";
+import type { AiForm, AiTemplate } from "./ai/schema";
+import {
+    BlockType,
+    BuilderField,
+    BuilderForm,
+    BuilderTemplate,
+    LayoutType,
+    NumberFieldValidation,
+} from "./builder/types";
 import {
     BLOCK_META,
     HEADING,
@@ -18,7 +26,7 @@ export const STATUS_BADGE: Record<Status, { cls: string; label: string }> = {
     draft: { cls: "o-badge--sakura", label: "draft" },
     archived: { cls: "o-badge--ghost", label: "archived" },
     // TODO: Check this, the filter tabs in forms - shoving live tag in expired tab
-    expired: { cls: "o-badge--ghost", label: "expired" }
+    expired: { cls: "o-badge--ghost", label: "expired" },
 };
 
 export const hash = (s: string) => {
@@ -49,7 +57,7 @@ export const toUiForm = (f: ApiForm) => ({
     editedRank: f.updatedAt ? -new Date(f.updatedAt).getTime() : 0,
     pinned: false,
     description: f.description ?? "",
-    logoUrl: f.logoUrl ?? ""
+    logoUrl: f.logoUrl ?? "",
 });
 
 export const TEMPLATE_STATUS_BADGE: Record<TemplateStatus, { cls: string; label: string }> = {
@@ -184,7 +192,25 @@ export const blankField = (type: BlockType): BuilderField => {
 type SavedForm = RouterOutputs["forms"]["getFormById"];
 type ApiField = SavedForm["fields"][number];
 
-const toBuilderField = (field: Omit<ApiField, "formId">): BuilderField => {
+/**
+ * Only the properties the mapper reads, so a saved field and a freshly
+ * generated one (which carries no identity columns) both fit.
+ */
+type BuilderFieldSource = {
+    id: string;
+    type: ApiField["type"];
+    label: string;
+    order: number;
+    description?: string | null;
+    helpText?: string | null;
+    required?: boolean | null;
+    validation?: Record<string, unknown> | null;
+    options?: unknown;
+    placeholder?: string | null;
+    defaultValue?: string | null;
+};
+
+const toBuilderField = (field: BuilderFieldSource): BuilderField => {
     const block = {
         id: field.id,
         type: field.type,
@@ -239,6 +265,52 @@ export const toBuilderTemplate = (template: SavedTemplate): BuilderForm => ({
     logoUrl: template.logoUrl ?? undefined,
     status: template.status,
     fields: template.fields.map(toBuilderField),
+});
+
+type AiField = AiTemplate["fields"][number];
+
+/**
+ * the AI schema spells "absent" as null, because the API's strict mode has no
+ * other way to say it. createFieldSchema uses `.optional()`, which rejects null,
+ * so the keys have to go rather than be nulled.
+ */
+const withoutNulls = (validation: AiField["validation"]) => {
+    if (!validation) return undefined;
+    const kept = Object.entries(validation).filter(([, value]) => value !== null);
+    return kept.length ? Object.fromEntries(kept) : undefined;
+};
+
+/**
+ * A generated field has no ids yet — the builder needs them for selection and
+ * reordering, so we mint them here, as duplicateField does.
+ */
+const toBuilderFieldFromAIAssist = (field: AiField): BuilderField =>
+    toBuilderField({
+        ...field,
+        id: uid("q"),
+        validation: withoutNulls(field.validation),
+        options: field.options?.map((option) => ({ ...option, id: uid("o") })),
+    });
+
+/** seeds the studio from an AI-generated draft, before anything is saved */
+export const toBuilderTemplateFromAIAssist = (template: AiTemplate): BuilderForm => ({
+    title: template.title,
+    description: template.description ?? "",
+    visibility: "unlisted",
+    expiresAt: null,
+    logoUrl: undefined,
+    fields: template.fields.map(toBuilderFieldFromAIAssist),
+    status: "draft",
+});
+
+export const toBuilderFormFromAIAssist = (form: AiForm): BuilderForm => ({
+    title: form.title,
+    description: form.description ?? "",
+    visibility: "unlisted",
+    expiresAt: null,
+    logoUrl: undefined,
+    fields: form.fields.map(toBuilderFieldFromAIAssist),
+    status: "draft",
 });
 
 export const estimatedTimeToCompleteForm = (fields: number) => {

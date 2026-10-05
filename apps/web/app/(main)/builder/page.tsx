@@ -17,7 +17,7 @@ import type { Status } from "../types";
 const Builder = () => {
   const searchParams = useSearchParams();
 
-  const asTemplate = searchParams.get(BUILDER_TYPE_PARAM) === TEMPLATE;
+  const isTemplate = searchParams.get(BUILDER_TYPE_PARAM) === TEMPLATE;
 
   const {
     form,
@@ -26,6 +26,7 @@ const Builder = () => {
     selectedField,
     selectedIndex,
     settingsOpen,
+    previewing,
     selectField,
     setTitle,
     setDescription,
@@ -40,10 +41,9 @@ const Builder = () => {
     saveAsDraft,
     saveAndPublish,
     preview,
-    previewing,
     previewDraft,
     closePreview,
-  } = useBuilder(undefined, undefined, { asTemplate });
+  } = useBuilder({ isTemplate });
 
   const formSettings = {
     visibility: form.visibility,
@@ -56,7 +56,7 @@ const Builder = () => {
       <Topbar
         title={form?.title}
         status={form?.status}
-        asTemplate={asTemplate}
+        asTemplate={isTemplate}
         setTitle={setTitle}
         saveAsDraft={saveAsDraft}
         saveAndPublish={saveAndPublish}

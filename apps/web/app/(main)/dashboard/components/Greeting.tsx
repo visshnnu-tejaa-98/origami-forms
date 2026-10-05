@@ -50,6 +50,9 @@ const Greeting = () => {
                         <Link className="o-btn o-btn--accent" href="/builder">
                             Fold your first form
                         </Link>
+                        <Link className="o-btn" href="/ai">
+                            <Icon name="sparkles" size={14} /> Generate with AI
+                        </Link>
                         <Link className="o-btn" href="/templates">
                             <Icon name="analytics" size={14} /> Start from a template
                         </Link>
@@ -112,12 +115,13 @@ const Greeting = () => {
                     )}
                 </p>
                 <div className="actions">
-                    <Link className="o-btn o-btn--accent" href="/builder">
-                        New form
+                    <Link className="o-btn o-btn--accent" href="/ai">
+                        <Icon name='sparkles' size={16} />
+                        Generate with AI
                     </Link>
-                    {/* <Link className="o-btn" href="#">
+                    <Link className="o-btn" href="/analytics">
                         <Icon name="analytics" size={14} /> See analytics
-                    </Link> */}
+                    </Link>
                 </div>
             </div>
             <div className="focus-card">

@@ -40,7 +40,7 @@ const FormPreviewPage = () => {
     );
   }
 
-  return <PreviewScreen form={toBuilderForm(formData)} status={formData.status} onClose={goBack} />;
+  return <PreviewScreen form={toBuilderForm(formData)} status={formData.status} onClose={goBack} asPage />
 };
 
 export default FormPreviewPage;

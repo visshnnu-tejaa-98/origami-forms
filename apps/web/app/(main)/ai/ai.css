@@ -1,0 +1,1098 @@
+/* ============================================================
+   AI · describe a form, get a draft
+   The prompt composer, the example shelf, the wait and the
+   draft review. Built on the Origami design-system tokens
+   (origami.css) and rendered inside the (main) shell.
+   ============================================================ */
+
+/* This page is a workbench, not a document: it fills the pane exactly and the two
+   columns scroll inside themselves, so nothing hangs below the fold. The shell pads
+   <main> 28px top / 80px bottom for scrolling pages — that bottom gap is what leaves
+   empty space here, so it is matched to the top for this page only. */
+.db-shell > main:has(.ai-page) {
+  padding-bottom: 28px;
+  overflow: hidden;
+}
+.db-shell .ai-page {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ====== FLOATING DECO ======
+   Folds drifting behind the page at low opacity. They never take a click and
+   they are the first thing dropped when the layout gets tight. */
+.db-shell .ai-deco {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.db-shell .ai-deco .ad {
+  position: absolute;
+}
+.db-shell .ai-deco .ad-crane {
+  top: 2px;
+  right: 6%;
+  color: var(--lavender-deep);
+  opacity: 0.12;
+  transform: rotate(-10deg);
+  animation: paperFloat 8s ease-in-out infinite;
+}
+.db-shell .ai-deco .ad-star {
+  top: 28%;
+  right: 2%;
+  color: var(--highlighter-deep);
+  opacity: 0.14;
+  animation: paperFloat 9s 0.4s ease-in-out infinite;
+}
+.db-shell .ai-deco .ad-boat {
+  bottom: 8%;
+  left: 3%;
+  color: var(--indigo-deep);
+  opacity: 0.1;
+  transform: rotate(6deg);
+  animation: paperFloat 10s 0.8s ease-in-out infinite;
+}
+.db-shell .ai-deco .ad-flower {
+  bottom: 24%;
+  right: 8%;
+  color: var(--sakura-deep);
+  opacity: 0.12;
+  animation: paperFloat 11s 1.2s ease-in-out infinite;
+}
+
+/* ====== PAGE HEAD ====== */
+.db-shell .ai-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.db-shell .ai-head h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-hand);
+  font-size: 2.6rem;
+  line-height: 1;
+  margin: 0;
+  color: var(--ink-1);
+}
+.db-shell .ai-head .sub {
+  margin-top: 4px;
+  font-size: 0.86rem;
+  font-style: italic;
+  color: var(--ink-3);
+}
+/* the title keeps the left edge; anything after it (the New prompt button) is
+   pushed to the right — never the title itself, which is sometimes the only child */
+.db-shell .ai-head-id {
+  margin-right: auto;
+}
+
+/* ====== COMPOSE · composer and shelf beside the rail ====== */
+.db-shell .ai-compose {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+.db-shell .ai-main {
+  display: grid;
+  grid-auto-rows: max-content;
+  gap: 22px;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* one scrollbar treatment for every inner-scrolling column on this page */
+.db-shell .ai-main,
+.db-shell .ai-rail,
+.db-shell .recents,
+.db-shell .draft-fields {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-5) transparent;
+}
+.db-shell .ai-main::-webkit-scrollbar,
+.db-shell .ai-rail::-webkit-scrollbar,
+.db-shell .recents::-webkit-scrollbar,
+.db-shell .draft-fields::-webkit-scrollbar {
+  width: 6px;
+}
+.db-shell .ai-main::-webkit-scrollbar-thumb,
+.db-shell .ai-rail::-webkit-scrollbar-thumb,
+.db-shell .recents::-webkit-scrollbar-thumb,
+.db-shell .draft-fields::-webkit-scrollbar-thumb {
+  background: var(--ink-5);
+  border-radius: var(--r-pill);
+}
+.db-shell .ai-main::-webkit-scrollbar-track,
+.db-shell .ai-rail::-webkit-scrollbar-track,
+.db-shell .recents::-webkit-scrollbar-track,
+.db-shell .draft-fields::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ====== PROMPT FORGE ======
+   Washed in lavender rather than the greeting's coral so the two read as
+   different offers while sharing the same paper. */
+.db-shell .forge {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 32px 24px;
+  background:
+    radial-gradient(circle at 92% -30%, var(--lavender-soft), transparent 58%),
+    radial-gradient(circle at 4% 120%, var(--highlighter-soft), transparent 52%),
+    var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-2);
+}
+.db-shell .forge-crane {
+  position: absolute;
+  right: 26px;
+  bottom: 20px;
+  color: var(--lavender);
+  opacity: 0.45;
+  transform: rotate(10deg);
+  animation: paperFloat 7s ease-in-out infinite;
+  pointer-events: none;
+}
+.db-shell .forge-head .o-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--lavender-deep);
+}
+.db-shell .forge-head h2 {
+  font-family: var(--font-hand);
+  font-size: clamp(1.8rem, 2.4vw, 2.4rem);
+  line-height: 1;
+  color: var(--ink-1);
+  margin: 6px 0 0;
+}
+.db-shell .forge-lede {
+  margin-top: 8px;
+  max-width: 54ch;
+  font-size: 0.94rem;
+  color: var(--ink-2);
+}
+
+/* the sheet · a slip of paper to write the brief on */
+.db-shell .forge-sheet {
+  position: relative;
+  margin-top: 18px;
+  padding: 14px 16px 12px 22px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-md);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+/* the red margin rule of a notebook page */
+.db-shell .forge-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 10px auto 10px 12px;
+  width: 1.5px;
+  background: var(--margin-line);
+  border-radius: 1px;
+}
+.db-shell .forge-sheet:focus-within {
+  border-color: var(--lavender);
+  box-shadow: var(--glow-focus);
+}
+.db-shell .forge-sheet textarea {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  resize: vertical;
+  color: var(--ink-1);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.db-shell .forge-sheet textarea:focus {
+  outline: none;
+}
+.db-shell .forge-sheet textarea::placeholder {
+  color: var(--ink-4);
+}
+.db-shell .forge-sheet-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--rule-line);
+}
+.db-shell .forge-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  color: var(--ink-4);
+}
+.db-shell .forge-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ====== EXAMPLE SHELF ====== */
+.db-shell .ex-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.db-shell .ex-head h3 {
+  font-family: var(--font-hand);
+  font-size: 1.7rem;
+  line-height: 1;
+  margin: 0;
+  color: var(--ink-1);
+}
+.db-shell .ex-head .sub {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--ink-3);
+}
+.db-shell .ex-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.db-shell .ex-card {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+  text-align: left;
+  cursor: pointer;
+  padding: 14px;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-paper-1);
+  font-family: var(--font-body);
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+.db-shell .ex-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-paper-2);
+  border-color: var(--rule-strong);
+}
+.db-shell .ex-card-ic {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 8px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.db-shell .ex-card-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--ink-1);
+}
+.db-shell .ex-card-blurb {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+.db-shell .ex-card-use {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--ink-4);
+  transition: color 140ms ease, gap 140ms ease;
+}
+.db-shell .ex-card:hover .ex-card-use {
+  gap: 7px;
+  color: var(--accent-deep);
+}
+
+/* tints echo the builder's field palette */
+.db-shell .tint-matcha .ex-card-ic { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .tint-pink .ex-card-ic { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .tint-peach .ex-card-ic { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .tint-lavender .ex-card-ic { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .tint-indigo .ex-card-ic { background: var(--indigo-soft); color: var(--indigo-deep); }
+.db-shell .tint-highlighter .ex-card-ic { background: var(--highlighter-soft); color: var(--highlighter-deep); }
+
+/* ====== SIDE RAIL ====== */
+.db-shell .ai-rail {
+  display: grid;
+  grid-auto-rows: max-content;
+  gap: 16px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 2px 4px 2px 0;
+}
+/* Three cards that would otherwise read as identical boxes. Each gets its own
+   tint — carried by the dog-eared corner and the heading chip — and a hand-written
+   heading, so the rail scans as three distinct notes rather than one repeated panel. */
+.db-shell .ai-card {
+  position: relative;
+  padding: 20px 20px 18px;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-2);
+}
+/* a folded-corner dog-ear in the card's own colour */
+.db-shell .ai-card::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, transparent 50%, var(--card-tint, var(--bg-sunken)) 50%);
+  border-bottom-right-radius: 20px 24px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+/* flat paper — the tint survives only in the dog-ear and the heading chip */
+.db-shell .ai-card--steps {
+  --card-tint: var(--matcha);
+  /* the tape overhangs the top edge, so the card needs room above it */
+  margin-top: 10px;
+}
+.db-shell .ai-card--tips {
+  --card-tint: var(--peach);
+}
+.db-shell .ai-card--recent {
+  --card-tint: var(--indigo);
+}
+
+/* the heading: a hand-written title with a ruled line running off to the right */
+.db-shell .ai-card-lbl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-family: var(--font-hand);
+  font-size: 1.32rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1;
+  color: var(--ink-1);
+}
+.db-shell .ai-card-lbl .lbl-ic {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--bg-sunken);
+  color: var(--ink-3);
+}
+.db-shell .ai-card--steps .lbl-ic { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .ai-card--tips .lbl-ic { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .ai-card--recent .lbl-ic { background: var(--indigo-soft); color: var(--indigo-deep); }
+
+.db-shell .steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.db-shell .step {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+/* the steps are strung on a thread, so they read as a sequence not a list */
+.db-shell .step {
+  position: relative;
+}
+.db-shell .step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 32px;
+  bottom: -14px;
+  width: 1px;
+  border-left: 1px dashed var(--rule-line);
+}
+.db-shell .step-n {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface-card);
+  border: 1px solid var(--matcha);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--matcha-deep);
+}
+.db-shell .step-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink-1);
+}
+.db-shell .step-body {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.db-shell .tips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.db-shell .tip {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 9px;
+  align-items: start;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+/* a ticked checklist rather than bullets — these are things to do, not facts.
+   Peach rather than highlighter: yellow-on-yellow is the palette's weakest pair
+   and the ticks were washing out against the card. */
+.db-shell .tip-tick {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border-radius: 5px;
+  background: var(--peach-soft);
+  color: var(--peach-deep);
+}
+
+/* the rail is sticky, so the list is capped rather than letting it grow past the
+   viewport — roughly four rows, then it scrolls on its own */
+.db-shell .recents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  max-height: 285px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-5) transparent;
+}
+.db-shell .recents::-webkit-scrollbar {
+  width: 6px;
+}
+.db-shell .recents::-webkit-scrollbar-thumb {
+  background: var(--ink-5);
+  border-radius: var(--r-pill);
+}
+.db-shell .recents::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* rows behave like the responses table: dashed separators, a plain background
+   lift on hover and the chevron darkening — no border or colour shift */
+.db-shell .recents li + li .recent {
+  border-top: 1px dashed var(--rule-line);
+}
+.db-shell .recent {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  cursor: pointer;
+  padding: 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  text-align: left;
+  font-family: var(--font-body);
+  color: var(--ink-4);
+  outline: none;
+  transition: background 160ms;
+}
+.db-shell .recent:hover {
+  background: var(--bg-elevated);
+}
+.db-shell .recent:hover .recent-chev {
+  color: var(--ink-2);
+}
+.db-shell .recent:focus-visible {
+  box-shadow: var(--glow-focus) inset;
+}
+.db-shell .recent-chev {
+  display: flex;
+  justify-content: flex-end;
+  color: var(--ink-4);
+}
+.db-shell .recent-ic {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--indigo-soft);
+  color: var(--indigo-deep);
+}
+/* a template reads lavender, a form indigo — the badge below says the same thing
+   in words, so the colour is reinforcement rather than the only signal */
+.db-shell .recent.is-template .recent-ic {
+  background: var(--lavender-soft);
+  color: var(--lavender-deep);
+}
+.db-shell .recent-body {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.db-shell .recent-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.db-shell .recent-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  color: var(--ink-3);
+}
+.db-shell .recent-sub .o-badge {
+  font-size: 0.6rem;
+  padding: 2px 7px;
+}
+
+.db-shell .ai-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 14px 6px 10px;
+  text-align: center;
+  color: var(--ink-4);
+}
+.db-shell .ai-empty p {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  max-width: 24ch;
+}
+
+/* ====== DRAFTING · the wait ======
+   Reads as folding rather than loading: the creases land one after another. */
+.db-shell .draft-wait {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  padding: 44px 32px 48px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% -40%, var(--lavender-soft), transparent 62%),
+    var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-2);
+}
+/* THE FOLD · one 4.8s timeline every piece shares, so the sheet is gone by the
+   time the bird lands. Percentages, not delays, keep the phases locked together. */
+.db-shell .draft-wait-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  margin: 0 auto 6px;
+}
+/* a soft wash under the fold, breathing with it */
+.db-shell .draft-wait-halo {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--lavender-soft), transparent 68%);
+  animation: foldHalo 4.8s ease-in-out infinite;
+}
+.db-shell .fold {
+  position: relative;
+  color: var(--lavender-deep);
+  overflow: visible;
+  animation: foldTilt 4.8s ease-in-out infinite;
+}
+
+/* --- the flat sheet --- */
+.db-shell .fold-sheet {
+  animation: foldSheetOut 4.8s ease-in-out infinite;
+}
+.db-shell .fold-edge {
+  stroke-dasharray: 1;
+  animation: foldEdgeDraw 4.8s ease-in-out infinite;
+}
+.db-shell .fold-crease {
+  stroke-dasharray: 1;
+  stroke-opacity: 0.55;
+}
+.db-shell .fold-crease--1 { animation: foldCrease1 4.8s ease-in-out infinite; }
+.db-shell .fold-crease--2 { animation: foldCrease2 4.8s ease-in-out infinite; }
+.db-shell .fold-crease--3 { animation: foldCrease3 4.8s ease-in-out infinite; }
+
+/* --- the finished bird --- */
+.db-shell .fold-bird {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: foldBirdIn 4.8s ease-in-out infinite;
+}
+.db-shell .fold-fill {
+  stroke: none;
+  animation: foldFillIn 4.8s ease-in-out infinite;
+}
+.db-shell .fold-line {
+  stroke-dasharray: 1;
+}
+.db-shell .fold-line--1 { animation: foldLine1 4.8s ease-in-out infinite; }
+.db-shell .fold-line--2 { animation: foldLine2 4.8s ease-in-out infinite; }
+.db-shell .fold-line--3 { animation: foldLine3 4.8s ease-in-out infinite; }
+.db-shell .fold-line--4 { animation: foldLine4 4.8s ease-in-out infinite; }
+.db-shell .fold-line--5 { animation: foldLine5 4.8s ease-in-out infinite; }
+
+/* the sheet squares up, then the bird settles and lifts */
+@keyframes foldTilt {
+  0%   { transform: rotate(-3deg) translateY(0); }
+  40%  { transform: rotate(3deg) translateY(1px); }
+  62%  { transform: rotate(-2deg) translateY(-2px); }
+  100% { transform: rotate(-3deg) translateY(0); }
+}
+@keyframes foldHalo {
+  0%, 100% { opacity: 0.5; transform: scale(0.94); }
+  62%      { opacity: 0.9; transform: scale(1.04); }
+}
+@keyframes foldSheetOut {
+  0%, 48%  { opacity: 1; }
+  60%, 100% { opacity: 0; }
+}
+@keyframes foldEdgeDraw {
+  0%   { stroke-dashoffset: 1; }
+  22%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes foldCrease1 {
+  0%, 20% { stroke-dashoffset: 1; }
+  32%     { stroke-dashoffset: 0; }
+  100%    { stroke-dashoffset: 0; }
+}
+@keyframes foldCrease2 {
+  0%, 28% { stroke-dashoffset: 1; }
+  40%     { stroke-dashoffset: 0; }
+  100%    { stroke-dashoffset: 0; }
+}
+@keyframes foldCrease3 {
+  0%, 36% { stroke-dashoffset: 1; }
+  48%     { stroke-dashoffset: 0; }
+  100%    { stroke-dashoffset: 0; }
+}
+/* the bird rises out of the sheet's centre as the paper goes */
+@keyframes foldBirdIn {
+  0%, 50%   { opacity: 0; transform: scale(0.82); }
+  68%       { opacity: 1; transform: scale(1.03); }
+  76%, 92%  { opacity: 1; transform: scale(1); }
+  100%      { opacity: 0; transform: scale(1); }
+}
+@keyframes foldFillIn {
+  0%, 58%  { opacity: 0; }
+  78%, 92% { opacity: 1; }
+  100%     { opacity: 0; }
+}
+@keyframes foldLine1 {
+  0%, 52% { stroke-dashoffset: 1; }
+  64%     { stroke-dashoffset: 0; }
+  100%    { stroke-dashoffset: 0; }
+}
+@keyframes foldLine2 {
+  0%, 56% { stroke-dashoffset: 1; }
+  68%     { stroke-dashoffset: 0; }
+  100%    { stroke-dashoffset: 0; }
+}
+@keyframes foldLine3 {
+  0%, 60% { stroke-dashoffset: 1; }
+  72%     { stroke-dashoffset: 0; }
+  100%    { stroke-dashoffset: 0; }
+}
+@keyframes foldLine4 {
+  0%, 64% { stroke-dashoffset: 1; }
+  76%     { stroke-dashoffset: 0; }
+  100%    { stroke-dashoffset: 0; }
+}
+@keyframes foldLine5 {
+  0%, 68% { stroke-dashoffset: 1; }
+  80%     { stroke-dashoffset: 0; }
+  100%    { stroke-dashoffset: 0; }
+}
+
+.db-shell .draft-wait h2 {
+  font-family: var(--font-hand);
+  font-size: 2rem;
+  line-height: 1;
+  margin: 6px 0 0;
+  color: var(--ink-1);
+}
+.db-shell .draft-wait-echo {
+  max-width: 48ch;
+  margin: 10px auto 0;
+  font-style: italic;
+  color: var(--ink-3);
+  font-size: 0.9rem;
+}
+
+/* the questions arriving, on the same slip of paper as the composer's sheet */
+.db-shell .draft-wait-sheet {
+  position: relative;
+  display: grid;
+  gap: 11px;
+  width: min(420px, 100%);
+  margin: 26px auto 0;
+  padding: 18px 20px 18px 26px;
+  text-align: left;
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-md);
+}
+.db-shell .draft-wait-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 12px auto 12px 14px;
+  width: 1.5px;
+  background: var(--margin-line);
+  border-radius: 1px;
+}
+.db-shell .draft-wait-line {
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(
+    90deg,
+    var(--bg-sunken) 0%,
+    var(--lavender-soft) 50%,
+    var(--bg-sunken) 100%
+  );
+  background-size: 200% 100%;
+  transform-origin: left center;
+  animation: forgeSweep 1.6s ease-in-out infinite, lineLand 1.6s ease-out both;
+}
+/* the lines get shorter down the sheet, like a form tapering off */
+.db-shell .draft-wait-line:nth-child(2) { width: 88%; }
+.db-shell .draft-wait-line:nth-child(3) { width: 76%; }
+.db-shell .draft-wait-line:nth-child(4) { width: 92%; }
+.db-shell .draft-wait-line:nth-child(5) { width: 64%; }
+
+@keyframes forgeSweep {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+/* each line is written in rather than simply appearing */
+@keyframes lineLand {
+  from { opacity: 0; transform: scaleX(0.3); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+/* ====== REVIEW · the draft ====== */
+.db-shell .draft {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-card);
+  border: 1px solid var(--rule-line);
+  border-radius: var(--r-paper);
+  box-shadow: var(--shadow-paper-2);
+  overflow: hidden;
+}
+.db-shell .draft-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 26px 20px;
+  background: radial-gradient(circle at 88% -60%, var(--lavender-soft), transparent 58%), transparent;
+  border-bottom: 1px dashed var(--rule-line);
+}
+.db-shell .draft-head .o-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--lavender-deep);
+}
+.db-shell .draft-head h2 {
+  font-family: var(--font-hand);
+  font-size: 2.1rem;
+  line-height: 1;
+  margin: 6px 0 0;
+  color: var(--ink-1);
+}
+.db-shell .draft-desc {
+  margin-top: 6px;
+  max-width: 54ch;
+  font-size: 0.92rem;
+  color: var(--ink-2);
+}
+.db-shell .draft-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+.db-shell .draft-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.db-shell .draft-head-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* the field list · one line per question, numbered like the builder canvas */
+.db-shell .draft-fields {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 8px 14px;
+}
+.db-shell .draft-field {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  transition: background 160ms ease;
+}
+.db-shell .draft-field:hover {
+  background: var(--bg-elevated);
+}
+.db-shell .draft-field + .draft-field {
+  border-top: 1px dashed var(--rule-line);
+}
+.db-shell .draft-field-ic {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+/* tints come from BLOCK_META, so a field reads the same colour as in the palette */
+.db-shell .draft-field.tint-matcha .draft-field-ic { background: var(--matcha-soft); color: var(--matcha-deep); }
+.db-shell .draft-field.tint-pink .draft-field-ic { background: var(--sakura-soft); color: var(--sakura-deep); }
+.db-shell .draft-field.tint-peach .draft-field-ic { background: var(--peach-soft); color: var(--peach-deep); }
+.db-shell .draft-field.tint-lavender .draft-field-ic { background: var(--lavender-soft); color: var(--lavender-deep); }
+.db-shell .draft-field.tint-indigo .draft-field-ic { background: var(--indigo-soft); color: var(--indigo-deep); }
+.db-shell .draft-field.tint-highlighter .draft-field-ic { background: var(--highlighter-soft); color: var(--highlighter-deep); }
+
+.db-shell .draft-field-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink-1);
+}
+.db-shell .draft-field-n {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-4);
+}
+.db-shell .draft-req {
+  color: var(--accent-deep);
+  font-weight: 700;
+}
+.db-shell .draft-field-help {
+  margin-top: 3px;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+}
+.db-shell .draft-opts {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.db-shell .draft-opt {
+  padding: 3px 9px;
+  background: var(--bg-sunken);
+  border-radius: var(--r-pill);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.db-shell .draft-field-type {
+  padding-top: 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+
+.db-shell .draft-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 26px 18px;
+  background: var(--bg-elevated);
+  border-top: 1px dashed var(--rule-line);
+}
+.db-shell .draft-foot-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+.db-shell .draft-foot-actions {
+  display: flex;
+  gap: 7px;
+  margin-left: auto;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1080px) {
+  /* stacked, the content is taller than the pane — hand scrolling back to the page */
+  .db-shell > main:has(.ai-page) {
+    padding-bottom: 80px;
+    overflow-y: auto;
+  }
+  .db-shell .ai-page {
+    height: auto;
+    min-height: 100%;
+  }
+  .db-shell .ai-compose {
+    grid-template-columns: 1fr;
+  }
+  .db-shell .ai-main,
+  .db-shell .ai-rail {
+    overflow: visible;
+    padding-right: 0;
+  }
+  .db-shell .draft,
+  .db-shell .draft-wait {
+    flex: none;
+  }
+  .db-shell .draft-fields {
+    overflow: visible;
+  }
+  /* the right-hand folds sit over the content once the rail drops under it */
+  .db-shell .ai-deco .ad-star,
+  .db-shell .ai-deco .ad-flower {
+    display: none;
+  }
+  .db-shell .ai-rail {
+    position: static;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .db-shell .ai-deco {
+    display: none;
+  }
+  .db-shell .forge {
+    padding: 22px 20px 18px;
+  }
+  .db-shell .forge-crane {
+    display: none;
+  }
+  /* the controls need the full width before the hint does */
+  .db-shell .forge-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .db-shell .forge-actions .o-btn {
+    margin-left: auto;
+  }
+  .db-shell .ex-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .db-shell .ai-rail {
+    grid-template-columns: 1fr;
+  }
+  .db-shell .draft-head,
+  .db-shell .draft-foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .db-shell .draft-head-actions,
+  .db-shell .draft-foot-actions {
+    margin-left: 0;
+  }
+  .db-shell .draft-field {
+    grid-template-columns: 34px 1fr;
+  }
+  .db-shell .draft-field-type {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-shell .ai-deco .ad,
+  .db-shell .forge-crane,
+  .db-shell .draft-wait-halo,
+  .db-shell .draft-wait-line,
+  .db-shell .fold,
+  .db-shell .fold-sheet,
+  .db-shell .fold-edge,
+  .db-shell .fold-crease,
+  .db-shell .fold-bird,
+  .db-shell .fold-fill,
+  .db-shell .fold-line {
+    animation: none;
+  }
+  /* no loop to run, so rest on the finished fold rather than the flat sheet */
+  .db-shell .fold-sheet {
+    display: none;
+  }
+  .db-shell .ex-card:hover {
+    transform: none;
+  }
+}

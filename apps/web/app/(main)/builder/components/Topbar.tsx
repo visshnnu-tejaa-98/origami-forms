@@ -61,6 +61,9 @@ const Topbar = (props: TopbarProps) => {
         {!showPublishButton && <button className="o-btn o-btn--accent o-btn--sm" onClick={archiveForm}>
           <Icon name="archive" size={14} /> {asTemplate ? "Archive template" : "Archive Form"}
         </button>}
+        {!showPublishButton && <button className="o-btn o-btn--sm" onClick={saveAndPublish}>
+          <Icon name="publish" size={14} /> {asTemplate ? "Update and share" : "Update and publish"}
+        </button>}
       </div>
     </header >
   );
