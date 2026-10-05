@@ -19,7 +19,6 @@ export const createTemplateInputModel = z.object({
     logoUrl: z.string().url("Invalid URL").optional().describe("logo url of the template"),
     status: z.enum(TEMPLATE_STATUS_OPTIONS).nullish().describe("status of the template"),
     fields: z.array(createTemplateFieldsSchema).min(1),
-    creatorId: z.string().uuid().optional().describe("id of the creator of the template"),
 });
 
 export type CreateTemplateInputModel = z.infer<typeof createTemplateInputModel>;

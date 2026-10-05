@@ -33,10 +33,10 @@ export const templatesRouter = router({
                 tags: TAGS,
             }),
         )
-        .input(createTemplateInputModel.omit({ creatorId: true }))
+        .input(createTemplateInputModel)
         .output(createTemplateOutputSchema)
         .mutation(async ({ input, ctx }) => {
-            const result = await templateService.createTemplate({ ...input, creatorId: ctx.userId });
+            const result = await templateService.createTemplate(ctx.userId, input);
 
             if (!result) {
                 throw new Error("Something went wrong while creating template");
