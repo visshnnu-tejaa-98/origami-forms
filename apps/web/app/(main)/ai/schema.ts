@@ -23,7 +23,7 @@ const aiValidationSchema = z.object({
     maxDateIso: z.string().nullable().describe("maximum date in ISO string format"),
 });
 
-export const aiTemplateFieldSchema = z.object({
+export const aiFormAndTemplateFieldSchema = z.object({
     type: z.enum(TEMPLATE_FIELD_TYPES).describe("type of the field"),
     label: z.string().describe("label for the field"),
     description: z.string().nullable().describe("description for the field"),
@@ -42,7 +42,15 @@ export const aiTemplateFieldSchema = z.object({
 export const aiTemplateSchema = z.object({
     title: z.string().describe("title of the template"),
     description: z.string().nullable().describe("description of the template"),
-    fields: z.array(aiTemplateFieldSchema).describe("fields of the template"),
+    fields: z.array(aiFormAndTemplateFieldSchema).describe("fields of the template"),
 });
 
 export type AiTemplate = z.infer<typeof aiTemplateSchema>;
+
+export const aiFormSchema = z.object({
+    title: z.string().describe("title of the template"),
+    description: z.string().nullable().describe("description of the template"),
+    fields: z.array(aiFormAndTemplateFieldSchema).describe("fields of the template"),
+});
+
+export type AiForm = z.infer<typeof aiFormSchema>

@@ -1,5 +1,5 @@
 import type { IconName } from "../components/icons";
-import type { Tint } from "../builder/types";
+import type { BuilderField, Tint } from "../builder/types";
 import { ZodObject } from "zod";
 
 export type ForgeKind = "form" | "template";
@@ -25,6 +25,7 @@ export type DraftReviewProps = {
     draft: DraftPreview
     onDiscard: () => void
     onRefine: () => void
+    saveDraft: () => void
 }
 
 export type DraftField = {
@@ -40,8 +41,7 @@ export type DraftPreview = {
     title: string;
     description?: string;
     kind: ForgeKind;
-    prompt: string;
-    fields: DraftField[];
+    fields: BuilderField[]
 };
 
 export type RecentDraft = {

@@ -2,8 +2,15 @@ import { RouterOutputs } from "@repo/trpc/client";
 import { ICONS, TINTS } from "./constants";
 import { PageOptions, Status, Template, TemplateStatus } from "./types";
 import { relativeTime } from "../utils";
-import type { AiTemplate } from "./ai/schema";
-import { BlockType, BuilderField, BuilderForm, BuilderTemplate, LayoutType, NumberFieldValidation } from "./builder/types";
+import type { AiForm, AiTemplate } from "./ai/schema";
+import {
+    BlockType,
+    BuilderField,
+    BuilderForm,
+    BuilderTemplate,
+    LayoutType,
+    NumberFieldValidation,
+} from "./builder/types";
 import {
     BLOCK_META,
     HEADING,
@@ -19,7 +26,7 @@ export const STATUS_BADGE: Record<Status, { cls: string; label: string }> = {
     draft: { cls: "o-badge--sakura", label: "draft" },
     archived: { cls: "o-badge--ghost", label: "archived" },
     // TODO: Check this, the filter tabs in forms - shoving live tag in expired tab
-    expired: { cls: "o-badge--ghost", label: "expired" }
+    expired: { cls: "o-badge--ghost", label: "expired" },
 };
 
 export const hash = (s: string) => {
@@ -50,7 +57,7 @@ export const toUiForm = (f: ApiForm) => ({
     editedRank: f.updatedAt ? -new Date(f.updatedAt).getTime() : 0,
     pinned: false,
     description: f.description ?? "",
-    logoUrl: f.logoUrl ?? ""
+    logoUrl: f.logoUrl ?? "",
 });
 
 export const TEMPLATE_STATUS_BADGE: Record<TemplateStatus, { cls: string; label: string }> = {
@@ -260,7 +267,6 @@ export const toBuilderTemplate = (template: SavedTemplate): BuilderForm => ({
     fields: template.fields.map(toBuilderField),
 });
 
-
 type AiField = AiTemplate["fields"][number];
 
 /**
@@ -294,6 +300,16 @@ export const toBuilderTemplateFromAIAssist = (template: AiTemplate): BuilderForm
     expiresAt: null,
     logoUrl: undefined,
     fields: template.fields.map(toBuilderFieldFromAIAssist),
+    status: "draft",
+});
+
+export const toBuilderFormFromAIAssist = (form: AiForm): BuilderForm => ({
+    title: form.title,
+    description: form.description ?? "",
+    visibility: "unlisted",
+    expiresAt: null,
+    logoUrl: undefined,
+    fields: form.fields.map(toBuilderFieldFromAIAssist),
     status: "draft",
 });
 

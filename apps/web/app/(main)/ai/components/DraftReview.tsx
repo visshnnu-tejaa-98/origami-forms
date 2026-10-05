@@ -2,12 +2,13 @@
 
 import React from 'react'
 import { Icon } from '../../components/icons'
-import { BLOCK_META } from '../../builder/constants'
+import { BLOCK_META, hasOptions, isFieldBlock } from '../../builder/constants'
 import type { DraftReviewProps } from '../types'
 
 
-const DraftReview = ({ draft, onDiscard, onRefine }: DraftReviewProps) => {
-    const questions = draft.fields.filter((f) => f.type !== 'heading' && f.type !== 'page_break')
+const DraftReview = ({ draft, onDiscard, onRefine, saveDraft }: DraftReviewProps) => {
+
+    const questions = draft.fields.filter(isFieldBlock)
 
     return (
         <section className="draft" aria-labelledby="draft-title">
@@ -35,10 +36,10 @@ const DraftReview = ({ draft, onDiscard, onRefine }: DraftReviewProps) => {
             </header>
 
             <ol className="draft-fields">
-                {draft.fields.map((field, index) => {
+                {questions.map((field, index) => {
                     const meta = BLOCK_META[field.type]
                     return (
-                        <li key={field.id} className={`draft-field tint-${meta?.tint ?? 'accent'}`}>
+                        <li key={field.id + index} className={`draft-field tint-${meta?.tint ?? 'accent'}`}>
                             <span className="draft-field-ic">
                                 <Icon name={meta?.icon ?? 'text'} size={15} />
                             </span>
@@ -50,10 +51,10 @@ const DraftReview = ({ draft, onDiscard, onRefine }: DraftReviewProps) => {
                                     {field.required && <span className="draft-req" title="Required">*</span>}
                                 </div>
                                 {field.helpText && <p className="draft-field-help">{field.helpText}</p>}
-                                {field.options && (
+                                {hasOptions(field) && (
                                     <div className="draft-opts">
                                         {field.options.map((option) => (
-                                            <span key={option} className="draft-opt">{option}</span>
+                                            <span key={option.id} className="draft-opt">{option.label}</span>
                                         ))}
                                     </div>
                                 )}
@@ -71,11 +72,8 @@ const DraftReview = ({ draft, onDiscard, onRefine }: DraftReviewProps) => {
                     the builder.
                 </p>
                 <div className="draft-foot-actions">
-                    <button type="button" className="o-btn o-btn--sm">
+                    <button type="button" className="o-btn o-btn--accent o-btn--sm" onClick={saveDraft}>
                         <Icon name="save" size={13} /> Save as draft
-                    </button>
-                    <button type="button" className="o-btn o-btn--accent o-btn--sm">
-                        <Icon name="edit" size={13} /> Open in builder
                     </button>
                 </div>
             </footer>
